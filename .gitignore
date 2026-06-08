@@ -1,0 +1,25 @@
+# manibase Website — only `site/` (plus repo docs) is tracked.
+# Everything below is local working material, not needed to run the website.
+
+# --- OS / editor junk ---
+.DS_Store
+**/.DS_Store
+Thumbs.db
+*.swp
+
+# --- Local tooling / agent config ---
+.agents/
+.claude/
+
+# --- Brand kit & design source (single source of truth lives here locally) ---
+# Optimized, site-ready copies are committed under site/assets & site/styles.
+Claude Design/
+
+# --- Customer-supplied source images (optimized .webp copies live in site/assets/) ---
+Bilder/
+
+# --- Positioning / research source material ---
+KI Klartag/
+
+# --- Large reference material ---
+*.pdf
