@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>manibase · KI-Helfer für die Büroarbeit, die niemand machen will</title>
+<meta name="description" content="manibase gibt Inhabern kleiner Betriebe ihre Abende zurück. KI-Helfer übernehmen Angebote, E-Mails, Berichte und Planung. DSGVO-konform, Server in Deutschland. Start mit dem KI-Klartag.">
+<link rel="icon" type="image/png" href="assets/signet.png">
+<link rel="preload" href="fonts/Sora.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/HankenGrotesk.woff2" as="font" type="font/woff2" crossorigin>
+<!-- Hero-Foto: Marissa Grootes / Unsplash (Unsplash License, frei nutzbar) -->
+<link rel="preload" href="assets/hero-hands.jpg" as="image" fetchpriority="high">
+<script>document.documentElement.className+=' js';</script>
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="styles/site.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Zum Inhalt springen</a>
+
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="/" aria-label="manibase Startseite">
+      <img class="brand__signet" src="assets/signet.png" alt="" width="34" height="34">
+      <span class="wordmark" aria-hidden="true"><span class="mani">mani</span><span class="base">base</span><span class="dot"></span></span>
+    </a>
+    <nav class="nav__links" aria-label="Hauptnavigation">
+      <a href="#pains">Kennen Sie das?</a>
+      <a href="#helfer">Unsere Helden</a>
+      <a href="#team">Über uns</a>
+      <a href="#ablauf">Ablauf</a>
+    </nav>
+    <div class="nav__cta">
+      <a class="btn" href="#termin"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="btn-label-long">Gespräch&nbsp;buchen</span><span class="btn-label-short" hidden>Termin</span></a>
+    </div>
+    <details class="menu-mobile">
+      <summary aria-label="Menü öffnen"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></summary>
+      <div class="menu-mobile__panel">
+        <a href="#pains">Kennen Sie das?</a>
+        <a href="#helfer">Unsere Helden</a>
+        <a href="#team">Über uns</a>
+        <a href="#ablauf">Ablauf</a>
+        <a href="#termin">Gespräch buchen</a>
+      </div>
+    </details>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container hero__inner">
+      <div class="hero__copy">
+        <h1 class="h-hero"><span class="sr-only">Ihre persönliche KI-Assistenz für Angebotserstellung, E-Mails, Wissensmanagement, Kundensupport, Dokumentation und mehr.</span><span aria-hidden="true">Ihre persönliche KI-Assistenz für<br><span class="rotator"><span class="rotator__word">Angebotserstellung</span></span></span></h1>
+        <p class="lead">Für kleine Familienbetriebe. Damit die Büroarbeit nicht mehr ins Wochenende rutscht! <br class="lead-br">Unsere KI-Helfer helfen Ihnen dabei, die tägliche Fleißarbeit im Büro schneller zu erledigen. <br class="lead-br">Die KI liefert die Vorarbeit, Sie bestimmen, was rausgeht.</p>
+        <div class="btn-row">
+          <a class="btn btn--accent" href="#termin"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Orientierungsgespräch buchen</a>
+          <a class="btn btn--ghost-paper" href="#ablauf">So arbeiten wir zusammen</a>
+        </div>
+        <div class="trust trust--on-media">
+          <span><svg class="ic ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>DSGVO-konform</span>
+          <span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Server in Deutschland</span>
+          <span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>individuell auf Sie zugeschnitten</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WERTBAND -->
+  <section class="valueband" aria-label="Der KI-Klartag auf einen Blick">
+    <div class="container">
+      <div class="valueband__grid">
+        <div class="vstat"><b class="num">1.800 €</b><span>Festpreis für einen Tag. Keine Überraschung auf der Rechnung.</span></div>
+        <div class="vstat"><b class="num">1 Tag</b><span>bis Sie einen fertigen Maßnahmenplan in der Hand halten.</span></div>
+        <div class="vstat"><b>Voll<br>anrechenbar</b><span>Setzen Sie um, zählt der Tag komplett aufs Projekt.</span></div>
+        <div class="vstat"><b>DSGVO</b><span>Server in Deutschland, echter Datenschützer im Rücken.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KENNEN SIE DAS (Pain Points + Folge) -->
+  <section class="pains section" id="pains" aria-labelledby="pains-h">
+    <div class="container">
+      <div class="pains__head">
+        <h2 class="h1" id="pains-h">Kennen Sie das?</h2>
+        <p class="lead">Vielleicht kommt Ihnen das bekannt vor. In kleinen Familienbetrieben läuft die eigentliche Arbeit rund, nur die Verwaltung drumherum findet nie ihren Platz im Tag.</p>
+      </div>
+
+      <ul class="pains__list">
+        <li class="pain reveal">
+          <span class="pain__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></span>
+          <div class="pain__body">
+            <h3 class="h3">Der ganze Bürokram bleibt an Ihnen hängen</h3>
+            <p>Angebote, E-Mails, Ablage, Berichte: Am Ende macht es der Chef. Oder Ihre Partnerin, nebenbei und am Wochenende. Einen Dritten, der sich darum kümmert, gibt es nicht.</p>
+          </div>
+        </li>
+        <li class="pain reveal">
+          <span class="pain__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span>
+          <div class="pain__body">
+            <h3 class="h3">Büro gibt es erst nach Feierabend</h3>
+            <p>Tagsüber sind Sie beim Kunden, auf der Baustelle, in der Werkstatt. Angebote und Rechnungen schreiben Sie abends, wenn längst alle zu Hause sind.</p>
+          </div>
+        </li>
+        <li class="pain reveal">
+          <span class="pain__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="4"/><path d="M3 21v-1a6 6 0 0 1 8-5.66"/><path d="M16 16l5 5M21 16l-5 5"/></svg></span>
+          <div class="pain__body">
+            <h3 class="h3">Für die paar Stunden findet sich niemand</h3>
+            <p>Eine halbe Stelle für die Verwaltung lohnt sich nicht und lässt sich kaum besetzen. Einarbeiten kostet genau die Zeit, die Sie ohnehin nicht haben.</p>
+          </div>
+        </li>
+      </ul>
+
+      <!-- Die Folge -->
+      <div class="folge reveal">
+        <p class="folge__lead">Und wenn das so bleibt?</p>
+        <ul class="folge__list">
+          <li>
+            <svg class="folge__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg>
+            <p><b>Aufträge gehen verloren.</b> <span class="folge__sub">Jede Anfrage, die zu lange liegen bleibt, schnappt sich ein Schnellerer, und das <span class="mark">kostet bares Geld</span>.</span></p>
+          </li>
+          <li>
+            <svg class="folge__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg>
+            <p><b>Die Abende gehören dem Büro, nicht Ihrer Familie.</b> <span class="folge__sub">Feierabend wird zur Ausnahme, nicht zur Regel.</span></p>
+          </li>
+          <li>
+            <svg class="folge__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="M12 5l7 7-7 7"/></svg>
+            <p><b>Die immer gleiche Schreibarbeit bringt keinen Cent Wertschöpfung.</b> <span class="folge__sub">Sie frisst Stunden und macht keinen Spaß.</span></p>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- SO LÖSEN WIR DAS -->
+  <section class="solve section" id="loesung" aria-labelledby="solve-h">
+    <div class="container">
+      <div class="solve__head">
+        <h2 class="h1" id="solve-h">So nehmen wir Ihnen das ab.</h2>
+        <p class="lead">Unsere KI-Helfer übernehmen die wiederkehrende Büroarbeit. Sie liefern die Vorarbeit, Sie behalten die Kontrolle und holen sich Ihre Zeit zurück.</p>
+      </div>
+      <ul class="solve__list">
+        <li class="solve__item reveal">
+          <span class="solve__check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <div>
+            <h3 class="h3">Kein Auftrag geht mehr verloren</h3>
+            <p>Angebote und Anfragen gehen raus, solange der Auftrag noch zu holen ist, nicht erst drei Abende später.</p>
+          </div>
+        </li>
+        <li class="solve__item reveal">
+          <span class="solve__check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <div>
+            <h3 class="h3">Ihre Abende gehören wieder Ihnen</h3>
+            <p>Die Fleißarbeit ist erledigt, bevor der Feierabend anfängt. Der Schreibtisch wartet nicht mehr auf Sie und Ihre Familie.</p>
+          </div>
+        </li>
+        <li class="solve__item reveal">
+          <span class="solve__check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <div>
+            <h3 class="h3">Zeit für das, was wirklich zählt</h3>
+            <p>Die immer gleiche Schreib- und Dokumentationsarbeit erledigt Ihr Helfer. Sie kümmern sich um Kunden, Aufträge und Ihren Betrieb.</p>
+          </div>
+        </li>
+        <li class="solve__item reveal">
+          <span class="solve__check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+          <div>
+            <h3 class="h3">Keine neue Stelle, keine Einarbeitung</h3>
+            <p>Ihr Helfer ist eingespielt und sofort einsatzbereit. Auf Servern in Deutschland, mit Ihren Daten im geschützten Rahmen.</p>
+          </div>
+        </li>
+      </ul>
+      <div class="solve__cta">
+        <a class="btn" href="#termin"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Gespräch buchen</a>
+        <span class="solve__hint">15 Minuten, kostenlos. Wir zeigen Ihnen, welcher Helfer bei Ihnen zuerst Sinn ergibt.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- UNSERE HELDEN -->
+  <section class="heroes section" id="helfer" aria-labelledby="heroes-h">
+    <div class="container">
+      <h2 class="h1" id="heroes-h">Unsere <span class="mark">Helden</span>.</h2>
+      <p class="lead heroes__intro">Jeder Helfer übernimmt eine wiederkehrende Aufgabe in Ihrem Büro.</p>
+      <ul class="heroes__grid" role="list">
+        <li class="hcard" tabindex="0">
+          <div class="hcard__media">
+            <img src="assets/helfer-anton.webp" width="600" height="600" loading="lazy" alt="Anton, der Angebotsmanager (Dachs mit Angebots-Klemmbrett)">
+            <div class="hcard__info"><p>Anton bereitet Ihre Angebote so weit vor, dass Sie sie nur noch gegenchecken und verschicken. So geht kein Auftrag mehr verloren, weil das Angebot zu lange dauert.</p></div>
+          </div>
+          <div class="hcard__label"><span class="hcard__name">Anton</span><span class="hcard__role">Angebotsmanager</span></div>
+        </li>
+        <li class="hcard" tabindex="0">
+          <div class="hcard__media">
+            <img src="assets/helfer-emma.webp" width="600" height="600" loading="lazy" alt="Emma, die E-Mail-Assistenz">
+            <div class="hcard__info"><p>Emma behält Ihr Postfach im Blick und meldet sich, wenn etwas Neues und Wichtiges reinkommt. Sie verfasst Ihre E-Mails vor und legt fertige Entwürfe für Sie bereit.</p></div>
+          </div>
+          <div class="hcard__label"><span class="hcard__name">Emma</span><span class="hcard__role">E-Mail-Assistenz</span></div>
+        </li>
+        <li class="hcard" tabindex="0">
+          <div class="hcard__media">
+            <img src="assets/helfer-doreen.webp" width="600" height="600" loading="lazy" alt="Doreen, die Dokumentationshilfe">
+            <div class="hcard__info"><p>Doreen dokumentiert Ihre Gedanken und Abläufe. Sie sprechen in einfacher Sprache, Doreen macht daraus fertige, saubere Berichte.</p></div>
+          </div>
+          <div class="hcard__label"><span class="hcard__name">Doreen</span><span class="hcard__role">Dokumentationshilfe</span></div>
+        </li>
+        <li class="hcard" tabindex="0">
+          <div class="hcard__media">
+            <img src="assets/helfer-wiktor.webp" width="600" height="600" loading="lazy" alt="Wiktor, der Wissensmanager (Eule mit Büchern)">
+            <div class="hcard__info"><p>Wiktor kennt Ihre Unterlagen und findet jede Information in Sekunden. Statt Ordner zu wälzen, fragen Sie einfach Wiktor.</p></div>
+          </div>
+          <div class="hcard__label"><span class="hcard__name">Wiktor</span><span class="hcard__role">Wissensmanager</span></div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- WIE FUNKTIONIERT UNSERE KI-HILFE -->
+  <section class="how section" id="hilfe" aria-labelledby="how-h">
+    <div class="container">
+      <div class="process__head">
+        <h2 class="h1" id="how-h">So funktioniert unsere KI-Hilfe.</h2>
+        <p class="lead">Keine Software, die Sie sich selbst zurechtbiegen. Ein Helfer, der Ihre Aufgabe übernimmt, während Sie die Kontrolle behalten.</p>
+      </div>
+      <ol class="steps">
+        <li class="step reveal">
+          <span class="step__n" aria-hidden="true">1</span>
+          <h3 class="h3">Wir lernen Ihre Abläufe kennen</h3>
+          <p>Sie zeigen uns, wie eine Aufgabe heute läuft: Ihre Vorlagen, Ihre Texte, Ihre Regeln. Wir hören zu, statt Ihnen ein fertiges Werkzeug überzustülpen.</p>
+        </li>
+        <li class="step reveal">
+          <span class="step__n" aria-hidden="true">2</span>
+          <h3 class="h3">Wir bauen Ihren Helfer</h3>
+          <p>Daraus entsteht ein KI-Helfer, der genau diese Aufgabe für Sie erledigt. Auf Servern in Deutschland, mit Ihren Daten im geschützten Rahmen.</p>
+        </li>
+        <li class="step reveal">
+          <span class="step__n" aria-hidden="true">3</span>
+          <h3 class="h3">Sie geben frei, wir bleiben dran</h3>
+          <p>Der Helfer bereitet alles vor, Sie schauen drüber und geben frei. Nichts geht ohne Sie raus. Wir passen an, bis er im Alltag sitzt.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- GRÜNDER -->
+  <section class="founders section" id="team" aria-labelledby="team-h">
+    <div class="container">
+      <h2 class="h1" id="team-h">Wer hinter <span class="wordmark wordmark--inline"><span class="mani">mani</span><span class="base">base</span><span class="dot" aria-hidden="true"></span></span> steht.</h2>
+      <p class="lead founders__intro">Kein anonymer Anbieter. Zwei Gründer, die selbst bauen und mit Ihnen umsetzen.</p>
+      <div class="founders__grid">
+        <article class="founder reveal">
+          <img class="founder__photo" src="assets/matthias.jpg" width="96" height="96" alt="Matthias Geisler" loading="lazy">
+          <div class="founder__body">
+            <h3 class="founder__name">Matthias Geisler</h3>
+            <p class="founder__role">Umsetzung &amp; Begleitung</p>
+            <p class="founder__bio">Seit über fünf Jahren IT-Projektmanager für die Einführung digitaler Werkzeuge in Organisationen. Als Trainer und Coach im Leistungssport holt er aus Menschen und Teams das Maximum. Genau das treibt ihn bei manibase an: das volle Potenzial Ihres Betriebs heben.</p>
+          </div>
+        </article>
+        <article class="founder reveal">
+          <img class="founder__photo" src="assets/nikolaus.webp" width="96" height="96" alt="Nikolaus Schauersberger" loading="lazy">
+          <div class="founder__body">
+            <h3 class="founder__name">Nikolaus Schauersberger</h3>
+            <p class="founder__role">Strategie &amp; Entwicklung</p>
+            <p class="founder__bio">Entwickelt seit über 15 Jahren Software und baut praxisnahe KI-Lösungen für Unternehmen, von internen KI-Plattformen über Prozessautomatisierung bis zu Sprach-Assistenten. Sein Ansatz ist pragmatisch: Reicht ein Standardwerkzeug, sagt er das. Braucht es eine eigene Architektur, setzt er sie sauber auf.</p>
+          </div>
+        </article>
+      </div>
+      <div class="founders__together reveal">
+        <span class="founders__label">Was uns ausmacht</span>
+        <p class="founders__claim">Gemeinsam bündeln wir unsere Stärken: <b>maßgeschneiderte KI-Helfer</b> und die <b>Begleitung bei der Umsetzung</b> im Betrieb. Ohne Fachchinesisch, nah an Ihrem Alltag, ausgerichtet auf das, was Sie wirklich brauchen.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- WARUM MANIBASE -->
+  <section class="section why" aria-labelledby="why-h">
+    <div class="container">
+      <h2 class="h1" id="why-h" style="max-width:22ch">Warum manibase?</h2>
+      <p class="lead why__intro">Kein weiterer Vortrag, kein Tool von der Stange. Wir bauen, begleiten und bleiben dran.</p>
+      <div class="trust-sec__grid">
+        <div class="pillar reveal"><h3 class="h3">Wir bauen, statt zu beraten</h3><p>Am Ende steht ein Helfer, der die Arbeit wirklich übernimmt. Kein Foliensatz, kein Werkzeug, das Sie sich selbst zurechtbiegen müssen.</p></div>
+        <div class="pillar reveal"><h3 class="h3">DSGVO von Anfang an</h3><p>Server in Deutschland, ein echter Datenschützer im Rücken. Das heimliche ChatGPT Ihrer Leute holen wir aus dem Verborgenen.</p></div>
+        <div class="pillar reveal"><h3 class="h3">15+ Jahre Entwicklung</h3><p>Tiefe in der Software und Verständnis für Ihre Abläufe. Passgenau auf Ihren Betrieb, nicht von der Stange.</p></div>
+        <div class="pillar reveal"><h3 class="h3">Wir bleiben dran</h3><p>Eingerichtet, eingearbeitet, betreut. Damit der Helfer nach zwei Wochen nicht in der Schublade verschwindet.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA-BAND -->
+  <section class="section ctaband-wrap" aria-labelledby="cta1-h">
+    <div class="container">
+      <div class="ctaband reveal">
+        <div>
+          <h2 class="h2" id="cta1-h">Reden wir 15 Minuten über Ihren Betrieb.</h2>
+          <p>Kostenlos, unverbindlich. Danach wissen Sie, ob wir Ihnen Zeit zurückholen können.</p>
+        </div>
+        <a class="btn btn--accent" href="#termin"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Orientierungsgespräch buchen</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIMELINE: So arbeiten wir zusammen -->
+  <section class="timeline section" id="ablauf" aria-labelledby="tl-h">
+    <div class="container">
+      <div class="process__head">
+        <h2 class="h1" id="tl-h">So arbeiten wir zusammen.</h2>
+        <p class="lead">Vom ersten Gespräch bis zur Umsetzung. Jeder Schritt ist für sich abgeschlossen, Sie entscheiden danach, ob es weitergeht.</p>
+      </div>
+      <ol class="tl">
+        <li class="tl__item reveal">
+          <span class="tl__node" aria-hidden="true"><span class="tl__num">1</span></span>
+          <div class="tl__card">
+            <h3 class="h3">Orientierungsgespräch <span class="tl__meta">15 Min · kostenlos</span></h3>
+            <p>Wir hören zu, wo bei Ihnen die Zeit draufgeht, und klären, ob wir zueinander passen. Ganz unverbindlich.</p>
+          </div>
+        </li>
+        <li class="tl__item reveal">
+          <span class="tl__node" aria-hidden="true"><span class="tl__num">2</span></span>
+          <div class="tl__card">
+            <h3 class="h3">KI-Klartag <span class="tl__meta">1 Tag · 1.800 € Festpreis</span></h3>
+            <p>Wir schauen Ihren Betrieb konkret an, statt einen Vortrag zu halten. Ergebnis: ein Maßnahmenplan mit Ampel, rot verbrennt Zeit, gelb prüfen, grün sofort abnehmbar. Bei Umsetzung voll anrechenbar.</p>
+            <p><a class="tl__link" href="ki-klartag.html">Mehr zum KI-Klartag<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+          </div>
+        </li>
+        <li class="tl__item reveal">
+          <span class="tl__node" aria-hidden="true"><span class="tl__num">3</span></span>
+          <div class="tl__card">
+            <h3 class="h3">Potenzial-Audit</h3>
+            <p>Gemeinsam arbeiten wir die größten Hebel heraus und priorisieren, was sich zuerst lohnt und am schnellsten Zeit spart.</p>
+          </div>
+        </li>
+        <li class="tl__item reveal">
+          <span class="tl__node" aria-hidden="true"><span class="tl__num">4</span></span>
+          <div class="tl__card">
+            <h3 class="h3">Zusammenfassung der Ergebnisse</h3>
+            <p>Sie bekommen alles klar zusammengefasst: was möglich ist, was es bringt und was die Umsetzung kostet. Eine Entscheidungsgrundlage, keine Folien.</p>
+          </div>
+        </li>
+        <li class="tl__item reveal">
+          <span class="tl__node" aria-hidden="true"><span class="tl__num">5</span></span>
+          <div class="tl__card">
+            <h3 class="h3">Umsetzung im Folgeprojekt</h3>
+            <p>Wir bauen die KI-Helfer und begleiten die Einführung im Betrieb, bis sie wirklich genutzt werden. Den Klartag rechnen wir voll an.</p>
+          </div>
+        </li>
+      </ol>
+      <div class="tl__cta">
+        <a class="btn btn--accent" href="#termin"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Mit dem Orientierungsgespräch starten</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEWSLETTER -->
+  <section class="newsletter" aria-labelledby="nl-h">
+    <div class="container newsletter__inner">
+      <div class="newsletter__copy">
+        <h2 class="h2" id="nl-h">Einmal im Monat ein Kniff, der Zeit spart.</h2>
+        <p>Kurze, praktische Tipps, wie KI Ihnen Büroarbeit abnimmt. Kein Verkaufsgerede, jederzeit abbestellbar.</p>
+      </div>
+      <form class="newsletter__form" id="newsletter" novalidate>
+        <div class="newsletter__row">
+          <label class="sr-only" for="nl-email">Ihre E-Mail-Adresse</label>
+          <input id="nl-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="ihre@firma.de" required>
+          <button class="btn btn--accent" type="submit">Anmelden</button>
+        </div>
+        <p class="newsletter__note">Sie erhalten eine Bestätigungs-Mail (Double-Opt-In). Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</p>
+        <p class="newsletter__ok" role="status" hidden>Fast geschafft. Bitte bestätigen Sie den Link in der E-Mail, die wir Ihnen gerade geschickt haben.</p>
+      </form>
+    </div>
+  </section>
+
+  <!-- TERMIN: Qualifizierungs-Maske + Kalender -->
+  <section class="booking" id="termin" aria-labelledby="booking-h">
+    <div class="container">
+      <div class="booking__head">
+        <h2 class="h1" id="booking-h">Buchen Sie Ihr 15-Minuten-Orientierungsgespräch.</h2>
+        <p class="lead">Kostenlos und unverbindlich. Vier kurze Angaben, dann wählen Sie direkt einen Termin. So sind wir im Gespräch sofort beim Thema.</p>
+      </div>
+
+      <form class="wizard" id="qualify" novalidate aria-describedby="wiz-progress">
+        <p class="wizard__progress" id="wiz-progress" aria-live="polite"><span class="wizard__bar"><span class="wizard__bar-fill"></span></span><span class="wizard__count">Schritt <b>1</b> von 5</span></p>
+
+        <fieldset class="wstep is-active" data-step="1" data-auto>
+          <legend class="wstep__q">Wie viele Mitarbeitende hat Ihr Betrieb?</legend>
+          <div class="qgrid">
+            <label class="qcard"><input type="radio" name="groesse" value="1-9"><span class="qcard__t">1 bis 9</span></label>
+            <label class="qcard"><input type="radio" name="groesse" value="10-20"><span class="qcard__t">10 bis 20</span></label>
+            <label class="qcard"><input type="radio" name="groesse" value="21-50"><span class="qcard__t">21 bis 50</span></label>
+            <label class="qcard"><input type="radio" name="groesse" value="50+"><span class="qcard__t">mehr als 50</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="wstep" data-step="2" data-auto>
+          <legend class="wstep__q">Welche Rolle haben Sie im Betrieb?</legend>
+          <div class="qgrid">
+            <label class="qcard"><input type="radio" name="rolle" value="inhaber"><span class="qcard__t">Inhaber oder Geschäftsführung</span></label>
+            <label class="qcard"><input type="radio" name="rolle" value="buero"><span class="qcard__t">Büro oder Verwaltung</span></label>
+            <label class="qcard"><input type="radio" name="rolle" value="sonstige"><span class="qcard__t">Etwas anderes</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="wstep" data-step="3">
+          <legend class="wstep__q">Wo brennt es am meisten? <span class="wstep__hint">Mehrfachauswahl möglich</span></legend>
+          <div class="qgrid">
+            <label class="qcard"><input type="checkbox" name="thema" value="angebote"><span class="qcard__t">Angebote &amp; Rechnungen</span></label>
+            <label class="qcard"><input type="checkbox" name="thema" value="email"><span class="qcard__t">E-Mails &amp; Schriftverkehr</span></label>
+            <label class="qcard"><input type="checkbox" name="thema" value="doku"><span class="qcard__t">Dokumentation &amp; Berichte</span></label>
+            <label class="qcard"><input type="checkbox" name="thema" value="wissen"><span class="qcard__t">Unterlagen &amp; Wissen finden</span></label>
+            <label class="qcard"><input type="checkbox" name="thema" value="termine"><span class="qcard__t">Termine &amp; Planung</span></label>
+            <label class="qcard"><input type="checkbox" name="thema" value="anderes"><span class="qcard__t">Etwas anderes</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="wstep" data-step="4" data-auto>
+          <legend class="wstep__q">Wie dringend ist das Thema bei Ihnen?</legend>
+          <div class="qgrid">
+            <label class="qcard"><input type="radio" name="dringlichkeit" value="akut"><span class="qcard__t">Akut</span><span class="qcard__d">Es muss sich etwas ändern.</span></label>
+            <label class="qcard"><input type="radio" name="dringlichkeit" value="quartal"><span class="qcard__t">Dieses Quartal</span><span class="qcard__d">Wir wollen es angehen.</span></label>
+            <label class="qcard"><input type="radio" name="dringlichkeit" value="info"><span class="qcard__t">Erstmal informieren</span><span class="qcard__d">Wir schauen, was möglich ist.</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="wstep wstep--contact" data-step="5">
+          <legend class="wstep__q">Wohin dürfen wir die Bestätigung schicken?</legend>
+          <div class="field"><label for="q-name">Name</label><input id="q-name" name="name" type="text" autocomplete="name" required></div>
+          <div class="field"><label for="q-mail">E-Mail</label><input id="q-mail" name="email" type="email" inputmode="email" autocomplete="email" required></div>
+          <div class="field"><label for="q-firma">Unternehmen <span class="field__opt">(optional)</span></label><input id="q-firma" name="firma" type="text" autocomplete="organization"></div>
+          <div class="field"><label for="q-tel">Telefon <span class="field__opt">(optional)</span></label><input id="q-tel" name="telefon" type="tel" inputmode="tel" autocomplete="tel"></div>
+          <label class="consent"><input type="checkbox" name="consent" required><span>Ich bin mit der Verarbeitung meiner Angaben zur Bearbeitung meiner Anfrage einverstanden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</span></label>
+        </fieldset>
+
+        <div class="wizard__nav">
+          <button type="button" class="btn btn--ghost-ink wizard__back" hidden>Zurück</button>
+          <button type="button" class="btn wizard__next">Weiter</button>
+          <button type="submit" class="btn btn--accent wizard__submit" hidden>Weiter zum Kalender</button>
+        </div>
+        <p class="wizard__err" role="alert" hidden></p>
+      </form>
+
+      <!-- Kalender wird erst nach Abschluss der Maske + Einwilligung geladen.
+           Buchungstool-Wechsel (Calendly ⇄ Zeeg) nur hier + in loadBookingCalendar() in site.js. -->
+      <div class="cal" id="booking-calendar" data-cal-url="https://calendly.com/geisler-matthias/orientierungscall?hide_gdpr_banner=1&background_color=fcfaf4&text_color=14224f&primary_color=2f3fdb" hidden>
+        <p class="cal__intro"><b>Geschafft.</b> Wählen Sie jetzt einen Termin, der Ihnen passt.</p>
+        <div id="cal-target" class="cal__embed"></div>
+        <p class="cal__note">Es öffnet sich der Kalender von <b>Calendly</b>. Hinweise zur Datenverarbeitung in der <a href="datenschutz.html">Datenschutzerklärung</a>. <a class="cal__alt" href="https://calendly.com/geisler-matthias/orientierungscall" target="_blank" rel="noopener">Direkt bei Calendly öffnen</a></p>
+      </div>
+      <noscript>
+        <p class="cal__note" style="margin-top:18px">Für die Online-Buchung bitte JavaScript aktivieren, oder schreiben Sie uns an <a href="mailto:kontakt@demiospace.ai">kontakt@demiospace.ai</a>. <a href="https://calendly.com/geisler-matthias/orientierungscall" target="_blank" rel="noopener">Direkt bei Calendly öffnen</a></p>
+      </noscript>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer__top">
+      <div>
+        <span class="wordmark on-ink"><span class="mani">mani</span><span class="base">base</span><span class="dot" aria-hidden="true"></span></span>
+        <p class="footer__claim">KI-Helfer für die Büroarbeit, die niemand machen will. Gebaut für inhabergeführte Betriebe.</p>
+      </div>
+      <nav class="footer__col" aria-label="Seiteninhalte">
+        <p class="footer__h">Seite</p>
+        <a href="#pains">Kennen Sie das?</a>
+        <a href="#helfer">Unsere Helden</a>
+        <a href="#ablauf">So arbeiten wir</a>
+        <a href="blog/">Blog</a>
+        <a href="#termin">Termin buchen</a>
+      </nav>
+      <nav class="footer__col" aria-label="Rechtliches">
+        <p class="footer__h">Rechtliches</p>
+        <a href="impressum.html">Impressum</a>
+        <a href="datenschutz.html">Datenschutz</a>
+      </nav>
+    </div>
+    <div class="footer__bottom">
+      <span>© 2026 manibase UG (haftungsbeschränkt) i. G.</span>
+      <span class="num">Server in Deutschland · DSGVO-konform</span>
+    </div>
+  </div>
+</footer>
+
+<script src="scripts/site.js" defer></script>
+</body>
+</html>

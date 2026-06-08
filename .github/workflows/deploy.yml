@@ -1,0 +1,47 @@
+name: Deploy to manibase.aicoreinfra.de
+
+# Deploys site/ to the production server on every merge to main.
+# Mechanism: GitHub-hosted runner -> SSH rsync into a timestamped release
+# dir -> atomically flip the `current` symlink nginx serves from.
+# One-time server provisioning (docroot, nginx vhost, TLS) is done out of
+# band by ~deploy/setup-manibase.sh on the server (lives in the deploy home
+# next to the other setup-*.sh scripts, per server convention; not versioned
+# here). Required repo secret: DEPLOY_SSH_KEY.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      HOST: deploy@72.62.42.27
+      BASE: /var/www/manibase.aicoreinfra.de
+      KEEP_RELEASES: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H 72.62.42.27 >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Deploy (rsync release + flip symlink)
+        run: |
+          set -euo pipefail
+          SSH="ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes"
+          REL="$BASE/releases/$(date +%Y%m%d%H%M%S)"
+          $SSH "$HOST" "mkdir -p '$REL'"
+          rsync -az --delete -e "$SSH" ./site/ "$HOST:$REL/"
+          $SSH "$HOST" "ln -sfn '$REL' '$BASE/current'"
+          # Prune old releases, keep the most recent $KEEP_RELEASES.
+          $SSH "$HOST" "ls -1dt $BASE/releases/*/ | tail -n +$((KEEP_RELEASES + 1)) | xargs -r rm -rf"
+          echo "Deployed $REL -> $BASE/current"

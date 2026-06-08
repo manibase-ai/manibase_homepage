@@ -1,0 +1,18 @@
+/* Self-hosted fonts (DSGVO: kein Google-CDN-Aufruf zur Laufzeit).
+   Variable woff2, latin-Subset deckt ä ö ü ß ab.
+   url() ist relativ zu DIESER Datei (site/fonts/). */
+@font-face{
+  font-family:'Sora';
+  font-style:normal; font-weight:400 700; font-display:swap;
+  src:url('Sora.woff2') format('woff2');
+}
+@font-face{
+  font-family:'Hanken Grotesk';
+  font-style:normal; font-weight:400 700; font-display:swap;
+  src:url('HankenGrotesk.woff2') format('woff2');
+}
+@font-face{
+  font-family:'JetBrains Mono';
+  font-style:normal; font-weight:400 600; font-display:swap;
+  src:url('JetBrainsMono.woff2') format('woff2');
+}
