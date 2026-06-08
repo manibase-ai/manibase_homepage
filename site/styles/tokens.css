@@ -1,0 +1,89 @@
+/* ============================================================
+   manibase · tokens.css  (Single Source of Truth)
+   Übernommen aus dem Brand-Kit "Claude Design/colors_and_type.css".
+   Einzige Änderung: Fonts werden selbst gehostet (DSGVO), nicht via Google-CDN.
+   ============================================================ */
+@import url('../fonts/_fontface.css');
+
+:root{
+  /* ---- Marke · Indigo-Cobalt ---- */
+  --cobalt-50:#EEF0FE;  --cobalt-100:#DADDFB; --cobalt-200:#B6BCF6; --cobalt-300:#8A92EE;
+  --cobalt-400:#5C68E6; --cobalt-500:#2F3FDB; --cobalt-600:#2531B0; --cobalt-700:#1E2789;
+  --cobalt-800:#19206B; --cobalt-900:#14224F;
+
+  /* ---- Akzent · Gelb ---- */
+  --yellow-50:#FEFBE6;  --yellow-100:#FDF4B8; --yellow-200:#FBEA78; --yellow-300:#F8DF3F;
+  --yellow-400:#F2D414; --yellow-500:#D9BB07; --yellow-600:#B89B05; --yellow-700:#8F7804;
+  --yellow-800:#6B5A03; --yellow-900:#463B02;
+
+  /* ---- Neutrals · warm ---- */
+  --warm-50:#F8F4EC;  --warm-100:#EFE9DD; --warm-200:#E2DBCB; --warm-300:#CFC7B4;
+  --warm-400:#B0A892; --warm-500:#8A8473; --warm-600:#6B6557; --warm-700:#4E4940;
+  --warm-800:#332F29; --warm-900:#211E1A; --paper:#FCFAF4;
+
+  /* ---- Semantisch · Status ---- */
+  --success:#2E9E5B; --warning:#E08A1E; --error:#DC3B3B; --info:#2F3FDB;
+  --success-bg:#E6F4EC; --warning-bg:#FBEEDC; --error-bg:#FAE4E4;
+
+  /* ---- Avatar-Kosmos · KI-Helfer (Figuren, nie große Flächen) ---- */
+  --agent-anton:#1FB6A0;  /* teal   · Angebote    */
+  --agent-mailo:#6C5CE7;  /* violet · E-Mail      */
+  --agent-kalla:#FF6B4A;  /* coral  · Kalkulation */
+  --agent-doku:#E8568E;   /* pink   · Dokumente   */
+  --agent-pia:#2BA8F4;    /* blue   · Planung     */
+  --agent-lime:#9BCB3A;   /* lime   · Reserve     */
+
+  /* ---- Semantische Rollen ---- */
+  --color-primary:#2F3FDB; --color-on-primary:#FFFFFF; --color-primary-hover:#2531B0;
+  --color-ink:#14224F; --color-accent:#F2D414; --color-on-accent:#14224F;
+  --color-background:#F8F4EC; --color-surface:#FCFAF4; --color-surface-sunken:#F2ECDE;
+  --color-text-primary:#211E1A; --color-text-secondary:#6B6557; --color-text-on-ink:#EFE9DD;
+  --color-border:#E2DBCB; --color-border-strong:#CFC7B4; --color-focus:#5C68E6;
+
+  /* ---- Type ---- */
+  --font-display:'Sora', system-ui, sans-serif;
+  --font-body:'Hanken Grotesk', system-ui, sans-serif;
+  --font-mono:'JetBrains Mono', ui-monospace, monospace;
+
+  --fw-regular:400; --fw-medium:500; --fw-semibold:600; --fw-bold:700;
+  --lh-tight:1.05; --lh-snug:1.2; --lh-normal:1.5; --lh-relaxed:1.7;
+  --ls-tighter:-0.04em; --ls-tight:-0.02em; --ls-normal:0; --ls-wide:0.06em; --ls-wider:0.16em;
+
+  /* ---- Fluid type scale (clamp, ratio >=1.25) ---- */
+  --t-display:clamp(2.75rem, 1.6rem + 5.1vw, 5.5rem);  /* Hero, max ~88px */
+  --t-h1:clamp(2rem, 1.4rem + 2.6vw, 3.25rem);
+  --t-h2:clamp(1.6rem, 1.25rem + 1.6vw, 2.4rem);
+  --t-h3:clamp(1.2rem, 1.05rem + 0.7vw, 1.5rem);
+  --t-lead:clamp(1.1rem, 1rem + 0.45vw, 1.3rem);
+  --t-body:1.0625rem;  /* 17px */
+  --t-small:0.875rem;
+
+  /* ---- Spacing ---- */
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:20px;
+  --space-6:24px; --space-8:32px; --space-10:40px; --space-12:48px; --space-16:64px;
+  --space-20:80px; --space-24:96px; --space-32:128px;
+  --section-y:clamp(3rem, 2rem + 4vw, 5.5rem);
+  --container:1160px;
+  --measure:65ch;
+
+  --radius-sm:8px; --radius-md:12px; --radius-lg:16px; --radius-xl:22px; --radius-pill:999px;
+
+  --shadow-xs:0 1px 2px rgba(33,30,26,.05);
+  --shadow-sm:0 1px 3px rgba(33,30,26,.06), 0 1px 2px rgba(33,30,26,.04);
+  --shadow-md:0 4px 16px rgba(33,30,26,.07), 0 2px 4px rgba(33,30,26,.04);
+  --shadow-lg:0 12px 32px rgba(20,34,79,.10), 0 4px 8px rgba(33,30,26,.05);
+  --shadow-focus:0 0 0 3px rgba(92,104,230,.35);
+
+  --ease-out:cubic-bezier(.2,.7,.2,1);
+  --dur-fast:120ms; --dur-base:220ms; --dur-slow:520ms;
+
+  /* ---- Bauplan-Raster (architect's grid) ---- */
+  --grid-line:#E9E2D2;
+  --grid-cell:32px;
+  --paper-grid:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+
+  /* z-index Skala (semantisch, keine 9999) */
+  --z-sticky:100; --z-nav:200; --z-overlay:300;
+}
