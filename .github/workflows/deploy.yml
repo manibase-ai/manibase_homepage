@@ -4,7 +4,9 @@ name: Deploy to manibase.aicoreinfra.de
 # Mechanism: GitHub-hosted runner -> SSH rsync into a timestamped release
 # dir -> atomically flip the `current` symlink nginx serves from.
 # One-time server provisioning (docroot, nginx vhost, TLS) is done out of
-# band by infra/provision-manibase.sh. Required repo secret: DEPLOY_SSH_KEY.
+# band by ~deploy/setup-manibase.sh on the server (lives in the deploy home
+# next to the other setup-*.sh scripts, per server convention; not versioned
+# here). Required repo secret: DEPLOY_SSH_KEY.
 
 on:
   push:
