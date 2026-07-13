@@ -1,12 +1,14 @@
-name: Deploy to manibase.aicoreinfra.de
+name: Deploy to manibase.de
 
 # Deploys site/ to the production server on every merge to main.
 # Mechanism: GitHub-hosted runner -> SSH rsync into a timestamped release
 # dir -> atomically flip the `current` symlink nginx serves from.
-# One-time server provisioning (docroot, nginx vhost, TLS) is done out of
-# band by ~deploy/setup-manibase.sh on the server (lives in the deploy home
-# next to the other setup-*.sh scripts, per server convention; not versioned
-# here). Required repo secret: DEPLOY_SSH_KEY.
+# One-time server provisioning (docroot, nginx vhost, PHP-FPM for the Odoo
+# newsletter proxy, TLS) is done out of band by ~deploy/setup-manibase.sh on
+# the server (lives in the deploy home next to the other setup-*.sh scripts,
+# per server convention; not versioned here). Required repo secret:
+# DEPLOY_SSH_KEY (the github-actions-deploy@manibase ed25519 key; its public
+# half is in ~deploy/.ssh/authorized_keys on 72.61.153.206).
 
 on:
   push:
@@ -21,8 +23,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      HOST: deploy@72.62.42.27
-      BASE: /var/www/manibase.aicoreinfra.de
+      HOST: deploy@72.61.153.206
+      BASE: /var/www/manibase.de
       KEEP_RELEASES: 5
     steps:
       - uses: actions/checkout@v4
@@ -32,7 +34,7 @@ jobs:
           mkdir -p ~/.ssh
           printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H 72.62.42.27 >> ~/.ssh/known_hosts 2>/dev/null
+          ssh-keyscan -H 72.61.153.206 >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: Deploy (rsync release + flip symlink)
         run: |

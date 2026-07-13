@@ -355,14 +355,16 @@
         <h2 class="h2" id="nl-h">Einmal im Monat ein Kniff, der Zeit spart.</h2>
         <p>Kurze, praktische Tipps, wie KI Ihnen Büroarbeit abnimmt. Kein Verkaufsgerede, jederzeit abbestellbar.</p>
       </div>
-      <form class="newsletter__form" id="newsletter" novalidate>
+      <form class="newsletter__form" id="newsletter" data-endpoint="/api/newsletter" novalidate>
+        <div class="newsletter__hp" aria-hidden="true"><label>Website (bitte frei lassen)<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
         <div class="newsletter__row">
           <label class="sr-only" for="nl-email">Ihre E-Mail-Adresse</label>
           <input id="nl-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="ihre@firma.de" required>
           <button class="btn btn--accent" type="submit">Anmelden</button>
         </div>
-        <p class="newsletter__note">Sie erhalten eine Bestätigungs-Mail (Double-Opt-In). Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</p>
-        <p class="newsletter__ok" role="status" hidden>Fast geschafft. Bitte bestätigen Sie den Link in der E-Mail, die wir Ihnen gerade geschickt haben.</p>
+        <p class="newsletter__note">Mit dem Absenden willigen Sie ein, unseren Newsletter zu erhalten. Jederzeit abbestellbar, Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</p>
+        <p class="newsletter__err" role="alert" hidden></p>
+        <p class="newsletter__ok" role="status" hidden>Danke, Sie sind angemeldet. Sie können sich jederzeit über den Abmeldelink in jeder E-Mail wieder austragen.</p>
       </form>
     </div>
   </section>
@@ -435,15 +437,22 @@
         <p class="wizard__err" role="alert" hidden></p>
       </form>
 
-      <!-- Kalender wird erst nach Abschluss der Maske + Einwilligung geladen.
-           Buchungstool-Wechsel (Calendly ⇄ Zeeg) nur hier + in loadBookingCalendar() in site.js. -->
-      <div class="cal" id="booking-calendar" data-cal-url="https://calendly.com/geisler-matthias/orientierungscall?hide_gdpr_banner=1&background_color=fcfaf4&text_color=14224f&primary_color=2f3fdb" hidden>
+      <!-- Kalender wird erst nach Abschluss der Maske + Einwilligung geladen (Zeeg).
+           Buchungstool-Konfiguration NUR hier + in loadBookingCalendar() in site.js.
+           data-cal-script = Zeeg embed.min.js (verifiziert). data-cal-url = öffentlicher
+           Event-Link (Zeeg -> Share -> Add to website -> Inline Embed: data-user/data-event-type).
+           data-cal-answer optional = ID einer Freitextfrage im Event (z.B. a1) für die Wizard-Notiz. -->
+      <div class="cal" id="booking-calendar"
+           data-cal-url="https://zeeg.me/rechnung27/technische-beratung"
+           data-cal-script="https://assets.zeeg.me/embed.min.js"
+           data-cal-answer=""
+           hidden>
         <p class="cal__intro"><b>Geschafft.</b> Wählen Sie jetzt einen Termin, der Ihnen passt.</p>
         <div id="cal-target" class="cal__embed"></div>
-        <p class="cal__note">Es öffnet sich der Kalender von <b>Calendly</b>. Hinweise zur Datenverarbeitung in der <a href="datenschutz.html">Datenschutzerklärung</a>. <a class="cal__alt" href="https://calendly.com/geisler-matthias/orientierungscall" target="_blank" rel="noopener">Direkt bei Calendly öffnen</a></p>
+        <p class="cal__note">Es öffnet sich der Kalender von <b>Zeeg</b>. Hinweise zur Datenverarbeitung in der <a href="datenschutz.html">Datenschutzerklärung</a>. <a class="cal__alt" href="https://zeeg.me/rechnung27/technische-beratung" target="_blank" rel="noopener">Direkt bei Zeeg öffnen</a></p>
       </div>
       <noscript>
-        <p class="cal__note" style="margin-top:18px">Für die Online-Buchung bitte JavaScript aktivieren, oder schreiben Sie uns an <a href="mailto:kontakt@demiospace.ai">kontakt@demiospace.ai</a>. <a href="https://calendly.com/geisler-matthias/orientierungscall" target="_blank" rel="noopener">Direkt bei Calendly öffnen</a></p>
+        <p class="cal__note" style="margin-top:18px">Für die Online-Buchung bitte JavaScript aktivieren, oder schreiben Sie uns an <a href="mailto:kontakt@demiospace.ai">kontakt@demiospace.ai</a>. <a href="https://zeeg.me/rechnung27/technische-beratung" target="_blank" rel="noopener">Direkt bei Zeeg öffnen</a></p>
       </noscript>
     </div>
   </section>
