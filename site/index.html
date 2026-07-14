@@ -348,26 +348,11 @@
     </div>
   </section>
 
-  <!-- NEWSLETTER -->
-  <section class="newsletter" aria-labelledby="nl-h">
-    <div class="container newsletter__inner">
-      <div class="newsletter__copy">
-        <h2 class="h2" id="nl-h">Einmal im Monat ein Kniff, der Zeit spart.</h2>
-        <p>Kurze, praktische Tipps, wie KI Ihnen Büroarbeit abnimmt. Kein Verkaufsgerede, jederzeit abbestellbar.</p>
-      </div>
-      <form class="newsletter__form" id="newsletter" data-endpoint="/api/newsletter" novalidate>
-        <div class="newsletter__hp" aria-hidden="true"><label>Website (bitte frei lassen)<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
-        <div class="newsletter__row">
-          <label class="sr-only" for="nl-email">Ihre E-Mail-Adresse</label>
-          <input id="nl-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="ihre@firma.de" required>
-          <button class="btn btn--accent" type="submit">Anmelden</button>
-        </div>
-        <p class="newsletter__note">Mit dem Absenden willigen Sie ein, unseren Newsletter zu erhalten. Jederzeit abbestellbar, Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</p>
-        <p class="newsletter__err" role="alert" hidden></p>
-        <p class="newsletter__ok" role="status" hidden>Danke, Sie sind angemeldet. Sie können sich jederzeit über den Abmeldelink in jeder E-Mail wieder austragen.</p>
-      </form>
-    </div>
-  </section>
+  <!-- NEWSLETTER: für den Launch deaktiviert, bis die Newsletter-Anbindung steht
+       (Odoo externe API ist auf dem aktuellen Plan nicht verfügbar). Zum
+       Reaktivieren: Sektion aus der Git-Historie (Commit "Fix P1 issues …")
+       zurückholen, Backend site/api/newsletter.php + Datenschutz-Abschnitt Newsletter
+       wieder ergänzen. Frontend-Handler in site.js bleibt (greift nur bei #newsletter). -->
 
   <!-- TERMIN: Qualifizierungs-Maske + Kalender -->
   <section class="booking" id="termin" aria-labelledby="booking-h">
