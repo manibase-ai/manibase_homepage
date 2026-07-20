@@ -7,7 +7,7 @@
       "name": "Webhook Confirm",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [200, 300]
+      "position": [160, 320]
     },
     {
       "parameters": {
@@ -17,7 +17,7 @@
       "name": "IF Secret ok (X-Manibase-Secret)",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [420, 300]
+      "position": [340, 320]
     },
     {
       "parameters": { "respondWith": "json", "responseCode": 401, "responseBody": "={ \"ok\": false }" },
@@ -25,45 +25,56 @@
       "name": "Respond 401",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [640, 520]
+      "position": [520, 560]
     },
     {
       "parameters": {
-        "jsCode": "const crypto=require('crypto');\nconst token=String(($json.body||{}).token||'');\nconst digest=crypto.createHash('sha256').update(token).digest('hex');\nreturn [{ json: { token_digest: digest } }];"
+        "jsCode": "const crypto=require('crypto');\nconst token=String(($json.body||{}).token||'');\nreturn [{ json: { token_digest: crypto.createHash('sha256').update(token).digest('hex') } }];"
       },
       "id": "wf2-code-digest",
       "name": "SHA-256(token)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [640, 300]
+      "position": [520, 320]
     },
     {
       "parameters": {
         "method": "POST",
         "url": "={{CONFIG:ODOO_URL}}/jsonrpc",
         "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"search_read\",[[[\"token_digest\",\"=\",\"{{ $json.token_digest }}\"]]],{\"fields\":[\"id\",\"status\",\"termin\"]}]] } }",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"search_read\",[[[\"token_digest\",\"=\",\"{{ $json.token_digest }}\"]]],{\"fields\":[\"id\",\"status\",\"termin\",\"email_norm\"]}]] } }",
         "options": {}
       },
       "id": "wf2-odoo-find",
       "name": "Odoo search_read reg by token_digest",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [860, 300]
+      "position": [720, 320]
+    },
+    {
+      "parameters": {
+        "jsCode": "// JSON-RPC-Result auspacken + Ablauf/TTL prüfen (Termin in der Zukunft?).\nconst rows = ($json.result)||[];\nif (rows.length === 0) return [{ json: { outcome: 'not_found' } }];\nconst r = rows[0];\nconst expired = new Date(r.termin).getTime() < Date.now();\nif (r.status === 'confirmed') return [{ json: { outcome: 'already', reg_id: r.id } }];\nif (expired) return [{ json: { outcome: 'expired', reg_id: r.id } }];\nreturn [{ json: { outcome: 'received', reg_id: r.id, termin: r.termin, email_norm: r.email_norm } }];"
+      },
+      "id": "wf2-map",
+      "name": "Result auspacken + TTL (found/status/termin)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [920, 320]
     },
     {
       "parameters": {
         "rules": { "values": [
-          { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.found }}", "rightValue": false, "operator": { "type": "boolean", "operation": "false" } } ] }, "outputKey": "not_found_or_expired" },
-          { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.status }}", "rightValue": "confirmed", "operator": { "type": "string", "operation": "equals" } } ] }, "outputKey": "already_confirmed" }
+          { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.outcome }}", "rightValue": "not_found", "operator": { "type": "string", "operation": "equals" } } ] }, "outputKey": "gone" },
+          { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.outcome }}", "rightValue": "expired", "operator": { "type": "string", "operation": "equals" } } ] }, "outputKey": "expired" },
+          { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.outcome }}", "rightValue": "already", "operator": { "type": "string", "operation": "equals" } } ] }, "outputKey": "already" }
         ] },
         "fallbackOutput": "extra"
       },
       "id": "wf2-switch",
-      "name": "Switch (nicht gefunden/abgelaufen | confirmed | received)",
+      "name": "Switch (gone | expired | already | received)",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3,
-      "position": [1080, 300]
+      "position": [1120, 320]
     },
     {
       "parameters": { "respondWith": "json", "responseCode": 410, "responseBody": "={ \"ok\": false, \"error\": \"gone\" }" },
@@ -71,7 +82,7 @@
       "name": "Respond 410 (nicht gefunden ODER abgelaufen)",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1320, 180]
+      "position": [1360, 140]
     },
     {
       "parameters": { "respondWith": "json", "responseCode": 409, "responseBody": "={ \"ok\": false, \"error\": \"already_confirmed\" }" },
@@ -79,7 +90,7 @@
       "name": "Respond 409 (bereits bestätigt / Claim verloren)",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1320, 300]
+      "position": [1360, 300]
     },
     {
       "parameters": {
@@ -93,18 +104,41 @@
       "name": "Claim outbox mail_key invite (unique = CAS)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [1320, 420],
-      "onError": "continueErrorOutput"
+      "position": [1360, 480]
     },
     {
       "parameters": {
-        "jsCode": "// ICS bauen (Europe/Berlin). Bei Unique-Violation stattdessen Read-after-Conflict\n// (Zustand lesen: confirmed->409, received-haengt->weitertreiben->200).\nconst reg = $json.reg_id;\nconst dtstart = ($json.termin_ics)||'20260729T193000';\nconst ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//manibase//Infotermin//DE','METHOD:REQUEST','BEGIN:VTIMEZONE','TZID:Europe/Berlin','END:VTIMEZONE','BEGIN:VEVENT','UID:'+reg+'@manibase.de','DTSTAMP:20260720T000000Z','SEQUENCE:0','DTSTART;TZID=Europe/Berlin:'+dtstart,'DTEND;TZID=Europe/Berlin:'+dtstart,'SUMMARY:manibase Infotermin','ORGANIZER:mailto:{{CONFIG:SENDER}}','END:VEVENT','END:VCALENDAR'].join('\\r\\n');\nreturn [{ json: { ics_base64: Buffer.from(ics).toString('base64') } }];"
+        "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] }
+      },
+      "id": "wf2-if-claim",
+      "name": "IF Claim-Konflikt (Read-after-Conflict -> 409)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1560, 480]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{CONFIG:ODOO_URL}}/jsonrpc",
+        "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"write\",[[{{ $('Result auspacken + TTL (found/status/termin)').item.json.reg_id }}],{\"status\":\"confirmed\"}]] } }",
+        "options": {}
+      },
+      "id": "wf2-write-confirmed",
+      "name": "Odoo write status=confirmed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1760, 560]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ICS (Europe/Berlin), Empfänger + Termin durchreichen, 60 min Dauer.\nconst m = $('Result auspacken + TTL (found/status/termin)').item.json;\nconst dt = new Date(m.termin);\nconst y=dt.getFullYear(); const pad=n=>String(n).padStart(2,'0');\nconst start = `${y}${pad(dt.getMonth()+1)}${pad(dt.getDate())}T${pad(dt.getHours())}${pad(dt.getMinutes())}00`;\nconst endDt = new Date(dt.getTime()+60*60000);\nconst end = `${endDt.getFullYear()}${pad(endDt.getMonth()+1)}${pad(endDt.getDate())}T${pad(endDt.getHours())}${pad(endDt.getMinutes())}00`;\nconst teams = new Date(m.termin).getDate() <= 29 ? '{{CONFIG:TEAMS_LINK_T1}}' : '{{CONFIG:TEAMS_LINK_T2}}';\nconst ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//manibase//Infotermin//DE','METHOD:REQUEST','BEGIN:VTIMEZONE','TZID:Europe/Berlin','END:VTIMEZONE','BEGIN:VEVENT','UID:'+m.reg_id+'@manibase.de','DTSTAMP:20260720T000000Z','SEQUENCE:0','DTSTART;TZID=Europe/Berlin:'+start,'DTEND;TZID=Europe/Berlin:'+end,'SUMMARY:manibase Infotermin','ORGANIZER:mailto:{{CONFIG:SENDER}}','END:VEVENT','END:VCALENDAR'].join('\\r\\n');\nreturn [{ json: { ics_base64: Buffer.from(ics).toString('base64'), email_norm: m.email_norm, teams } }];"
       },
       "id": "wf2-code-ics",
-      "name": "Build ICS (TZID=Europe/Berlin, UID, SEQUENCE)",
+      "name": "Build ICS (TZID=Europe/Berlin, UID, SEQUENCE, 60min)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1540, 420]
+      "position": [1960, 560]
     },
     {
       "parameters": {
@@ -113,25 +147,29 @@
         "authentication": "genericCredentialType",
         "genericAuthType": "oAuth2Api",
         "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"message\": { \"subject\": \"Ihre Einladung zum Infotermin\", \"body\": { \"contentType\": \"HTML\", \"content\": \"<p>Einwahl: <a href='{{CONFIG:TEAMS_LINK_T1}}'>Teams (Termin 1)</a> / <a href='{{CONFIG:TEAMS_LINK_T2}}'>Teams (Termin 2)</a></p>\" }, \"attachments\": [{ \"@odata.type\": \"#microsoft.graph.fileAttachment\", \"name\": \"termin.ics\", \"contentType\": \"text/calendar\", \"contentBytes\": \"{{ $json.ics_base64 }}\" }], \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{ $json.email_norm }}\" } }] } }",
+        "jsonBody": "={ \"message\": { \"subject\": \"Ihre Einladung zum Infotermin\", \"body\": { \"contentType\": \"HTML\", \"content\": \"<p>Einwahl: <a href='{{ $json.teams }}'>Teams</a></p>\" }, \"attachments\": [{ \"@odata.type\": \"#microsoft.graph.fileAttachment\", \"name\": \"termin.ics\", \"contentType\": \"text/calendar\", \"contentBytes\": \"{{ $json.ics_base64 }}\" }], \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{ $json.email_norm }}\" } }] } }",
         "options": {}
       },
       "id": "wf2-graph-invite",
       "name": "Graph sendMail Einladung + ICS",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [1760, 420],
+      "position": [2160, 560],
       "onError": "continueErrorOutput"
     },
     {
       "parameters": {
-        "jsCode": "// outbox invite -> sent. Graph-Fehler -> state=failed_unknown (Reconciliation).\nreturn [{ json: { outbox_state: 'sent' } }];"
+        "method": "POST",
+        "url": "={{CONFIG:ODOO_URL}}/jsonrpc",
+        "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"search\",[[[\"mail_key\",\"=\",\"invite:{{ $('Result auspacken + TTL (found/status/termin)').item.json.reg_id }}\"]]]]] } }",
+        "options": {}
       },
       "id": "wf2-outbox-sent",
-      "name": "outbox invite state=sent (sonst failed_unknown)",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [1980, 420]
+      "name": "Odoo write outbox invite state=sent (Fehler: failed_unknown)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [2360, 560]
     },
     {
       "parameters": { "respondWith": "json", "responseCode": 200, "responseBody": "={ \"ok\": true }" },
@@ -139,19 +177,22 @@
       "name": "Respond 200 (bestätigt)",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [2200, 420]
+      "position": [2560, 560]
     }
   ],
   "connections": {
     "Webhook Confirm": { "main": [[{ "node": "IF Secret ok (X-Manibase-Secret)", "type": "main", "index": 0 }]] },
     "IF Secret ok (X-Manibase-Secret)": { "main": [[{ "node": "SHA-256(token)", "type": "main", "index": 0 }], [{ "node": "Respond 401", "type": "main", "index": 0 }]] },
     "SHA-256(token)": { "main": [[{ "node": "Odoo search_read reg by token_digest", "type": "main", "index": 0 }]] },
-    "Odoo search_read reg by token_digest": { "main": [[{ "node": "Switch (nicht gefunden/abgelaufen | confirmed | received)", "type": "main", "index": 0 }]] },
-    "Switch (nicht gefunden/abgelaufen | confirmed | received)": { "main": [[{ "node": "Respond 410 (nicht gefunden ODER abgelaufen)", "type": "main", "index": 0 }], [{ "node": "Respond 409 (bereits bestätigt / Claim verloren)", "type": "main", "index": 0 }], [{ "node": "Claim outbox mail_key invite (unique = CAS)", "type": "main", "index": 0 }]] },
-    "Claim outbox mail_key invite (unique = CAS)": { "main": [[{ "node": "Build ICS (TZID=Europe/Berlin, UID, SEQUENCE)", "type": "main", "index": 0 }], [{ "node": "Respond 409 (bereits bestätigt / Claim verloren)", "type": "main", "index": 0 }]] },
-    "Build ICS (TZID=Europe/Berlin, UID, SEQUENCE)": { "main": [[{ "node": "Graph sendMail Einladung + ICS", "type": "main", "index": 0 }]] },
-    "Graph sendMail Einladung + ICS": { "main": [[{ "node": "outbox invite state=sent (sonst failed_unknown)", "type": "main", "index": 0 }]] },
-    "outbox invite state=sent (sonst failed_unknown)": { "main": [[{ "node": "Respond 200 (bestätigt)", "type": "main", "index": 0 }]] }
+    "Odoo search_read reg by token_digest": { "main": [[{ "node": "Result auspacken + TTL (found/status/termin)", "type": "main", "index": 0 }]] },
+    "Result auspacken + TTL (found/status/termin)": { "main": [[{ "node": "Switch (gone | expired | already | received)", "type": "main", "index": 0 }]] },
+    "Switch (gone | expired | already | received)": { "main": [[{ "node": "Respond 410 (nicht gefunden ODER abgelaufen)", "type": "main", "index": 0 }], [{ "node": "Respond 410 (nicht gefunden ODER abgelaufen)", "type": "main", "index": 0 }], [{ "node": "Respond 409 (bereits bestätigt / Claim verloren)", "type": "main", "index": 0 }], [{ "node": "Claim outbox mail_key invite (unique = CAS)", "type": "main", "index": 0 }]] },
+    "Claim outbox mail_key invite (unique = CAS)": { "main": [[{ "node": "IF Claim-Konflikt (Read-after-Conflict -> 409)", "type": "main", "index": 0 }]] },
+    "IF Claim-Konflikt (Read-after-Conflict -> 409)": { "main": [[{ "node": "Respond 409 (bereits bestätigt / Claim verloren)", "type": "main", "index": 0 }], [{ "node": "Odoo write status=confirmed", "type": "main", "index": 0 }]] },
+    "Odoo write status=confirmed": { "main": [[{ "node": "Build ICS (TZID=Europe/Berlin, UID, SEQUENCE, 60min)", "type": "main", "index": 0 }]] },
+    "Build ICS (TZID=Europe/Berlin, UID, SEQUENCE, 60min)": { "main": [[{ "node": "Graph sendMail Einladung + ICS", "type": "main", "index": 0 }]] },
+    "Graph sendMail Einladung + ICS": { "main": [[{ "node": "Odoo write outbox invite state=sent (Fehler: failed_unknown)", "type": "main", "index": 0 }]] },
+    "Odoo write outbox invite state=sent (Fehler: failed_unknown)": { "main": [[{ "node": "Respond 200 (bestätigt)", "type": "main", "index": 0 }]] }
   },
   "settings": { "executionOrder": "v1" }
 }

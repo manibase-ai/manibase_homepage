@@ -15,17 +15,17 @@
       "name": "Schedule (Europe/Berlin) 4 Feuerzeitpunkte",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1,
-      "position": [200, 300]
+      "position": [180, 320]
     },
     {
       "parameters": {
-        "jsCode": "// Aus dem Feuerzeitpunkt Termin + Reminder-Typ ableiten.\n// Termine: {{CONFIG:TERMIN_T1}} / {{CONFIG:TERMIN_T2}}.\nconst now = new Date();\nconst d = now.getUTCDate();\nconst termin = (d <= 29) ? '{{CONFIG:TERMIN_T1}}' : '{{CONFIG:TERMIN_T2}}';\nconst kind = (now.getUTCHours() < 18) ? 'reminder1d' : 'reminder1h';\nconst teams = (d <= 29) ? '{{CONFIG:TEAMS_LINK_T1}}' : '{{CONFIG:TEAMS_LINK_T2}}';\nreturn [{ json: { termin, kind, teams } }];"
+        "jsCode": "// Timezone-sicher über absolute Zeitstempel (Termin-ISO trägt +02:00-Offset):\n// Fenster ~24h -> reminder1d, ~1h -> reminder1h. Bestimmt Termin + Teams-Link.\nconst now = Date.now();\nconst cand = [['{{CONFIG:TERMIN_T1}}','{{CONFIG:TEAMS_LINK_T1}}'],['{{CONFIG:TERMIN_T2}}','{{CONFIG:TEAMS_LINK_T2}}']];\nfunction win(iso){ const h=(new Date(iso).getTime()-now)/3600000; if(h>12&&h<36) return 'reminder1d'; if(h>0&&h<=3) return 'reminder1h'; return null; }\nfor (const [iso,teams] of cand){ const k=win(iso); if(k) return [{ json: { termin: iso, kind: k, teams } }]; }\nreturn [];"
       },
       "id": "wf3-map",
       "name": "Termin + Reminder-Typ + Teams-Link",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [420, 300]
+      "position": [380, 320]
     },
     {
       "parameters": {
@@ -39,7 +39,17 @@
       "name": "Odoo search_read confirmed + Termin",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [640, 300]
+      "position": [580, 320]
+    },
+    {
+      "parameters": {
+        "jsCode": "// JSON-RPC-Result-Array in Einzel-Items je Teilnehmer aufspalten,\n// kind/teams aus dem Map-Node mitführen.\nconst rows = ($json.result)||[];\nconst m = $('Termin + Reminder-Typ + Teams-Link').item.json;\nreturn rows.map(r => ({ json: { reg_id: r.id, email_norm: r.email_norm, kind: m.kind, teams: m.teams } }));"
+      },
+      "id": "wf3-expand",
+      "name": "Result -> Items je Teilnehmer",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [780, 320]
     },
     {
       "parameters": { "batchSize": 1, "options": {} },
@@ -47,7 +57,7 @@
       "name": "Loop je Teilnehmer",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
-      "position": [860, 300]
+      "position": [980, 320]
     },
     {
       "parameters": {
@@ -61,8 +71,17 @@
       "name": "Claim outbox mail_key reminder (unique)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [1080, 300],
-      "onError": "continueErrorOutput"
+      "position": [1180, 320]
+    },
+    {
+      "parameters": {
+        "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] }
+      },
+      "id": "wf3-if-claim",
+      "name": "IF Claim schon vergeben -> skip",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1380, 320]
     },
     {
       "parameters": {
@@ -71,33 +90,41 @@
         "authentication": "genericCredentialType",
         "genericAuthType": "oAuth2Api",
         "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"message\": { \"subject\": \"Erinnerung: Ihr Infotermin\", \"body\": { \"contentType\": \"HTML\", \"content\": \"<p>Bis gleich. Einwahl: <a href='{{ $json.teams }}'>Teams</a></p>\" }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{ $json.email_norm }}\" } }] } }",
+        "jsonBody": "={ \"message\": { \"subject\": \"Erinnerung: Ihr Infotermin\", \"body\": { \"contentType\": \"HTML\", \"content\": \"<p>Bis gleich. Einwahl: <a href='{{ $('Loop je Teilnehmer').item.json.teams }}'>Teams</a></p>\" }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{ $('Loop je Teilnehmer').item.json.email_norm }}\" } }] } }",
         "options": {}
       },
       "id": "wf3-graph",
       "name": "Graph sendMail Reminder",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [1300, 300],
+      "position": [1580, 420],
       "onError": "continueErrorOutput"
     },
     {
-      "parameters": { "jsCode": "// outbox -> sent; Graph-Fehler -> state=failed_unknown (Reconciliation).\nreturn [{ json: { outbox_state: 'sent' } }];" },
+      "parameters": {
+        "method": "POST",
+        "url": "={{CONFIG:ODOO_URL}}/jsonrpc",
+        "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"search\",[[[\"mail_key\",\"=\",\"{{ $('Loop je Teilnehmer').item.json.kind }}:{{ $('Loop je Teilnehmer').item.json.reg_id }}\"]]]]] } }",
+        "options": {}
+      },
       "id": "wf3-sent",
-      "name": "outbox state=sent (sonst failed_unknown)",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [1520, 300]
+      "name": "Odoo write outbox state=sent (Fehler: failed_unknown)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1780, 420]
     }
   ],
   "connections": {
     "Schedule (Europe/Berlin) 4 Feuerzeitpunkte": { "main": [[{ "node": "Termin + Reminder-Typ + Teams-Link", "type": "main", "index": 0 }]] },
     "Termin + Reminder-Typ + Teams-Link": { "main": [[{ "node": "Odoo search_read confirmed + Termin", "type": "main", "index": 0 }]] },
-    "Odoo search_read confirmed + Termin": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }]] },
+    "Odoo search_read confirmed + Termin": { "main": [[{ "node": "Result -> Items je Teilnehmer", "type": "main", "index": 0 }]] },
+    "Result -> Items je Teilnehmer": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }]] },
     "Loop je Teilnehmer": { "main": [[{ "node": "Claim outbox mail_key reminder (unique)", "type": "main", "index": 0 }]] },
-    "Claim outbox mail_key reminder (unique)": { "main": [[{ "node": "Graph sendMail Reminder", "type": "main", "index": 0 }]] },
-    "Graph sendMail Reminder": { "main": [[{ "node": "outbox state=sent (sonst failed_unknown)", "type": "main", "index": 0 }]] },
-    "outbox state=sent (sonst failed_unknown)": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }]] }
+    "Claim outbox mail_key reminder (unique)": { "main": [[{ "node": "IF Claim schon vergeben -> skip", "type": "main", "index": 0 }]] },
+    "IF Claim schon vergeben -> skip": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }], [{ "node": "Graph sendMail Reminder", "type": "main", "index": 0 }]] },
+    "Graph sendMail Reminder": { "main": [[{ "node": "Odoo write outbox state=sent (Fehler: failed_unknown)", "type": "main", "index": 0 }]] },
+    "Odoo write outbox state=sent (Fehler: failed_unknown)": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }]] }
   },
   "settings": { "executionOrder": "v1" }
 }

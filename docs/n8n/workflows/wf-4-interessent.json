@@ -7,7 +7,7 @@
       "name": "Webhook Interessent",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [200, 300]
+      "position": [180, 320]
     },
     {
       "parameters": {
@@ -17,7 +17,7 @@
       "name": "IF Secret ok (X-Manibase-Secret)",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [420, 300]
+      "position": [380, 320]
     },
     {
       "parameters": { "respondWith": "json", "responseCode": 401, "responseBody": "={ \"ok\": false }" },
@@ -25,7 +25,7 @@
       "name": "Respond 401",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [640, 460]
+      "position": [560, 520]
     },
     {
       "parameters": {
@@ -39,7 +39,7 @@
       "name": "Odoo create crm.lead (Interessent)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [640, 300]
+      "position": [580, 320]
     },
     {
       "parameters": {
@@ -48,14 +48,14 @@
         "authentication": "genericCredentialType",
         "genericAuthType": "oAuth2Api",
         "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"message\": { \"subject\": \"Neuer Interessent (Infotermin)\", \"body\": { \"contentType\": \"Text\", \"content\": \"{{ $json.body.name }} / {{ $json.body.unternehmen }} / {{ $json.body.email }}\" }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{CONFIG:TEAM_NOTIFY_TO}}\" } }] } }",
+        "jsonBody": "={ \"message\": { \"subject\": \"Neuer Interessent (Infotermin)\", \"body\": { \"contentType\": \"Text\", \"content\": \"{{ $('Webhook Interessent').item.json.body.name }} / {{ $('Webhook Interessent').item.json.body.unternehmen }} / {{ $('Webhook Interessent').item.json.body.email }} / {{ $('Webhook Interessent').item.json.body.info }}\" }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{CONFIG:TEAM_NOTIFY_TO}}\" } }] } }",
         "options": {}
       },
       "id": "wf4-graph-intern",
       "name": "Graph interne Benachrichtigung",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [860, 240],
+      "position": [800, 220],
       "onError": "continueErrorOutput"
     },
     {
@@ -65,14 +65,14 @@
         "authentication": "genericCredentialType",
         "genericAuthType": "oAuth2Api",
         "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"message\": { \"subject\": \"Danke für Ihr Interesse\", \"body\": { \"contentType\": \"Text\", \"content\": \"Wir melden uns in den nächsten Tagen bei Ihnen.\" }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{ $json.body.email }}\" } }] } }",
+        "jsonBody": "={ \"message\": { \"subject\": \"Danke für Ihr Interesse\", \"body\": { \"contentType\": \"Text\", \"content\": \"Wir melden uns in den nächsten Tagen bei Ihnen.\" }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{ $('Webhook Interessent').item.json.body.email }}\" } }] } }",
         "options": {}
       },
       "id": "wf4-graph-bestaetigung",
       "name": "Graph Bestätigung an Interessent",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
-      "position": [860, 360],
+      "position": [800, 420],
       "onError": "continueErrorOutput"
     },
     {
@@ -81,14 +81,14 @@
       "name": "Respond 200",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [1080, 300]
+      "position": [1040, 320]
     }
   ],
   "connections": {
     "Webhook Interessent": { "main": [[{ "node": "IF Secret ok (X-Manibase-Secret)", "type": "main", "index": 0 }]] },
     "IF Secret ok (X-Manibase-Secret)": { "main": [[{ "node": "Odoo create crm.lead (Interessent)", "type": "main", "index": 0 }], [{ "node": "Respond 401", "type": "main", "index": 0 }]] },
-    "Odoo create crm.lead (Interessent)": { "main": [[{ "node": "Graph interne Benachrichtigung", "type": "main", "index": 0 }, { "node": "Graph Bestätigung an Interessent", "type": "main", "index": 0 }]] },
-    "Graph interne Benachrichtigung": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }]] },
+    "Odoo create crm.lead (Interessent)": { "main": [[{ "node": "Graph interne Benachrichtigung", "type": "main", "index": 0 }]] },
+    "Graph interne Benachrichtigung": { "main": [[{ "node": "Graph Bestätigung an Interessent", "type": "main", "index": 0 }]] },
     "Graph Bestätigung an Interessent": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }]] }
   },
   "settings": { "executionOrder": "v1" }
