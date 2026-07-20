@@ -82,5 +82,5 @@
     "Odoo write outbox state=sent": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }]] },
     "Odoo write outbox state=failed_unknown": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }]] }
   },
-  "settings": { "executionOrder": "v1" }
+  "settings": { "executionOrder": "v1", "timezone": "Europe/Berlin" }
 }

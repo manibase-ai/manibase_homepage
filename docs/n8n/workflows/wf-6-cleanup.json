@@ -45,7 +45,9 @@
         "jsonBody": "={ \"message\": { \"subject\": \"Cleanup-Fehler Infotermin\", \"body\": { \"contentType\": \"Text\", \"content\": \"Cleanup-Lauf meldet einen Fehler, bitte prüfen.\" }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{CONFIG:TEAM_NOTIFY_TO}}\" } }] } }",
         "options": {} },
       "id": "wf6-alert", "name": "Graph Alarm bei Fehler", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1260, 500]
-    }
+    },
+    { "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } }, "id": "wf6-if-outboxerr", "name": "IF outbox-unlink-Fehler? (JSON-RPC in 200)", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [1120, 300] },
+    { "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } }, "id": "wf6-if-regerr", "name": "IF reg-unlink-Fehler? (JSON-RPC in 200)", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [1360, 300] }
   ],
   "connections": {
     "Schedule täglich (Europe/Berlin)": { "main": [[{ "node": "Odoo suchen (received create_date<now-14d OR termin<now; confirmed termin<now-30d)", "type": "main", "index": 0 }]] },
@@ -53,8 +55,10 @@
     "IF Cleanup-RPC-Fehler? (JSON-RPC error in 200)": { "main": [[{ "node": "Graph Alarm bei Fehler", "type": "main", "index": 0 }], [{ "node": "IDs aus result", "type": "main", "index": 0 }]] },
     "IDs aus result": { "main": [[{ "node": "Zugehörige outbox-Rows suchen", "type": "main", "index": 0 }]] },
     "Zugehörige outbox-Rows suchen": { "main": [[{ "node": "outbox unlink (erst Kinder)", "type": "main", "index": 0 }]] },
-    "outbox unlink (erst Kinder)": { "main": [[{ "node": "reg unlink/anonymisieren (dann Eltern)", "type": "main", "index": 0 }], [{ "node": "Graph Alarm bei Fehler", "type": "main", "index": 0 }]] },
-    "reg unlink/anonymisieren (dann Eltern)": { "main": [[{ "node": "Audit persistieren (x_infotermin_audit, PII-frei, aus unlink-Erfolg)", "type": "main", "index": 0 }], [{ "node": "Graph Alarm bei Fehler", "type": "main", "index": 0 }]] }
+    "outbox unlink (erst Kinder)": { "main": [[{ "node": "IF outbox-unlink-Fehler? (JSON-RPC in 200)", "type": "main", "index": 0 }], [{ "node": "Graph Alarm bei Fehler", "type": "main", "index": 0 }]] },
+    "IF outbox-unlink-Fehler? (JSON-RPC in 200)": { "main": [[{ "node": "Graph Alarm bei Fehler", "type": "main", "index": 0 }], [{ "node": "reg unlink/anonymisieren (dann Eltern)", "type": "main", "index": 0 }]] },
+    "reg unlink/anonymisieren (dann Eltern)": { "main": [[{ "node": "IF reg-unlink-Fehler? (JSON-RPC in 200)", "type": "main", "index": 0 }], [{ "node": "Graph Alarm bei Fehler", "type": "main", "index": 0 }]] },
+    "IF reg-unlink-Fehler? (JSON-RPC in 200)": { "main": [[{ "node": "Graph Alarm bei Fehler", "type": "main", "index": 0 }], [{ "node": "Audit persistieren (x_infotermin_audit, PII-frei, aus unlink-Erfolg)", "type": "main", "index": 0 }]] }
   },
-  "settings": { "executionOrder": "v1" }
+  "settings": { "executionOrder": "v1", "timezone": "Europe/Berlin" }
 }
