@@ -348,8 +348,11 @@
     </div>
   </section>
 
-  <!-- NEWSLETTER (Odoo, Single-Opt-In). data-endpoint muss auf /api/newsletter.php
-       zeigen: nginx führt ausschließlich exakt diesen Pfad via PHP-FPM aus. -->
+  <!-- NEWSLETTER (Odoo, Double-Opt-In). data-endpoint muss auf /api/newsletter.php
+       zeigen: nginx führt ausschließlich exakt diesen Pfad via PHP-FPM aus.
+       Der Proxy trägt in Liste "Newsletter" (id 1) ein; die Odoo-Kampagne
+       "Double Opt-in" verschickt die Bestätigungsmail und schiebt Klicker nach
+       "Confirmed contacts". Versand NUR an "Confirmed contacts". -->
   <section class="newsletter" aria-labelledby="nl-h">
     <div class="container newsletter__inner">
       <div class="newsletter__copy">
@@ -363,9 +366,9 @@
           <input id="nl-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="ihre@firma.de" required>
           <button class="btn btn--accent" type="submit">Anmelden</button>
         </div>
-        <p class="newsletter__note">Mit dem Absenden willigen Sie ein, unseren Newsletter zu erhalten. Jederzeit abbestellbar, Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</p>
+        <p class="newsletter__note">Nach dem Absenden erhalten Sie eine E-Mail mit einem Bestätigungslink. Erst nach Ihrer Bestätigung schicken wir Ihnen den Newsletter, jederzeit abbestellbar. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</p>
         <p class="newsletter__err" role="alert" hidden></p>
-        <p class="newsletter__ok" role="status" hidden>Danke, Sie sind angemeldet. Sie können sich jederzeit über den Abmeldelink in jeder E-Mail wieder austragen.</p>
+        <p class="newsletter__ok" role="status" hidden>Fast geschafft: Wir haben Ihnen eine E-Mail geschickt. Bitte bestätigen Sie darin Ihre Anmeldung, dann sind Sie dabei.</p>
       </form>
     </div>
   </section>

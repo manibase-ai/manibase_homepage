@@ -2,11 +2,15 @@
 /*
  * manibase Newsletter-Proxy -> Odoo (JSON-RPC).
  *
- * Nimmt {"email": "..."} per POST entgegen und trägt die Adresse in eine
- * Odoo-Mailing-Liste ("Newsletter") ein (Single-Opt-In: sofortige Eintragung,
- * keine Bestätigungsmail). Für Double-Opt-In später die Odoo-App
- * "Marketing Automation" installieren und eine "Double Opt-in"-Kampagne auf
- * diese Liste einrichten; am Proxy ist dafür keine Änderung nötig.
+ * Nimmt {"email": "..."} per POST entgegen und trägt die Adresse in die
+ * Odoo-Mailing-Liste "Newsletter" (id 1) ein.
+ *
+ * Double-Opt-In läuft vollständig in Odoo, nicht hier: Die Kampagne
+ * "Double Opt-in" (App "Marketing Automation") schickt neuen Kontakten dieser
+ * Liste die Bestätigungsmail und verschiebt Klicker in die Liste
+ * "Confirmed contacts". Nur diese Liste gilt als einwilligend, Newsletter-
+ * Versand darf ausschließlich an sie gehen. "Newsletter" ist die Warteschlange
+ * mit unbestätigten Adressen. Am Proxy ist dafür keine Änderung nötig.
  *
  * Zugangsdaten liegen AUSSERHALB des Webroots und NICHT im Repo:
  *   /etc/manibase/odoo.php   (aus site/api/odoo.config.example.php erzeugen,

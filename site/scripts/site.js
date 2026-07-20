@@ -1,7 +1,7 @@
 /* manibase One-Pager — minimal JS, keine Abhängigkeiten.
    1) Scroll-Reveal (mit reduced-motion-Fallback)
    2) Hero: wechselnde Begriffe
-   3) Newsletter-Anmeldung (POST an /api/newsletter -> Odoo, Single-Opt-In)
+   3) Newsletter-Anmeldung (POST an /api/newsletter.php -> Odoo, Double-Opt-In)
    4) Qualifizierungs-Maske + Kalender erst nach Einwilligung laden (DSGVO)
 */
 (function () {
@@ -68,7 +68,8 @@
         body: JSON.stringify({ email: input.value.trim(), website: hp ? hp.value : '' })
       }).then(function (res) {
         if (!res.ok) { throw new Error('HTTP ' + res.status); }
-        // Erfolg: Adresse wurde in die Newsletter-Liste (Odoo) eingetragen (Single-Opt-In).
+        // Erfolg: Adresse steht in Liste "Newsletter" (Odoo). Die Kampagne
+        // "Double Opt-in" verschickt jetzt die Bestätigungsmail.
         var row = nl.querySelector('.newsletter__row');
         var note = nl.querySelector('.newsletter__note');
         var ok = nl.querySelector('.newsletter__ok');
