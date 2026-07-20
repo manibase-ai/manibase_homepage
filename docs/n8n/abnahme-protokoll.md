@@ -36,9 +36,14 @@ erwarteter Zustand / erwarteter HTTP-Code / erwartete Mailanzahl.
   die `sending`-Row → **409** (kein Doppelversand). Nach **Reconciliation** (stale Row löschen)
   liefert der nächste Retry **200 + Einladung**. (Best-Effort auf Odoo Online; harte Inline-
   Recovery nur mit Odoo.sh-Modul, s. `datenmodell-odoo.md`.)
-- [ ] **`cleanup-confirm-race`** — Cleanup läuft gleichzeitig mit aktiver Bestätigung → keine
-  inkonsistente Registrierung; späte Bestätigung nach Löschung → Verhalten wie `doi-after-cleanup`
-  (410). Erwartete DB-Zustände + Mailanzahl notiert.
+- [ ] **`cleanup-confirm-race`** — **BEST-EFFORT (akzeptiertes Restrisiko, Odoo Online).** Ein
+  workflow-übergreifender Mutex ist ohne DB-Constraints/Methode nicht möglich; das ist bewusst
+  akzeptiert. Absicherung durch: (a) Cleanup läuft **nachts 03:00** (`wf-6`), außerhalb des
+  Abend-Event-/Bestätigungsfensters; (b) die Löschkriterien treffen einen *gerade* bestätigenden
+  Datensatz praktisch nie (unbestätigt+jung ODER Termin schon vorbei — beides schließt die aktive
+  Bestätigungsphase aus). Prüfen: Cleanup-Zeit ≠ erwartete Bestätigungszeiten; späte Bestätigung
+  nach Löschung → `410` (wie `doi-after-cleanup`), **keine** Doppel-/Fehlmail. Harte Garantie nur
+  mit Odoo.sh-Modul (Upgrade-Pfad in `datenmodell-odoo.md`).
 - [ ] **`ics-clients`** — ICS-Anhang öffnet in Outlook, Apple Calendar und Google Calendar als
   **19:30 Europe/Berlin** (nicht um 2 h verschoben).
 - [ ] **`cleanup-both-paths`** — Cleanup-Testlauf für `created_at < now-14d` **und** separat

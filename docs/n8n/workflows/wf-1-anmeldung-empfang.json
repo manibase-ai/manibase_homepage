@@ -12,8 +12,16 @@
       "id": "wf1-search", "name": "search_read reg (email_norm+termin) [Dedup]", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [700, 400]
     },
     {
+      "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } },
+      "id": "wf1-if-searcherr", "name": "IF Dedup-Search-Fehler? (fail-closed)", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [860, 400]
+    },
+    {
       "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ ($json.result || []).length > 0 }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } },
-      "id": "wf1-if-exists", "name": "IF reg existiert? (Doppelanmeldung -> Recovery)", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [900, 400]
+      "id": "wf1-if-exists", "name": "IF reg existiert? (Doppelanmeldung -> Recovery)", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [1000, 400]
+    },
+    {
+      "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } },
+      "id": "wf1-if-recsearcherr", "name": "IF Recovery-Search-Fehler? (fail-closed)", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [1220, 560]
     },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
@@ -102,8 +110,10 @@
     "Webhook Anmeldung": { "main": [[{ "node": "IF Secret ok (X-Manibase-Secret)", "type": "main", "index": 0 }]] },
     "IF Secret ok (X-Manibase-Secret)": { "main": [[{ "node": "Normalize + Token/Digest", "type": "main", "index": 0 }], [{ "node": "Respond 401", "type": "main", "index": 0 }]] },
     "Normalize + Token/Digest": { "main": [[{ "node": "search_read reg (email_norm+termin) [Dedup]", "type": "main", "index": 0 }]] },
-    "search_read reg (email_norm+termin) [Dedup]": { "main": [[{ "node": "IF reg existiert? (Doppelanmeldung -> Recovery)", "type": "main", "index": 0 }]] },
+    "search_read reg (email_norm+termin) [Dedup]": { "main": [[{ "node": "IF Dedup-Search-Fehler? (fail-closed)", "type": "main", "index": 0 }]] },
+    "IF Dedup-Search-Fehler? (fail-closed)": { "main": [[{ "node": "Respond 502 (technischer Fehler)", "type": "main", "index": 0 }], [{ "node": "IF reg existiert? (Doppelanmeldung -> Recovery)", "type": "main", "index": 0 }]] },
     "IF reg existiert? (Doppelanmeldung -> Recovery)": { "main": [[{ "node": "Recovery: doi-outbox-Zustand lesen", "type": "main", "index": 0 }], [{ "node": "Odoo create x_infotermin_reg", "type": "main", "index": 0 }]] },
+    "IF Recovery-Search-Fehler? (fail-closed)": { "main": [[{ "node": "Respond 502 (technischer Fehler)", "type": "main", "index": 0 }], [{ "node": "Recovery entscheiden (resend nur wenn keine Row)", "type": "main", "index": 0 }]] },
     "Odoo create x_infotermin_reg": { "main": [[{ "node": "IF create-Fehler?", "type": "main", "index": 0 }]] },
     "IF create-Fehler?": { "main": [[{ "node": "Respond 502 (technischer Fehler)", "type": "main", "index": 0 }], [{ "node": "create doi-outbox (state=sending)", "type": "main", "index": 0 }]] },
     "create doi-outbox (state=sending)": { "main": [[{ "node": "IF Claim-Fehler? (kein Versand ohne Claim)", "type": "main", "index": 0 }]] },
@@ -111,7 +121,7 @@
     "Graph sendMail DOI": { "main": [[{ "node": "Odoo write doi-outbox state=sent", "type": "main", "index": 0 }], [{ "node": "Odoo write doi-outbox state=failed_unknown", "type": "main", "index": 0 }]] },
     "Odoo write doi-outbox state=sent": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }]] },
     "Odoo write doi-outbox state=failed_unknown": { "main": [[{ "node": "Respond 502 (DOI-Mail fehlgeschlagen)", "type": "main", "index": 0 }]] },
-    "Recovery: doi-outbox-Zustand lesen": { "main": [[{ "node": "Recovery entscheiden (resend nur wenn keine Row)", "type": "main", "index": 0 }]] },
+    "Recovery: doi-outbox-Zustand lesen": { "main": [[{ "node": "IF Recovery-Search-Fehler? (fail-closed)", "type": "main", "index": 0 }]] },
     "Recovery entscheiden (resend nur wenn keine Row)": { "main": [[{ "node": "IF resend?", "type": "main", "index": 0 }]] },
     "IF resend?": { "main": [[{ "node": "Recovery: reg token_digest rotieren", "type": "main", "index": 0 }], [{ "node": "Respond 200 (Recovery idempotent)", "type": "main", "index": 0 }]] },
     "Recovery: reg token_digest rotieren": { "main": [[{ "node": "IF rotate-Fehler? (kein Versand)", "type": "main", "index": 0 }]] },

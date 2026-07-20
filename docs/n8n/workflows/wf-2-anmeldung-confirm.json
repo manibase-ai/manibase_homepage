@@ -92,7 +92,14 @@
         "options": {} },
       "id": "wf2-crm", "name": "Odoo create crm.lead (Spiegel)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [3620, 140]
     },
-    { "parameters": { "respondWith": "json", "responseCode": 200, "responseBody": "={ \"ok\": true }" }, "id": "wf2-resp-200", "name": "Respond 200 (bestätigt)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [3860, 220] }
+    { "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } }, "id": "wf2-if-crmerr", "name": "IF crm.lead-Fehler? (monitorbar)", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [3820, 140] },
+    {
+      "parameters": { "method": "POST", "url": "https://graph.microsoft.com/v1.0/users/{{CONFIG:SENDER}}/sendMail", "authentication": "genericCredentialType", "genericAuthType": "oAuth2Api", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"message\": { \"subject\": \"CRM-Spiegel fehlgeschlagen (Infotermin bestätigt)\", \"body\": { \"contentType\": \"Text\", \"content\": {{ JSON.stringify('crm.lead-Anlage nach Bestätigung fehlgeschlagen, reg_id ' + $('Dedup-Entscheidung').item.json.reg_id + ' bitte nachtragen.') }} }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{CONFIG:TEAM_NOTIFY_TO}}\" } }] } }",
+        "options": {} },
+      "id": "wf2-crm-alert", "name": "Graph Alarm: CRM-Spiegel nachtragen", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [4020, 220], "onError": "continueErrorOutput"
+    },
+    { "parameters": { "respondWith": "json", "responseCode": 200, "responseBody": "={ \"ok\": true }" }, "id": "wf2-resp-200", "name": "Respond 200 (bestätigt)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [4240, 220] }
   ],
   "connections": {
     "Webhook Confirm": { "main": [[{ "node": "IF Secret ok (X-Manibase-Secret)", "type": "main", "index": 0 }]] },
@@ -113,8 +120,10 @@
     "Odoo write invite-outbox state=sent": { "main": [[{ "node": "IF sent-Write-Fehler? (Reconciliation)", "type": "main", "index": 0 }]] },
     "IF sent-Write-Fehler? (Reconciliation)": { "main": [[{ "node": "Graph Alarm (Reconciliation nötig)", "type": "main", "index": 0 }], [{ "node": "Odoo create crm.lead (Spiegel)", "type": "main", "index": 0 }]] },
     "Odoo write invite-outbox state=failed_unknown": { "main": [[{ "node": "Respond 502 (technischer Fehler)", "type": "main", "index": 0 }]] },
-    "Odoo create crm.lead (Spiegel)": { "main": [[{ "node": "Respond 200 (bestätigt)", "type": "main", "index": 0 }]] },
-    "Graph Alarm (Reconciliation nötig)": { "main": [[{ "node": "Respond 200 (bestätigt)", "type": "main", "index": 0 }]] }
+    "Odoo create crm.lead (Spiegel)": { "main": [[{ "node": "IF crm.lead-Fehler? (monitorbar)", "type": "main", "index": 0 }]] },
+    "IF crm.lead-Fehler? (monitorbar)": { "main": [[{ "node": "Graph Alarm: CRM-Spiegel nachtragen", "type": "main", "index": 0 }], [{ "node": "Respond 200 (bestätigt)", "type": "main", "index": 0 }]] },
+    "Graph Alarm: CRM-Spiegel nachtragen": { "main": [[{ "node": "Respond 200 (bestätigt)", "type": "main", "index": 0 }], [{ "node": "Respond 200 (bestätigt)", "type": "main", "index": 0 }]] },
+    "Graph Alarm (Reconciliation nötig)": { "main": [[{ "node": "Respond 200 (bestätigt)", "type": "main", "index": 0 }], [{ "node": "Respond 200 (bestätigt)", "type": "main", "index": 0 }]] }
   },
   "settings": { "executionOrder": "v1" }
 }
