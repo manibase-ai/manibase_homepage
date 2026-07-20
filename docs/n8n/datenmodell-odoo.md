@@ -1,8 +1,24 @@
-# Odoo-Datenmodell — Infotermin
+# Odoo-Datenmodell — Infotermin (Odoo Online, ohne Custom-Module)
 
-Die Nebenläufigkeits-Korrektheit (kein Doppel-Lead, kein Doppelversand, atomarer DOI)
-kommt aus **Datenbank-Unique-Constraints**, nicht aus n8n. Dafür zwei kleine Custom-Modelle.
-Anlegen per Odoo Studio (Felder + „SQL Constraints") oder als kleines Modul.
+**Plattform-Realität:** Die Instanz ist **Odoo Online** (`manibase-ug.odoo.com`). Odoo Online
+erlaubt **keine** Custom-Python-Module — also **weder** eigene Model-Methoden **noch**
+`_sql_constraints`. Die früher geplante DB-Atomizität (Unique-Constraints, transaktionale
+Methode) ist hier **nicht installierbar**. Die Modelle werden daher per **Odoo Studio nur mit
+Feldern** angelegt (keine Constraints, keine Methoden).
+
+**Nebenläufigkeit (Best-Effort, proportional zur Veranstaltungsgröße):**
+- Jeder zustandsändernde Workflow läuft mit **n8n „Limit execution to 1"** (Concurrency 1, im
+  n8n-Workflow-Settings-UI zu setzen). Dadurch ist **innerhalb** eines Workflows jeder
+  „suchen → schreiben"-Schritt serialisiert = kollisionsfrei.
+- Dedup/Idempotenz über **search-before-create**: vor jedem `create` wird per `search_read`
+  geprüft, ob der Datensatz (reg per `email_norm`+`termin`, Versand per `mail_key`) schon
+  existiert.
+- **Bewusste, ehrliche Grenze:** Ein echtes workflow-**übergreifendes** Race (z. B. Cleanup
+  löscht, während eine Bestätigung läuft) ist ohne DB-Constraint nicht hart ausgeschlossen.
+  Bei eurer Größenordnung (Dutzende über Tage eintröpfelnde Anmeldungen, Bestätigungen als
+  einzelne Nutzer-Klicks) ist die reale Kollisionswahrscheinlichkeit ≈ 0. Wer harte Garantien
+  braucht: **Upgrade auf Odoo.sh / on-prem** ermöglicht ein Modul mit Unique-Constraints +
+  transaktionaler `confirm`-Methode (Upgrade-Pfad, hier bewusst nicht umgesetzt).
 
 ## Modell `x_infotermin_reg` (Registrierung = Quelle der Wahrheit)
 
@@ -15,20 +31,11 @@ Anlegen per Odoo Studio (Felder + „SQL Constraints") oder als kleines Modul.
 | `status` | Selection | `received` → `confirmed` |
 | `token_digest` | Char | SHA-256-Hex des DOI-Tokens (nie Klartext) |
 
-Für die Cleanup-Frist wird Odoos **automatisches `create_date`** genutzt (kein eigenes Feld
-nötig — jedes Odoo-Modell hat es).
+Cleanup-Frist über Odoos automatisches `create_date`. **Dedup:** WF-1 macht vor `create` ein
+`search_read` auf `email_norm`+`termin`; existiert die reg schon → Recovery-Zweig statt Doublette
+(unter Concurrency 1 sicher).
 
-**SQL-Constraint (Pflicht):**
-```python
-_sql_constraints = [
-    ('reg_uniq', 'unique(email_norm, termin)',
-     'Pro E-Mail und Termin nur eine Registrierung.'),
-]
-```
-→ WF-1 `create` einer Doublette scheitert atomar an der DB → Recovery-Zweig (idempotent),
-kein `search→create`-Race.
-
-## Modell `x_infotermin_outbox` (Versand-Jobs = atomarer Claim)
+## Modell `x_infotermin_outbox` (Versand-Tracker, search-before-create)
 
 | Feld | Typ | Zweck |
 |------|-----|-------|
@@ -37,17 +44,11 @@ kein `search→create`-Race.
 | `state` | Selection | `sending` → `sent` \| `failed_unknown` |
 | `ts` | Datetime | Claim-/Sendezeit |
 
-**SQL-Constraint (Pflicht):**
-```python
-_sql_constraints = [
-    ('mailkey_uniq', 'unique(mail_key)',
-     'Jede Mail wird höchstens einmal beansprucht.'),
-]
-```
-→ **Claim = `create`**: gelingt der Insert, sendet dieser Lauf; Unique-Violation = ein anderer
-Lauf (egal welcher der sechs Workflows) hat bereits beansprucht → überspringen. Workflow-
-übergreifend atomar auf DB-Ebene. Dies ist zugleich der **CAS** der confirm-WF (wer `invite:<id>`
-zuerst anlegt, gewinnt → 200; Verlierer → 409).
+**Claim = search-before-create (unter Concurrency 1):** vor dem Versand `search_read` auf
+`mail_key`. Existiert eine Row mit `state=sent` → **nicht** erneut senden (409/skip). Existiert
+eine Row in `sending`/`failed_unknown` → **kein Auto-Resend** (unbekannter Versandzustand) →
+Reconciliation. Nur wenn **keine** Row existiert → `create` (state `sending`) + senden +
+`write state=sent`. So wird bei unbekanntem Zustand nie doppelt versandt.
 
 ## Statusmodell
 
@@ -114,56 +115,26 @@ END:VCALENDAR
 Als Base64 (`contentBytes`) in `sendMail` anhängen. Vor Go-live in Outlook, Apple Calendar und
 Google Calendar prüfen (Abnahme `ics-clients`).
 
-## Pflicht: transaktionale Bestätigungsmethode `confirm_by_digest`
+## Confirm-Ablauf ohne Custom-Methode (WF-2, Concurrency 1)
 
-Die Confirm-WF (WF-2) ruft **eine** atomare Odoo-Methode auf, die in **einer** DB-Transaktion
-TTL prüft, den `invite`-Claim setzt und den Status auf `confirmed` bringt. Das ist der einzige
-robuste Weg, parallele Bestätigungen (genau 1× senden) UND Crash-Recovery (Pre-Send-Crash bzw.
-confirmed-aber-nicht-versandt → erneut senden) korrekt zu behandeln — ohne race-anfällige
-Mehrfach-RPCs in n8n. Als kleines Odoo-Modul auf `x_infotermin_reg` ergänzen:
+Da Odoo Online keine Methode erlaubt, orchestriert WF-2 den Ablauf mit Standard-RPC unter
+Concurrency 1 (serialisiert → kein Race innerhalb WF-2):
 
-```python
-from odoo import api, fields, models
-from datetime import timedelta
+1. `search_read x_infotermin_reg` per `token_digest` (Felder id/status/termin/email_norm/name/
+   unternehmen/`create_date`).
+2. **TTL offset-korrekt** (Review-Finding 6): Termin als offset-ISO in echten Zeitpunkt parsen
+   (`new Date(termin)` respektiert `+02:00`), `create_date` (UTC) + 7 Tage. Abgelaufen → 410.
+3. nicht gefunden → 410; `status=confirmed` **und** `invite`-Outbox `sent` → 409.
+4. `search_read x_infotermin_outbox` per `mail_key=invite:<id>`:
+   - `state=sent` → 409 (fertig).
+   - `state=sending`/`failed_unknown` → **kein Auto-Resend** → 409 + Reconciliation (unbekannter
+     Zustand; s. u.).
+   - keine Row → `create` (`sending`) → `write reg.status=confirmed` → ICS/Graph senden →
+     `write outbox state=sent` (mit Fehlerprüfung) → `crm.lead` → 200.
 
-class InfoterminReg(models.Model):
-    _inherit = 'x_infotermin_reg'   # bzw. _name im eigenen Modul
+Damit: Parallel-Confirm → dank Concurrency 1 läuft der zweite erst nach dem ersten → sieht die
+Outbox-Row → 409 (genau 1× senden). Ein Crash mit hängender `sending`-Row → 409 bis die
+Reconciliation die Row **löscht**; danach re-sendet ein Retry (search findet keine Row → sendet).
 
-    @api.model
-    def confirm_by_digest(self, digest):
-        rec = self.search([('token_digest', '=', digest)], limit=1)
-        if not rec:
-            return {'outcome': 'not_found'}
-        now = fields.Datetime.now()
-        # TTL: Termin vorbei ODER >7 Tage seit Anlage
-        termin_dt = fields.Datetime.from_string((rec.termin or '').replace('T', ' ')[:19])
-        expired = (termin_dt and termin_dt < now) or \
-                  (rec.create_date and rec.create_date < now - timedelta(days=7))
-        if expired:
-            return {'outcome': 'expired'}
-        Outbox = self.env['x_infotermin_outbox']
-        key = 'invite:%d' % rec.id
-        ob = Outbox.search([('mail_key', '=', key)], limit=1)
-        if ob and ob.state == 'sent':
-            return {'outcome': 'already', 'reg_id': rec.id}
-        if ob and ob.state in ('sending', 'failed_unknown'):
-            # frischer Claim eines parallelen Gewinners -> dieser Aufrufer sendet NICHT
-            if ob.ts and ob.ts > now - timedelta(minutes=15):
-                return {'outcome': 'already', 'reg_id': rec.id}
-            ob.write({'state': 'sending', 'ts': now})       # stale -> übernehmen
-        elif not ob:
-            # Unique-Constraint auf mail_key: bei echtem Parallel-Create gewinnt genau
-            # einer; der Verlierer wiederholt die RPC (Odoo-Serialisierung) und sieht
-            # dann den frischen Claim -> 'already'.
-            Outbox.create({'mail_key': key, 'reg_id': rec.id, 'state': 'sending', 'ts': now})
-        if rec.status != 'confirmed':
-            rec.status = 'confirmed'
-        return {'outcome': 'confirm_now', 'reg_id': rec.id, 'outbox_id':
-                Outbox.search([('mail_key', '=', key)], limit=1).id,
-                'email_norm': rec.email_norm, 'name': rec.name,
-                'unternehmen': rec.unternehmen, 'termin': rec.termin}
-```
-
-**Rückgabe-Enum → HTTP:** `not_found`/`expired` → 410, `already` → 409, `confirm_now` → WF-2
-sendet die Einladung und markiert die `invite`-Outbox `sent`/`failed_unknown`. Idempotent:
-`confirmed`-aber-nicht-`sent` liefert erneut `confirm_now` (Recovery), erst `sent` → `already`.
+**Wichtig:** „Concurrency 1" wird im n8n-Workflow-Settings-UI gesetzt („Limit execution to 1").
+Das ist der Serialisierungs-Mechanismus dieses Best-Effort-Designs.

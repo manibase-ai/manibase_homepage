@@ -10,10 +10,11 @@ dieser Ordner liefert die Bausteine + das Runbook.
 
 ## Reihenfolge
 
-1. **[`datenmodell-odoo.md`](datenmodell-odoo.md)** — Odoo-Modelle `x_infotermin_reg`
-   (Felder inkl. name/unternehmen), `x_infotermin_outbox`, `x_infotermin_audit` **mit**
-   `_sql_constraints` anlegen (Basis der Atomizität) **und** die Pflicht-Methode
-   `confirm_by_digest` (kleines Odoo-Modul) — WF-2 ruft sie atomar auf. crm.lead-Spiegel.
+1. **[`datenmodell-odoo.md`](datenmodell-odoo.md)** — Odoo-**Studio**-Modelle
+   `x_infotermin_reg` (Felder inkl. name/unternehmen), `x_infotermin_outbox`,
+   `x_infotermin_audit` anlegen — **nur Felder**, KEINE `_sql_constraints`/Methoden
+   (Odoo Online lässt keine Custom-Module zu). crm.lead-Spiegel. Nebenläufigkeit über
+   n8n-Concurrency 1 + search-before-create (s. Doku).
 2. **[`entra-graph-rbac.md`](entra-graph-rbac.md)** — Graph-App **ohne** Tenant-Consent,
    `Mail.Send` nur via Exchange RBAC auf `kontakt@manibase.de`; n8n-OAuth2-Credential anlegen.
 3. **[`config-schema.md`](config-schema.md)** — alle Werte bereitstellen (Teams-Links, Termine,

@@ -13,6 +13,12 @@
       "id": "wf5-expand", "name": "Result -> Items je Teilnehmer", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [560, 340]
     },
     { "parameters": { "options": {} }, "id": "wf5-batch", "name": "Loop je Teilnehmer", "type": "n8n-nodes-base.splitInBatches", "typeVersion": 3, "position": [760, 340] },
+    {
+      "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"search_read\",[[[\"mail_key\",\"=\",\"thanks:{{ $json.reg_id }}\"]]],{\"fields\":[\"id\"]}]] } }",
+        "options": {} },
+      "id": "wf5-search", "name": "search thanks-outbox (mail_key) [Dedup]", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [860, 340]
+    },
     { "parameters": {}, "id": "wf5-done", "name": "Fertig (alle gesendet)", "type": "n8n-nodes-base.noOp", "typeVersion": 1, "position": [760, 160] },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
@@ -21,8 +27,8 @@
       "id": "wf5-outbox", "name": "Claim outbox mail_key thanks (unique)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [960, 340]
     },
     {
-      "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } },
-      "id": "wf5-if-claim", "name": "IF Claim schon vergeben -> skip", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [1160, 340]
+      "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ ($json.result || []).length > 0 }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } },
+      "id": "wf5-if-claim", "name": "IF Danke bereits versandt? -> skip", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [1160, 340]
     },
     {
       "parameters": { "method": "POST", "url": "https://graph.microsoft.com/v1.0/users/{{CONFIG:SENDER}}/sendMail", "authentication": "genericCredentialType", "genericAuthType": "oAuth2Api", "sendBody": true, "specifyBody": "json",
@@ -47,9 +53,10 @@
     "Manuell auslösen (nach Upload der Aufzeichnung)": { "main": [[{ "node": "Odoo search_read confirmed", "type": "main", "index": 0 }]] },
     "Odoo search_read confirmed": { "main": [[{ "node": "Result -> Items je Teilnehmer", "type": "main", "index": 0 }]] },
     "Result -> Items je Teilnehmer": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }]] },
-    "Loop je Teilnehmer": { "main": [[{ "node": "Fertig (alle gesendet)", "type": "main", "index": 0 }], [{ "node": "Claim outbox mail_key thanks (unique)", "type": "main", "index": 0 }]] },
-    "Claim outbox mail_key thanks (unique)": { "main": [[{ "node": "IF Claim schon vergeben -> skip", "type": "main", "index": 0 }]] },
-    "IF Claim schon vergeben -> skip": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }], [{ "node": "Graph sendMail Danke + Aufzeichnung", "type": "main", "index": 0 }]] },
+    "Loop je Teilnehmer": { "main": [[{ "node": "Fertig (alle gesendet)", "type": "main", "index": 0 }], [{ "node": "search thanks-outbox (mail_key) [Dedup]", "type": "main", "index": 0 }]] },
+    "search thanks-outbox (mail_key) [Dedup]": { "main": [[{ "node": "IF Danke bereits versandt? -> skip", "type": "main", "index": 0 }]] },
+    "IF Danke bereits versandt? -> skip": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }], [{ "node": "Claim outbox mail_key thanks (unique)", "type": "main", "index": 0 }]] },
+    "Claim outbox mail_key thanks (unique)": { "main": [[{ "node": "Graph sendMail Danke + Aufzeichnung", "type": "main", "index": 0 }]] },
     "Graph sendMail Danke + Aufzeichnung": { "main": [[{ "node": "Odoo write outbox state=sent", "type": "main", "index": 0 }], [{ "node": "Odoo write outbox state=failed_unknown", "type": "main", "index": 0 }]] },
     "Odoo write outbox state=sent": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }]] },
     "Odoo write outbox state=failed_unknown": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }]] }

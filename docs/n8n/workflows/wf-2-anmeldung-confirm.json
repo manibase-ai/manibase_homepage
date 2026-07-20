@@ -1,81 +1,120 @@
 {
-  "name": "manibase Infotermin – 2 Anmeldung Confirm (DOI)",
+  "name": "manibase Infotermin – 2 Anmeldung Confirm (DOI) [Concurrency 1 im UI setzen]",
   "nodes": [
-    { "parameters": { "httpMethod": "POST", "path": "manibase-confirm", "responseMode": "responseNode", "options": {} }, "id": "wf2-webhook", "name": "Webhook Confirm", "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [140, 360] },
-    { "parameters": { "conditions": { "options": { "caseSensitive": true }, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.headers['x-manibase-secret'] }}", "rightValue": "{{CONFIG:SHARED_SECRET}}", "operator": { "type": "string", "operation": "equals" } } ] } }, "id": "wf2-if-secret", "name": "IF Secret ok (X-Manibase-Secret)", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [320, 360] },
-    { "parameters": { "respondWith": "json", "responseCode": 401, "responseBody": "={ \"ok\": false }" }, "id": "wf2-resp-401", "name": "Respond 401", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [500, 600] },
-    { "parameters": { "jsCode": "const crypto=require('crypto');\nconst token=String(($json.body||{}).token||'');\nreturn [{ json: { token_digest: crypto.createHash('sha256').update(token).digest('hex') } }];" }, "id": "wf2-code-digest", "name": "SHA-256(token)", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [500, 360] },
+    { "parameters": { "httpMethod": "POST", "path": "manibase-confirm", "responseMode": "responseNode", "options": {} }, "id": "wf2-webhook", "name": "Webhook Confirm", "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [120, 380] },
+    { "parameters": { "conditions": { "options": { "caseSensitive": true }, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.headers['x-manibase-secret'] }}", "rightValue": "{{CONFIG:SHARED_SECRET}}", "operator": { "type": "string", "operation": "equals" } } ] } }, "id": "wf2-if-secret", "name": "IF Secret ok (X-Manibase-Secret)", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [300, 380] },
+    { "parameters": { "respondWith": "json", "responseCode": 401, "responseBody": "={ \"ok\": false }" }, "id": "wf2-resp-401", "name": "Respond 401", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [480, 640] },
+    { "parameters": { "jsCode": "const crypto=require('crypto');\nconst token=String(($json.body||{}).token||'');\nreturn [{ json: { token_digest: crypto.createHash('sha256').update(token).digest('hex') } }];" }, "id": "wf2-digest", "name": "SHA-256(token)", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [480, 380] },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"confirm_by_digest\",[{{ JSON.stringify($json.token_digest) }}]] } }",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"search_read\",[[[\"token_digest\",\"=\",{{ JSON.stringify($json.token_digest) }}]]],{\"fields\":[\"id\",\"status\",\"termin\",\"email_norm\",\"name\",\"unternehmen\",\"create_date\"]}]] } }",
         "options": {} },
-      "id": "wf2-confirm", "name": "Odoo confirm_by_digest (atomar: TTL+Claim+Status)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [720, 360]
+      "id": "wf2-find-reg", "name": "Odoo search_read reg by token_digest", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [700, 380]
     },
-    { "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } }, "id": "wf2-if-err", "name": "IF technischer Odoo-Fehler?", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [920, 360] },
-    { "parameters": { "respondWith": "json", "responseCode": 502, "responseBody": "={ \"ok\": false, \"error\": \"upstream\" }" }, "id": "wf2-resp-502", "name": "Respond 502 (technischer Fehler)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [1120, 600] },
+    {
+      "parameters": { "jsCode": "// Result auspacken + TTL offset-korrekt (Termin-ISO trägt +02:00; create_date ist UTC).\nif($json.error!==undefined) return [{ json:{ outcome:'error' } }];\nconst rows=$json.result||[];\nif(rows.length===0) return [{ json:{ outcome:'not_found' } }];\nconst r=rows[0];\nconst terminMs=Date.parse(r.termin);\nconst createdMs=r.create_date?Date.parse((r.create_date+'').replace(' ','T')+'Z'):0;\nconst expired=(terminMs && terminMs<Date.now()) || (createdMs && (Date.now()-createdMs)/86400000>7);\nif(expired) return [{ json:{ outcome:'expired' } }];\nreturn [{ json:{ outcome:'proceed', reg_id:r.id, status:r.status, termin:r.termin, email_norm:r.email_norm, name:r.name, unternehmen:r.unternehmen } }];" },
+      "id": "wf2-map", "name": "Result + TTL (offset-korrekt)", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [900, 380]
+    },
     {
       "parameters": { "rules": { "values": [
-        { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.result.outcome }}", "rightValue": "not_found", "operator": { "type": "string", "operation": "equals" } } ] }, "outputKey": "gone" },
-        { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.result.outcome }}", "rightValue": "expired", "operator": { "type": "string", "operation": "equals" } } ] }, "outputKey": "expired" },
-        { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.result.outcome }}", "rightValue": "already", "operator": { "type": "string", "operation": "equals" } } ] }, "outputKey": "already" }
+        { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.outcome }}", "rightValue": "error", "operator": { "type": "string", "operation": "equals" } } ] }, "outputKey": "error" },
+        { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.outcome }}", "rightValue": "not_found", "operator": { "type": "string", "operation": "equals" } } ] }, "outputKey": "gone" },
+        { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.outcome }}", "rightValue": "expired", "operator": { "type": "string", "operation": "equals" } } ] }, "outputKey": "expired" }
       ] }, "fallbackOutput": "extra" },
-      "id": "wf2-switch", "name": "Switch outcome (gone|expired|already|confirm_now)", "type": "n8n-nodes-base.switch", "typeVersion": 3, "position": [1120, 360]
+      "id": "wf2-switch1", "name": "Switch (error|gone|expired|proceed)", "type": "n8n-nodes-base.switch", "typeVersion": 3, "position": [1120, 380]
     },
-    { "parameters": { "respondWith": "json", "responseCode": 410, "responseBody": "={ \"ok\": false, \"error\": \"gone\" }" }, "id": "wf2-resp-410", "name": "Respond 410 (nicht gefunden ODER abgelaufen)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [1360, 160] },
-    { "parameters": { "respondWith": "json", "responseCode": 409, "responseBody": "={ \"ok\": false, \"error\": \"already_confirmed\" }" }, "id": "wf2-resp-409", "name": "Respond 409 (bereits bestätigt/versandt)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [1360, 300] },
+    { "parameters": { "respondWith": "json", "responseCode": 502, "responseBody": "={ \"ok\": false, \"error\": \"upstream\" }" }, "id": "wf2-resp-502", "name": "Respond 502 (technischer Fehler)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [1360, 120] },
+    { "parameters": { "respondWith": "json", "responseCode": 410, "responseBody": "={ \"ok\": false, \"error\": \"gone\" }" }, "id": "wf2-resp-410", "name": "Respond 410 (nicht gefunden ODER abgelaufen)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [1360, 240] },
     {
-      "parameters": { "jsCode": "// ICS Europe/Berlin (Luxon), vollständige VTIMEZONE (STANDARD+DAYLIGHT).\n// Teams-Link zusätzlich als LOCATION/URL/DESCRIPTION (RFC-5545-escaped), damit\n// er auch beim reinen Öffnen des Kalendereintrags sichtbar ist. mail_key invite:<reg_id>.\nconst r=$json.result;\nconst esc=s=>String(s||'').replace(/\\\\/g,'\\\\\\\\').replace(/;/g,'\\\\;').replace(/,/g,'\\\\,').replace(/\\r?\\n/g,'\\\\n');\nconst start=DateTime.fromISO(r.termin,{setZone:true}).setZone('Europe/Berlin');\nconst end=start.plus({minutes:60});\nconst f=dt=>dt.toFormat(\"yyyyLLdd'T'HHmmss\");\nconst teams=start.day<=29?'{{CONFIG:TEAMS_LINK_T1}}':'{{CONFIG:TEAMS_LINK_T2}}';\nconst ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//manibase//Infotermin//DE','CALSCALE:GREGORIAN','METHOD:REQUEST','BEGIN:VTIMEZONE','TZID:Europe/Berlin','BEGIN:DAYLIGHT','TZOFFSETFROM:+0100','TZOFFSETTO:+0200','TZNAME:CEST','DTSTART:19700329T020000','RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU','END:DAYLIGHT','BEGIN:STANDARD','TZOFFSETFROM:+0200','TZOFFSETTO:+0100','TZNAME:CET','DTSTART:19701025T030000','RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU','END:STANDARD','END:VTIMEZONE','BEGIN:VEVENT','UID:'+r.reg_id+'@manibase.de','DTSTAMP:'+DateTime.utc().toFormat(\"yyyyLLdd'T'HHmmss'Z'\"),'SEQUENCE:0','DTSTART;TZID=Europe/Berlin:'+f(start),'DTEND;TZID=Europe/Berlin:'+f(end),'SUMMARY:manibase Infotermin','LOCATION:'+esc(teams),'URL:'+esc(teams),'DESCRIPTION:'+esc('Einwahl (MS Teams): '+teams),'ORGANIZER:mailto:{{CONFIG:SENDER}}','END:VEVENT','END:VCALENDAR'].join('\\r\\n');\nreturn [{ json:{ ics_base64:Buffer.from(ics).toString('base64'), email_norm:r.email_norm, teams, reg_id:r.reg_id, outbox_id:r.outbox_id, name:r.name, unternehmen:r.unternehmen, termin:r.termin } }];" },
-      "id": "wf2-ics", "name": "Build ICS (Europe/Berlin, VTIMEZONE, LOCATION/URL/DESCRIPTION)", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [1360, 460]
+      "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"search_read\",[[[\"mail_key\",\"=\",\"invite:{{ $json.reg_id }}\"]]],{\"fields\":[\"id\",\"state\"]}]] } }",
+        "options": {} },
+      "id": "wf2-find-outbox", "name": "search_read invite-outbox (mail_key)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1360, 460]
+    },
+    {
+      "parameters": { "jsCode": "// Best-Effort-Dedup (unter Concurrency 1): sent -> 409; sending/failed_unknown ->\n// KEIN Auto-Resend (unbekannter Zustand) -> 409+Reconciliation; keine Row -> senden.\nconst m=$('Result + TTL (offset-korrekt)').item.json;\nconst rows=$json.result||[];\nif($json.error!==undefined) return [{ json:{ decision:'error' } }];\nif(rows.some(r=>r.state==='sent')) return [{ json:{ decision:'already' } }];\nif(rows.length>0) return [{ json:{ decision:'reconcile' } }];\nreturn [{ json:{ decision:'send', reg_id:m.reg_id, termin:m.termin, email_norm:m.email_norm, name:m.name, unternehmen:m.unternehmen } }];" },
+      "id": "wf2-decide", "name": "Dedup-Entscheidung", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [1580, 460]
+    },
+    {
+      "parameters": { "rules": { "values": [
+        { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.decision }}", "rightValue": "send", "operator": { "type": "string", "operation": "equals" } } ] }, "outputKey": "send" },
+        { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.decision }}", "rightValue": "error", "operator": { "type": "string", "operation": "equals" } } ] }, "outputKey": "error" }
+      ] }, "fallbackOutput": "extra" },
+      "id": "wf2-switch2", "name": "Switch (send|error|already/reconcile)", "type": "n8n-nodes-base.switch", "typeVersion": 3, "position": [1800, 460]
+    },
+    { "parameters": { "respondWith": "json", "responseCode": 409, "responseBody": "={ \"ok\": false, \"error\": \"already_confirmed\" }" }, "id": "wf2-resp-409", "name": "Respond 409 (bereits bestätigt/versandt)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [2020, 620] },
+    {
+      "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"create\",[{\"mail_key\":\"invite:{{ $json.reg_id }}\",\"reg_id\":{{ $json.reg_id }},\"state\":\"sending\",\"ts\":\"{{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}\"}]] } }",
+        "options": {} },
+      "id": "wf2-claim", "name": "create invite-outbox (state=sending)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [2020, 380]
+    },
+    { "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } }, "id": "wf2-if-claimerr", "name": "IF Claim-Fehler?", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [2220, 380] },
+    {
+      "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"write\",[[{{ $('Dedup-Entscheidung').item.json.reg_id }}],{\"status\":\"confirmed\"}]] } }",
+        "options": {} },
+      "id": "wf2-confirm", "name": "Odoo write status=confirmed", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [2420, 300]
+    },
+    { "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } }, "id": "wf2-if-confirmerr", "name": "IF confirmed-Write-Fehler?", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [2620, 300] },
+    {
+      "parameters": { "jsCode": "// ICS Europe/Berlin (Luxon), vollständige VTIMEZONE, Teams-Link als\n// LOCATION/URL/DESCRIPTION (RFC-5545-escaped). Bezug outbox mail_key invite.\nconst m=$('Dedup-Entscheidung').item.json;\nconst esc=s=>String(s||'').replace(/\\\\/g,'\\\\\\\\').replace(/;/g,'\\\\;').replace(/,/g,'\\\\,').replace(/\\r?\\n/g,'\\\\n');\nconst start=DateTime.fromISO(m.termin,{setZone:true}).setZone('Europe/Berlin');\nconst end=start.plus({minutes:60});\nconst f=dt=>dt.toFormat(\"yyyyLLdd'T'HHmmss\");\nconst teams=start.day<=29?'{{CONFIG:TEAMS_LINK_T1}}':'{{CONFIG:TEAMS_LINK_T2}}';\nconst ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//manibase//Infotermin//DE','CALSCALE:GREGORIAN','METHOD:REQUEST','BEGIN:VTIMEZONE','TZID:Europe/Berlin','BEGIN:DAYLIGHT','TZOFFSETFROM:+0100','TZOFFSETTO:+0200','TZNAME:CEST','DTSTART:19700329T020000','RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU','END:DAYLIGHT','BEGIN:STANDARD','TZOFFSETFROM:+0200','TZOFFSETTO:+0100','TZNAME:CET','DTSTART:19701025T030000','RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU','END:STANDARD','END:VTIMEZONE','BEGIN:VEVENT','UID:'+m.reg_id+'@manibase.de','DTSTAMP:'+DateTime.utc().toFormat(\"yyyyLLdd'T'HHmmss'Z'\"),'SEQUENCE:0','DTSTART;TZID=Europe/Berlin:'+f(start),'DTEND;TZID=Europe/Berlin:'+f(end),'SUMMARY:manibase Infotermin','LOCATION:'+esc(teams),'URL:'+esc(teams),'DESCRIPTION:'+esc('Einwahl (MS Teams): '+teams),'ORGANIZER:mailto:{{CONFIG:SENDER}}','END:VEVENT','END:VCALENDAR'].join('\\r\\n');\nreturn [{ json:{ ics_base64:Buffer.from(ics).toString('base64'), email_norm:m.email_norm, teams, reg_id:m.reg_id, name:m.name, unternehmen:m.unternehmen, termin:m.termin } }];" },
+      "id": "wf2-ics", "name": "Build ICS (Europe/Berlin, VTIMEZONE, LOCATION/URL/DESCRIPTION)", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [2820, 300]
     },
     {
       "parameters": { "method": "POST", "url": "https://graph.microsoft.com/v1.0/users/{{CONFIG:SENDER}}/sendMail", "authentication": "genericCredentialType", "genericAuthType": "oAuth2Api", "sendBody": true, "specifyBody": "json",
         "jsonBody": "={ \"message\": { \"subject\": \"Ihre Einladung zum Infotermin\", \"body\": { \"contentType\": \"HTML\", \"content\": \"<p>Einwahl: <a href='{{ $json.teams }}'>Teams</a></p>\" }, \"attachments\": [{ \"@odata.type\": \"#microsoft.graph.fileAttachment\", \"name\": \"termin.ics\", \"contentType\": \"text/calendar\", \"contentBytes\": \"{{ $json.ics_base64 }}\" }], \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{ $json.email_norm }}\" } }] } }",
         "options": {} },
-      "id": "wf2-graph", "name": "Graph sendMail Einladung + ICS", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1580, 460], "onError": "continueErrorOutput"
+      "id": "wf2-graph", "name": "Graph sendMail Einladung + ICS", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [3020, 300], "onError": "continueErrorOutput"
     },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"write\",[[{{ $('Build ICS (Europe/Berlin, VTIMEZONE, LOCATION/URL/DESCRIPTION)').item.json.outbox_id }}],{\"state\":\"sent\"}]] } }",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"write\",[[{{ $('create invite-outbox (state=sending)').item.json.result }}],{\"state\":\"sent\"}]] } }",
         "options": {} },
-      "id": "wf2-sent", "name": "Odoo write invite-outbox state=sent", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1800, 380]
+      "id": "wf2-sent", "name": "Odoo write invite-outbox state=sent", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [3220, 220]
     },
+    { "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } }, "id": "wf2-if-senterr", "name": "IF sent-Write-Fehler? (Reconciliation)", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [3420, 220] },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"write\",[[{{ $('Build ICS (Europe/Berlin, VTIMEZONE, LOCATION/URL/DESCRIPTION)').item.json.outbox_id }}],{\"state\":\"failed_unknown\"}]] } }",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"write\",[[{{ $('create invite-outbox (state=sending)').item.json.result }}],{\"state\":\"failed_unknown\"}]] } }",
         "options": {} },
-      "id": "wf2-failed", "name": "Odoo write invite-outbox state=failed_unknown", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1800, 600] },
+      "id": "wf2-failed", "name": "Odoo write invite-outbox state=failed_unknown", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [3220, 460]
+    },
+    {
+      "parameters": { "method": "POST", "url": "https://graph.microsoft.com/v1.0/users/{{CONFIG:SENDER}}/sendMail", "authentication": "genericCredentialType", "genericAuthType": "oAuth2Api", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"message\": { \"subject\": \"Infotermin: Zustand prüfen\", \"body\": { \"contentType\": \"Text\", \"content\": {{ JSON.stringify('Einladung versandt, aber outbox-Statusschreibung/Folgeschritt unklar, reg_id ' + $('Dedup-Entscheidung').item.json.reg_id + ' bitte reconciliieren.') }} }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{CONFIG:TEAM_NOTIFY_TO}}\" } }] } }",
+        "options": {} },
+      "id": "wf2-alert", "name": "Graph Alarm (Reconciliation nötig)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [3620, 320], "onError": "continueErrorOutput"
+    },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
         "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"crm.lead\",\"create\",[{\"name\":\"Infotermin Anmeldung\",\"contact_name\":{{ JSON.stringify($('Build ICS (Europe/Berlin, VTIMEZONE, LOCATION/URL/DESCRIPTION)').item.json.name) }},\"partner_name\":{{ JSON.stringify($('Build ICS (Europe/Berlin, VTIMEZONE, LOCATION/URL/DESCRIPTION)').item.json.unternehmen) }},\"email_from\":{{ JSON.stringify($('Build ICS (Europe/Berlin, VTIMEZONE, LOCATION/URL/DESCRIPTION)').item.json.email_norm) }},\"description\":{{ JSON.stringify('Angemeldet Infoveranstaltung, Termin ' + $('Build ICS (Europe/Berlin, VTIMEZONE, LOCATION/URL/DESCRIPTION)').item.json.termin) }}}]] } }",
         "options": {} },
-      "id": "wf2-crm", "name": "Odoo create crm.lead (Spiegel)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [2020, 380]
+      "id": "wf2-crm", "name": "Odoo create crm.lead (Spiegel)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [3620, 140]
     },
-    {
-      "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } },
-      "id": "wf2-if-crmerr", "name": "IF crm.lead-Fehler? (monitorbar, kein Abbruch)", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [2220, 380]
-    },
-    {
-      "parameters": { "method": "POST", "url": "https://graph.microsoft.com/v1.0/users/{{CONFIG:SENDER}}/sendMail", "authentication": "genericCredentialType", "genericAuthType": "oAuth2Api", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"message\": { \"subject\": \"CRM-Spiegel fehlgeschlagen (Infotermin bestätigt)\", \"body\": { \"contentType\": \"Text\", \"content\": {{ JSON.stringify('crm.lead-Anlage nach Bestätigung fehlgeschlagen, reg_id ' + $('Build ICS (Europe/Berlin, VTIMEZONE, LOCATION/URL/DESCRIPTION)').item.json.reg_id + ' – bitte nachtragen.') }} }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{CONFIG:TEAM_NOTIFY_TO}}\" } }] } }",
-        "options": {} },
-      "id": "wf2-crm-alert", "name": "Graph Alarm: CRM-Spiegel nachtragen", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [2420, 480], "onError": "continueErrorOutput"
-    },
-    { "parameters": { "respondWith": "json", "responseCode": 200, "responseBody": "={ \"ok\": true }" }, "id": "wf2-resp-200", "name": "Respond 200 (bestätigt)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [2640, 380] }
+    { "parameters": { "respondWith": "json", "responseCode": 200, "responseBody": "={ \"ok\": true }" }, "id": "wf2-resp-200", "name": "Respond 200 (bestätigt)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [3860, 220] }
   ],
   "connections": {
     "Webhook Confirm": { "main": [[{ "node": "IF Secret ok (X-Manibase-Secret)", "type": "main", "index": 0 }]] },
     "IF Secret ok (X-Manibase-Secret)": { "main": [[{ "node": "SHA-256(token)", "type": "main", "index": 0 }], [{ "node": "Respond 401", "type": "main", "index": 0 }]] },
-    "SHA-256(token)": { "main": [[{ "node": "Odoo confirm_by_digest (atomar: TTL+Claim+Status)", "type": "main", "index": 0 }]] },
-    "Odoo confirm_by_digest (atomar: TTL+Claim+Status)": { "main": [[{ "node": "IF technischer Odoo-Fehler?", "type": "main", "index": 0 }]] },
-    "IF technischer Odoo-Fehler?": { "main": [[{ "node": "Respond 502 (technischer Fehler)", "type": "main", "index": 0 }], [{ "node": "Switch outcome (gone|expired|already|confirm_now)", "type": "main", "index": 0 }]] },
-    "Switch outcome (gone|expired|already|confirm_now)": { "main": [[{ "node": "Respond 410 (nicht gefunden ODER abgelaufen)", "type": "main", "index": 0 }], [{ "node": "Respond 410 (nicht gefunden ODER abgelaufen)", "type": "main", "index": 0 }], [{ "node": "Respond 409 (bereits bestätigt/versandt)", "type": "main", "index": 0 }], [{ "node": "Build ICS (Europe/Berlin, VTIMEZONE, LOCATION/URL/DESCRIPTION)", "type": "main", "index": 0 }]] },
+    "SHA-256(token)": { "main": [[{ "node": "Odoo search_read reg by token_digest", "type": "main", "index": 0 }]] },
+    "Odoo search_read reg by token_digest": { "main": [[{ "node": "Result + TTL (offset-korrekt)", "type": "main", "index": 0 }]] },
+    "Result + TTL (offset-korrekt)": { "main": [[{ "node": "Switch (error|gone|expired|proceed)", "type": "main", "index": 0 }]] },
+    "Switch (error|gone|expired|proceed)": { "main": [[{ "node": "Respond 502 (technischer Fehler)", "type": "main", "index": 0 }], [{ "node": "Respond 410 (nicht gefunden ODER abgelaufen)", "type": "main", "index": 0 }], [{ "node": "Respond 410 (nicht gefunden ODER abgelaufen)", "type": "main", "index": 0 }], [{ "node": "search_read invite-outbox (mail_key)", "type": "main", "index": 0 }]] },
+    "search_read invite-outbox (mail_key)": { "main": [[{ "node": "Dedup-Entscheidung", "type": "main", "index": 0 }]] },
+    "Dedup-Entscheidung": { "main": [[{ "node": "Switch (send|error|already/reconcile)", "type": "main", "index": 0 }]] },
+    "Switch (send|error|already/reconcile)": { "main": [[{ "node": "create invite-outbox (state=sending)", "type": "main", "index": 0 }], [{ "node": "Respond 502 (technischer Fehler)", "type": "main", "index": 0 }], [{ "node": "Respond 409 (bereits bestätigt/versandt)", "type": "main", "index": 0 }]] },
+    "create invite-outbox (state=sending)": { "main": [[{ "node": "IF Claim-Fehler?", "type": "main", "index": 0 }]] },
+    "IF Claim-Fehler?": { "main": [[{ "node": "Respond 502 (technischer Fehler)", "type": "main", "index": 0 }], [{ "node": "Odoo write status=confirmed", "type": "main", "index": 0 }]] },
+    "Odoo write status=confirmed": { "main": [[{ "node": "IF confirmed-Write-Fehler?", "type": "main", "index": 0 }]] },
+    "IF confirmed-Write-Fehler?": { "main": [[{ "node": "Respond 502 (technischer Fehler)", "type": "main", "index": 0 }], [{ "node": "Build ICS (Europe/Berlin, VTIMEZONE, LOCATION/URL/DESCRIPTION)", "type": "main", "index": 0 }]] },
     "Build ICS (Europe/Berlin, VTIMEZONE, LOCATION/URL/DESCRIPTION)": { "main": [[{ "node": "Graph sendMail Einladung + ICS", "type": "main", "index": 0 }]] },
     "Graph sendMail Einladung + ICS": { "main": [[{ "node": "Odoo write invite-outbox state=sent", "type": "main", "index": 0 }], [{ "node": "Odoo write invite-outbox state=failed_unknown", "type": "main", "index": 0 }]] },
-    "Odoo write invite-outbox state=sent": { "main": [[{ "node": "Odoo create crm.lead (Spiegel)", "type": "main", "index": 0 }]] },
+    "Odoo write invite-outbox state=sent": { "main": [[{ "node": "IF sent-Write-Fehler? (Reconciliation)", "type": "main", "index": 0 }]] },
+    "IF sent-Write-Fehler? (Reconciliation)": { "main": [[{ "node": "Graph Alarm (Reconciliation nötig)", "type": "main", "index": 0 }], [{ "node": "Odoo create crm.lead (Spiegel)", "type": "main", "index": 0 }]] },
     "Odoo write invite-outbox state=failed_unknown": { "main": [[{ "node": "Respond 502 (technischer Fehler)", "type": "main", "index": 0 }]] },
-    "Odoo create crm.lead (Spiegel)": { "main": [[{ "node": "IF crm.lead-Fehler? (monitorbar, kein Abbruch)", "type": "main", "index": 0 }]] },
-    "IF crm.lead-Fehler? (monitorbar, kein Abbruch)": { "main": [[{ "node": "Graph Alarm: CRM-Spiegel nachtragen", "type": "main", "index": 0 }], [{ "node": "Respond 200 (bestätigt)", "type": "main", "index": 0 }]] },
-    "Graph Alarm: CRM-Spiegel nachtragen": { "main": [[{ "node": "Respond 200 (bestätigt)", "type": "main", "index": 0 }]] }
+    "Odoo create crm.lead (Spiegel)": { "main": [[{ "node": "Respond 200 (bestätigt)", "type": "main", "index": 0 }]] },
+    "Graph Alarm (Reconciliation nötig)": { "main": [[{ "node": "Respond 200 (bestätigt)", "type": "main", "index": 0 }]] }
   },
   "settings": { "executionOrder": "v1" }
 }
