@@ -20,4 +20,10 @@ return [
     'username' => 'api@ihre-firma.de',           // Login des API-Nutzers
     'api_key'  => 'ODOO_API_SCHLUESSEL',          // API-Schlüssel (nicht das Passwort)
     'list_id'  => 0,                              // ID der Mailing-Liste "Newsletter"
+
+    // Optional: ID der DOI-Kampagne ("Double Opt-in", Marketing-Automation).
+    // Nur diese Kampagne wird beim Anmelden gezielt angestoßen (Sofortversand).
+    // Leer/0 lassen => kein Sofortversand, Odoo-Cronjobs holen nach.
+    // NIEMALS alle laufenden Kampagnen oder die globale Mail-Queue auslösen.
+    'campaign_id' => 0,                           // z.B. 3 (Marketing-Automation -> Kampagne öffnen, id=... in URL)
 ];
