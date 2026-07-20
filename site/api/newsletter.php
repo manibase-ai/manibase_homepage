@@ -10,7 +10,10 @@
  * Liste die Bestätigungsmail und verschiebt Klicker in die Liste
  * "Confirmed contacts". Nur diese Liste gilt als einwilligend, Newsletter-
  * Versand darf ausschließlich an sie gehen. "Newsletter" ist die Warteschlange
- * mit unbestätigten Adressen. Am Proxy ist dafür keine Änderung nötig.
+ * mit unbestätigten Adressen.
+ *
+ * Den Versand der Bestätigungsmail stößt dieser Proxy unten selbst an, damit
+ * sie in Sekunden statt über die Cron-Kette ankommt (siehe Kommentar dort).
  *
  * Zugangsdaten liegen AUSSERHALB des Webroots und NICHT im Repo:
  *   /etc/manibase/odoo.php   (aus site/api/odoo.config.example.php erzeugen,
@@ -134,6 +137,28 @@ try {
     } else {
         $exec('mailing.contact', 'create',
             [['name' => $email, 'email' => $email, 'list_ids' => [[4, $listId]]]]);
+    }
+
+    // Bestätigungsmail sofort auslösen statt auf die Cronjobs zu warten.
+    // Odoo verschickt die DOI-Mail sonst über drei nacheinander laufende
+    // Cronjobs (Teilnehmer synchronisieren -> Aktivitäten ausführen -> Mail-
+    // Warteschlange), im Ergebnis bis zu einer halben Stunde Verzögerung.
+    // Hier rufen wir dieselben ORM-Methoden direkt auf: Zustellung in Sekunden.
+    //
+    // Bewusst in eigenem try/catch: Schlägt das fehl, ist die Adresse trotzdem
+    // eingetragen und der Nutzer bekommt seine Bestätigung, nur eben verzögert
+    // über die Cronjobs. Die bleiben als Sicherheitsnetz aktiv.
+    try {
+        $camps = $exec('marketing.campaign', 'search', [[['state', '=', 'running']]]);
+        if (is_array($camps) && count($camps) > 0) {
+            $exec('marketing.campaign', 'sync_participants', [$camps]);
+            $exec('marketing.campaign', 'execute_activities', [$camps]);
+        }
+        // execute_activities versendet in der Praxis direkt; das hier ist nur
+        // Absicherung, falls eine Mail doch in der Warteschlange landet.
+        $exec('mail.mail', 'process_email_queue', [[]]);
+    } catch (Throwable $e) {
+        error_log('newsletter: sofortversand fehlgeschlagen (cron holt nach): ' . $e->getMessage());
     }
 } catch (Throwable $e) {
     error_log('newsletter: ' . $e->getMessage());
