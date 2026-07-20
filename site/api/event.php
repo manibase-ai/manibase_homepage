@@ -148,6 +148,13 @@ if ($form === 'anmeldung') {
     if (!is_string($termin) || !in_array($termin, $TERMINE, true)) {
         respond(422, ['ok' => false, 'error' => 'invalid_termin']);
     }
+    // Bereits begonnene/vergangene Termine ablehnen: sonst käme eine Anmeldung
+    // in eine DOI-Kette, die zu keinem gültigen Termin mehr führt (der Token
+    // läuft spätestens zum Termin ab).
+    $ts = strtotime($termin);
+    if ($ts === false || $ts <= time()) {
+        respond(422, ['ok' => false, 'error' => 'termin_past']);
+    }
     $payload['termin'] = $termin;
     $webhook = $cfg['webhook_anmeldung'];
 } else {

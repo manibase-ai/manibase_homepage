@@ -91,6 +91,28 @@
   eventForms.forEach(initEventForm);
 
   function initEventForm(form) {
+    // Vergangene/laufende Termine ausgrauen und sperren (Server lehnt sie ohnehin
+    // ab). Sind alle Termine vorbei, Formular sperren und Hinweis zeigen.
+    if (form.getAttribute('data-form') === 'anmeldung') {
+      var now = Date.now();
+      var radios = form.querySelectorAll('[name="termin"]');
+      var available = 0;
+      Array.prototype.forEach.call(radios, function (r) {
+        var t = Date.parse(r.value);
+        if (!isNaN(t) && t <= now) {
+          r.disabled = true;
+          var card = r.closest('.qcard');
+          if (card) { card.classList.add('qcard--past'); card.setAttribute('aria-disabled', 'true'); }
+        } else { available++; }
+      });
+      if (radios.length && available === 0) {
+        var noneBtn = form.querySelector('button[type="submit"]');
+        var noneErr = form.querySelector('.eventform__err');
+        if (noneBtn) { noneBtn.disabled = true; }
+        if (noneErr) { noneErr.hidden = false; noneErr.textContent = 'Aktuell sind keine Termine verfügbar. Bitte schreiben Sie uns an kontakt@manibase.de.'; }
+      }
+    }
+
     form.addEventListener('submit', function (ev) {
       ev.preventDefault();
       var err = form.querySelector('.eventform__err');

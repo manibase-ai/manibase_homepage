@@ -525,3 +525,5 @@ section[id]{scroll-margin-top:84px;}
 .confirm__inner { max-width: 640px; }
 .confirm .wordmark { display: inline-block; margin-bottom: 1.5rem; }
 .confirm form { margin-top: 1.5rem; }
+.qcard--past { opacity: .5; }
+.qcard--past .qcard__t::after { content: " (vorbei)"; font-weight: normal; }
