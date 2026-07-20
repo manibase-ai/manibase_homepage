@@ -1,0 +1,103 @@
+{
+  "name": "manibase Infotermin – 3 Reminder (1 Tag / 1 Stunde)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [
+          { "field": "cronExpression", "expression": "30 19 28 7 *" },
+          { "field": "cronExpression", "expression": "30 18 29 7 *" },
+          { "field": "cronExpression", "expression": "30 19 30 7 *" },
+          { "field": "cronExpression", "expression": "30 18 31 7 *" }
+        ] },
+        "options": { "timezone": "Europe/Berlin" }
+      },
+      "id": "wf3-sched",
+      "name": "Schedule (Europe/Berlin) 4 Feuerzeitpunkte",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aus dem Feuerzeitpunkt Termin + Reminder-Typ ableiten.\n// Termine: {{CONFIG:TERMIN_T1}} / {{CONFIG:TERMIN_T2}}.\nconst now = new Date();\nconst d = now.getUTCDate();\nconst termin = (d <= 29) ? '{{CONFIG:TERMIN_T1}}' : '{{CONFIG:TERMIN_T2}}';\nconst kind = (now.getUTCHours() < 18) ? 'reminder1d' : 'reminder1h';\nconst teams = (d <= 29) ? '{{CONFIG:TEAMS_LINK_T1}}' : '{{CONFIG:TEAMS_LINK_T2}}';\nreturn [{ json: { termin, kind, teams } }];"
+      },
+      "id": "wf3-map",
+      "name": "Termin + Reminder-Typ + Teams-Link",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{CONFIG:ODOO_URL}}/jsonrpc",
+        "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"search_read\",[[[\"status\",\"=\",\"confirmed\"],[\"termin\",\"=\",\"{{ $json.termin }}\"]]],{\"fields\":[\"id\",\"email_norm\"]}]] } }",
+        "options": {}
+      },
+      "id": "wf3-find",
+      "name": "Odoo search_read confirmed + Termin",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [640, 300]
+    },
+    {
+      "parameters": { "batchSize": 1, "options": {} },
+      "id": "wf3-batch",
+      "name": "Loop je Teilnehmer",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [860, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{CONFIG:ODOO_URL}}/jsonrpc",
+        "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"create\",[{\"mail_key\":\"{{ $json.kind }}:{{ $json.reg_id }}\",\"reg_id\":{{ $json.reg_id }},\"state\":\"sending\"}]] } }",
+        "options": {}
+      },
+      "id": "wf3-outbox",
+      "name": "Claim outbox mail_key reminder (unique)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1080, 300],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.microsoft.com/v1.0/users/{{CONFIG:SENDER}}/sendMail",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"message\": { \"subject\": \"Erinnerung: Ihr Infotermin\", \"body\": { \"contentType\": \"HTML\", \"content\": \"<p>Bis gleich. Einwahl: <a href='{{ $json.teams }}'>Teams</a></p>\" }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{ $json.email_norm }}\" } }] } }",
+        "options": {}
+      },
+      "id": "wf3-graph",
+      "name": "Graph sendMail Reminder",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1300, 300],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": { "jsCode": "// outbox -> sent; Graph-Fehler -> state=failed_unknown (Reconciliation).\nreturn [{ json: { outbox_state: 'sent' } }];" },
+      "id": "wf3-sent",
+      "name": "outbox state=sent (sonst failed_unknown)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1520, 300]
+    }
+  ],
+  "connections": {
+    "Schedule (Europe/Berlin) 4 Feuerzeitpunkte": { "main": [[{ "node": "Termin + Reminder-Typ + Teams-Link", "type": "main", "index": 0 }]] },
+    "Termin + Reminder-Typ + Teams-Link": { "main": [[{ "node": "Odoo search_read confirmed + Termin", "type": "main", "index": 0 }]] },
+    "Odoo search_read confirmed + Termin": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }]] },
+    "Loop je Teilnehmer": { "main": [[{ "node": "Claim outbox mail_key reminder (unique)", "type": "main", "index": 0 }]] },
+    "Claim outbox mail_key reminder (unique)": { "main": [[{ "node": "Graph sendMail Reminder", "type": "main", "index": 0 }]] },
+    "Graph sendMail Reminder": { "main": [[{ "node": "outbox state=sent (sonst failed_unknown)", "type": "main", "index": 0 }]] },
+    "outbox state=sent (sonst failed_unknown)": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}

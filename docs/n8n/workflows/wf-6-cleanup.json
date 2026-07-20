@@ -1,0 +1,92 @@
+{
+  "name": "manibase Infotermin – 6 Cleanup (DSGVO-Löschung)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [ { "field": "cronExpression", "expression": "0 3 * * *" } ] },
+        "options": { "timezone": "Europe/Berlin" }
+      },
+      "id": "wf6-sched",
+      "name": "Schedule täglich (Europe/Berlin)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{CONFIG:ODOO_URL}}/jsonrpc",
+        "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"search\",[[[\"status\",\"=\",\"received\"],\"|\",[\"created_at\",\"<\",\"{{ $now.minus({days:14}).toFormat('yyyy-MM-dd HH:mm:ss') }}\"],[\"termin\",\"<\",\"{{ $now.toISO() }}\"]]]]] } }",
+        "options": {}
+      },
+      "id": "wf6-find-received",
+      "name": "Odoo suchen received (created<now-14d OR termin<now)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [420, 240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{CONFIG:ODOO_URL}}/jsonrpc",
+        "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"search\",[[[\"status\",\"=\",\"confirmed\"],[\"termin\",\"<\",\"{{ $now.minus({days:30}).toISO() }}\"]]]]] } }",
+        "options": {}
+      },
+      "id": "wf6-find-confirmed",
+      "name": "Odoo suchen confirmed (termin<now-30d)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [420, 360]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{CONFIG:ODOO_URL}}/jsonrpc",
+        "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"unlink\",[{{ $json.ids }}]] } }",
+        "options": {}
+      },
+      "id": "wf6-unlink",
+      "name": "Odoo unlink/anonymisieren (reg + outbox)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [700, 300],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Audit lead-unabhängig: nur Zählwerte, keine PII.\nconst deleted_received = $json.count_received || 0;\nconst deleted_confirmed = $json.count_confirmed || 0;\nreturn [{ json: { audit: { deleted_received, deleted_confirmed, at: 'run' } } }];"
+      },
+      "id": "wf6-audit",
+      "name": "Audit-Zählwerte (ohne PII)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [920, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.microsoft.com/v1.0/users/{{CONFIG:SENDER}}/sendMail",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"message\": { \"subject\": \"Cleanup-Fehler Infotermin\", \"body\": { \"contentType\": \"Text\", \"content\": \"Cleanup-Lauf meldet einen Fehler, bitte prüfen.\" }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{CONFIG:TEAM_NOTIFY_TO}}\" } }] } }",
+        "options": {}
+      },
+      "id": "wf6-alert",
+      "name": "Graph Alarm bei Fehler",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [920, 460]
+    }
+  ],
+  "connections": {
+    "Schedule täglich (Europe/Berlin)": { "main": [[{ "node": "Odoo suchen received (created<now-14d OR termin<now)", "type": "main", "index": 0 }, { "node": "Odoo suchen confirmed (termin<now-30d)", "type": "main", "index": 0 }]] },
+    "Odoo suchen received (created<now-14d OR termin<now)": { "main": [[{ "node": "Odoo unlink/anonymisieren (reg + outbox)", "type": "main", "index": 0 }]] },
+    "Odoo suchen confirmed (termin<now-30d)": { "main": [[{ "node": "Odoo unlink/anonymisieren (reg + outbox)", "type": "main", "index": 0 }]] },
+    "Odoo unlink/anonymisieren (reg + outbox)": { "main": [[{ "node": "Audit-Zählwerte (ohne PII)", "type": "main", "index": 0 }], [{ "node": "Graph Alarm bei Fehler", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}

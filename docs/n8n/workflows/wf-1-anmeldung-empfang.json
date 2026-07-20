@@ -1,0 +1,153 @@
+{
+  "name": "manibase Infotermin – 1 Anmeldung Empfang",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "manibase-anmeldung",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "wf1-webhook",
+      "name": "Webhook Anmeldung",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.headers['x-manibase-secret'] }}",
+              "rightValue": "{{CONFIG:SHARED_SECRET}}",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "wf1-if-secret",
+      "name": "IF Secret ok (X-Manibase-Secret)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseCode": 401,
+        "responseBody": "={ \"ok\": false, \"error\": \"unauthorized\" }"
+      },
+      "id": "wf1-resp-401",
+      "name": "Respond 401",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [640, 460]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalisieren, Termin gegen Allowlist prüfen, Token + SHA-256-Digest.\n// Termine: {{CONFIG:TERMIN_T1}} / {{CONFIG:TERMIN_T2}}.\nconst crypto = require('crypto');\nconst b = $json.body || {};\nconst email_norm = String(b.email||'').trim().toLowerCase();\nconst termin = String(b.termin||'');\nconst token = crypto.randomBytes(24).toString('base64url'); // >=128 bit\nconst token_digest = crypto.createHash('sha256').update(token).digest('hex');\nreturn [{ json: { email_norm, termin, name: b.name, unternehmen: b.unternehmen, token, token_digest } }];"
+      },
+      "id": "wf1-code-token",
+      "name": "Normalize + Token/Digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{CONFIG:ODOO_URL}}/jsonrpc",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"create\",[{\"email_norm\":\"{{ $json.email_norm }}\",\"termin\":\"{{ $json.termin }}\",\"status\":\"received\",\"token_digest\":\"{{ $json.token_digest }}\"}]] } }",
+        "options": {}
+      },
+      "id": "wf1-odoo-create-reg",
+      "name": "Odoo create x_infotermin_reg (unique email_norm+termin)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [860, 300],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{CONFIG:ODOO_URL}}/jsonrpc",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"create\",[{\"mail_key\":\"doi:{{ $json.reg_id }}\",\"reg_id\":{{ $json.reg_id }},\"state\":\"sending\"}]] } }",
+        "options": {}
+      },
+      "id": "wf1-outbox-doi",
+      "name": "Claim outbox mail_key doi (unique)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1080, 240],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.microsoft.com/v1.0/users/{{CONFIG:SENDER}}/sendMail",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"message\": { \"subject\": \"Bitte bestätigen Sie Ihre Anmeldung\", \"body\": { \"contentType\": \"HTML\", \"content\": \"<p>Bitte bestätigen: <a href='{{CONFIG:BASE_URL}}/api/event-confirm.php?t={{ $json.token }}'>Anmeldung bestätigen</a></p>\" }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{ $json.email_norm }}\" } }] } }",
+        "options": {}
+      },
+      "id": "wf1-graph-doi",
+      "name": "Graph sendMail DOI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1300, 240],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Erfolg: outbox doi -> sent. Fehler nach Graph-Erfolg vor sent-Write bleibt\n// state=sending => Reconciliation. Bei Graph-Fehler: state=failed_unknown.\nreturn [{ json: { outbox_state: 'sent' } }];"
+      },
+      "id": "wf1-outbox-sent",
+      "name": "outbox doi state=sent (sonst failed_unknown)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1520, 240]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Duplicate-Zweig (Unique-Violation): Recovery statt Dauersperre.\n// doi-outbox lesen: state=sent -> idempotent 200 (Digest UNVERAENDERT);\n// fehlt -> DOI (re)senden; state=sending&alt -> reconcile. Kein neuer Digest.\nreturn [{ json: { recovery: true } }];"
+      },
+      "id": "wf1-dup-recovery",
+      "name": "Duplicate Recovery (kein neuer Digest)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1080, 420]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseCode": 200,
+        "responseBody": "={ \"ok\": true }"
+      },
+      "id": "wf1-resp-200",
+      "name": "Respond 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1740, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Anmeldung": { "main": [[{ "node": "IF Secret ok (X-Manibase-Secret)", "type": "main", "index": 0 }]] },
+    "IF Secret ok (X-Manibase-Secret)": { "main": [[{ "node": "Normalize + Token/Digest", "type": "main", "index": 0 }], [{ "node": "Respond 401", "type": "main", "index": 0 }]] },
+    "Normalize + Token/Digest": { "main": [[{ "node": "Odoo create x_infotermin_reg (unique email_norm+termin)", "type": "main", "index": 0 }]] },
+    "Odoo create x_infotermin_reg (unique email_norm+termin)": { "main": [[{ "node": "Claim outbox mail_key doi (unique)", "type": "main", "index": 0 }], [{ "node": "Duplicate Recovery (kein neuer Digest)", "type": "main", "index": 0 }]] },
+    "Claim outbox mail_key doi (unique)": { "main": [[{ "node": "Graph sendMail DOI", "type": "main", "index": 0 }]] },
+    "Graph sendMail DOI": { "main": [[{ "node": "outbox doi state=sent (sonst failed_unknown)", "type": "main", "index": 0 }]] },
+    "outbox doi state=sent (sonst failed_unknown)": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }]] },
+    "Duplicate Recovery (kein neuer Digest)": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}

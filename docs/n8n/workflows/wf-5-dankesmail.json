@@ -1,0 +1,84 @@
+{
+  "name": "manibase Infotermin – 5 Dankesmail (Aufzeichnung)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "wf5-manual",
+      "name": "Manuell auslösen (nach Upload der Aufzeichnung)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{CONFIG:ODOO_URL}}/jsonrpc",
+        "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"search_read\",[[[\"status\",\"=\",\"confirmed\"]]],{\"fields\":[\"id\",\"email_norm\"]}]] } }",
+        "options": {}
+      },
+      "id": "wf5-find",
+      "name": "Odoo search_read confirmed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [420, 300]
+    },
+    {
+      "parameters": { "batchSize": 1, "options": {} },
+      "id": "wf5-batch",
+      "name": "Loop je Teilnehmer",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{CONFIG:ODOO_URL}}/jsonrpc",
+        "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"create\",[{\"mail_key\":\"thanks:{{ $json.reg_id }}\",\"reg_id\":{{ $json.reg_id }},\"state\":\"sending\"}]] } }",
+        "options": {}
+      },
+      "id": "wf5-outbox",
+      "name": "Claim outbox mail_key thanks (unique)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [860, 300],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.microsoft.com/v1.0/users/{{CONFIG:SENDER}}/sendMail",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"message\": { \"subject\": \"Danke – hier die Aufzeichnung\", \"body\": { \"contentType\": \"HTML\", \"content\": \"<p>Aufzeichnung: <a href='{{CONFIG:RECORDING_URL}}'>ansehen</a></p>\" }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{ $json.email_norm }}\" } }] } }",
+        "options": {}
+      },
+      "id": "wf5-graph",
+      "name": "Graph sendMail Danke + Aufzeichnung",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1080, 300],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": { "jsCode": "// outbox -> sent; Graph-Fehler -> state=failed_unknown (Reconciliation).\nreturn [{ json: { outbox_state: 'sent' } }];" },
+      "id": "wf5-sent",
+      "name": "outbox state=sent (sonst failed_unknown)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1300, 300]
+    }
+  ],
+  "connections": {
+    "Manuell auslösen (nach Upload der Aufzeichnung)": { "main": [[{ "node": "Odoo search_read confirmed", "type": "main", "index": 0 }]] },
+    "Odoo search_read confirmed": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }]] },
+    "Loop je Teilnehmer": { "main": [[{ "node": "Claim outbox mail_key thanks (unique)", "type": "main", "index": 0 }]] },
+    "Claim outbox mail_key thanks (unique)": { "main": [[{ "node": "Graph sendMail Danke + Aufzeichnung", "type": "main", "index": 0 }]] },
+    "Graph sendMail Danke + Aufzeichnung": { "main": [[{ "node": "outbox state=sent (sonst failed_unknown)", "type": "main", "index": 0 }]] },
+    "outbox state=sent (sonst failed_unknown)": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}
