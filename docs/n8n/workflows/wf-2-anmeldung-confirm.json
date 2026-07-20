@@ -39,38 +39,22 @@
     },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"search_read\",[[[\"id\",\"=\",{{ $('Result auspacken + TTL').item.json.reg_id }}]]],{\"fields\":[\"id\",\"status\"]}]] } }",
-        "options": {} },
-      "id": "wf2-conflict-read", "name": "Claim-Konflikt: reg-Status neu lesen", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1540, 760]
-    },
-    {
-      "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"search_read\",[[[\"mail_key\",\"=\",\"invite:{{ $('Result auspacken + TTL').item.json.reg_id }}\"]]],{\"fields\":[\"id\",\"state\"]}]] } }",
-        "options": {} },
-      "id": "wf2-conflict-read-outbox", "name": "Claim-Konflikt: invite-outbox-Zustand lesen", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1740, 760]
-    },
-    {
-      "parameters": { "jsCode": "// Nur ein nachweisbarer Pre-Send-Crash darf fortgesetzt werden:\n// reg noch 'received' UND invite-outbox NICHT 'sent' -> resume (weitertreiben).\n// Sonst (confirmed ODER outbox sent) -> ein anderer Lauf hat gewonnen -> 409.\nconst reg=($json.result&&$json.result[0])||{};\nconst outbox=$('Claim-Konflikt: invite-outbox-Zustand lesen').item.json.result||[];\nconst sent=outbox.some(r=>r.state==='sent');\nconst resume = reg.status==='received' && !sent;\nreturn [{ json:{ resume } }];" },
-      "id": "wf2-conflict-decide", "name": "Claim-Konflikt: resume nur bei Pre-Send-Crash", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [1940, 760]
-    },
-    {
-      "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.resume }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } },
-      "id": "wf2-if-resume", "name": "IF resume? (sonst 409)", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [2140, 760]
-    },
-    {
-      "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
         "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"write\",[[{{ $('Result auspacken + TTL').item.json.reg_id }}],{\"status\":\"confirmed\"}]] } }",
         "options": {} },
       "id": "wf2-write-confirmed", "name": "Odoo write status=confirmed", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1760, 560]
     },
     {
+      "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } },
+      "id": "wf2-if-confirmerr", "name": "IF confirmed-Write-Fehler?", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [1900, 560]
+    },
+    {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"crm.lead\",\"create\",[{\"name\":\"Infotermin Anmeldung\",\"contact_name\":\"{{ $('Result auspacken + TTL').item.json.name }}\",\"partner_name\":\"{{ $('Result auspacken + TTL').item.json.unternehmen }}\",\"email_from\":\"{{ $('Result auspacken + TTL').item.json.email_norm }}\",\"description\":\"Angemeldet Infoveranstaltung, Termin {{ $('Result auspacken + TTL').item.json.termin }}\"}]] } }",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"crm.lead\",\"create\",[{\"name\":\"Infotermin Anmeldung\",\"contact_name\":{{ JSON.stringify($('Result auspacken + TTL').item.json.name) }},\"partner_name\":{{ JSON.stringify($('Result auspacken + TTL').item.json.unternehmen) }},\"email_from\":{{ JSON.stringify($('Result auspacken + TTL').item.json.email_norm) }},\"description\":{{ JSON.stringify('Angemeldet Infoveranstaltung, Termin ' + $('Result auspacken + TTL').item.json.termin) }}}]] } }",
         "options": {} },
       "id": "wf2-crm-lead", "name": "Odoo create crm.lead (Spiegel, idempotent via Vertriebsregel)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1980, 560]
     },
     {
-      "parameters": { "jsCode": "// ICS in Europe/Berlin per Luxon (host-TZ-unabhängig).\nconst m=$('Result auspacken + TTL').item.json;\nconst start=DateTime.fromISO(m.termin,{setZone:true}).setZone('Europe/Berlin');\nconst end=start.plus({minutes:60});\nconst f=dt=>dt.toFormat(\"yyyyLLdd'T'HHmmss\");\nconst teams=start.day<=29?'{{CONFIG:TEAMS_LINK_T1}}':'{{CONFIG:TEAMS_LINK_T2}}';\nconst ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//manibase//Infotermin//DE','METHOD:REQUEST','BEGIN:VTIMEZONE','TZID:Europe/Berlin','END:VTIMEZONE','BEGIN:VEVENT','UID:'+m.reg_id+'@manibase.de','DTSTAMP:'+DateTime.utc().toFormat(\"yyyyLLdd'T'HHmmss'Z'\"),'SEQUENCE:0','DTSTART;TZID=Europe/Berlin:'+f(start),'DTEND;TZID=Europe/Berlin:'+f(end),'SUMMARY:manibase Infotermin','ORGANIZER:mailto:{{CONFIG:SENDER}}','END:VEVENT','END:VCALENDAR'].join('\\r\\n');\nreturn [{ json:{ ics_base64:Buffer.from(ics).toString('base64'), email_norm:m.email_norm, teams } }];" },
+      "parameters": { "jsCode": "// ICS in Europe/Berlin per Luxon (host-TZ-unabhängig), vollständige VTIMEZONE\n// mit STANDARD (CET) + DAYLIGHT (CEST), damit Kalenderclients sie akzeptieren.\nconst m=$('Result auspacken + TTL').item.json;\nconst start=DateTime.fromISO(m.termin,{setZone:true}).setZone('Europe/Berlin');\nconst end=start.plus({minutes:60});\nconst f=dt=>dt.toFormat(\"yyyyLLdd'T'HHmmss\");\nconst teams=start.day<=29?'{{CONFIG:TEAMS_LINK_T1}}':'{{CONFIG:TEAMS_LINK_T2}}';\nconst ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//manibase//Infotermin//DE','CALSCALE:GREGORIAN','METHOD:REQUEST','BEGIN:VTIMEZONE','TZID:Europe/Berlin','BEGIN:DAYLIGHT','TZOFFSETFROM:+0100','TZOFFSETTO:+0200','TZNAME:CEST','DTSTART:19700329T020000','RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU','END:DAYLIGHT','BEGIN:STANDARD','TZOFFSETFROM:+0200','TZOFFSETTO:+0100','TZNAME:CET','DTSTART:19701025T030000','RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU','END:STANDARD','END:VTIMEZONE','BEGIN:VEVENT','UID:'+m.reg_id+'@manibase.de','DTSTAMP:'+DateTime.utc().toFormat(\"yyyyLLdd'T'HHmmss'Z'\"),'SEQUENCE:0','DTSTART;TZID=Europe/Berlin:'+f(start),'DTEND;TZID=Europe/Berlin:'+f(end),'SUMMARY:manibase Infotermin','ORGANIZER:mailto:{{CONFIG:SENDER}}','END:VEVENT','END:VCALENDAR'].join('\\r\\n');\nreturn [{ json:{ ics_base64:Buffer.from(ics).toString('base64'), email_norm:m.email_norm, teams } }];" },
       "id": "wf2-code-ics", "name": "Build ICS (Luxon Europe/Berlin, UID, SEQUENCE, 60min)", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [2200, 560]
     },
     {
@@ -101,12 +85,9 @@
     "Result auspacken + TTL": { "main": [[{ "node": "Switch (gone|expired|already|error|received)", "type": "main", "index": 0 }]] },
     "Switch (gone|expired|already|error|received)": { "main": [[{ "node": "Respond 410 (nicht gefunden ODER abgelaufen)", "type": "main", "index": 0 }], [{ "node": "Respond 410 (nicht gefunden ODER abgelaufen)", "type": "main", "index": 0 }], [{ "node": "Respond 409 (bereits bestätigt)", "type": "main", "index": 0 }], [{ "node": "Respond 502 (technischer Fehler)", "type": "main", "index": 0 }], [{ "node": "Claim outbox mail_key invite (unique = CAS)", "type": "main", "index": 0 }]] },
     "Claim outbox mail_key invite (unique = CAS)": { "main": [[{ "node": "IF Claim-Konflikt?", "type": "main", "index": 0 }]] },
-    "IF Claim-Konflikt?": { "main": [[{ "node": "Claim-Konflikt: reg-Status neu lesen", "type": "main", "index": 0 }], [{ "node": "Odoo write status=confirmed", "type": "main", "index": 0 }]] },
-    "Claim-Konflikt: reg-Status neu lesen": { "main": [[{ "node": "Claim-Konflikt: invite-outbox-Zustand lesen", "type": "main", "index": 0 }]] },
-    "Claim-Konflikt: invite-outbox-Zustand lesen": { "main": [[{ "node": "Claim-Konflikt: resume nur bei Pre-Send-Crash", "type": "main", "index": 0 }]] },
-    "Claim-Konflikt: resume nur bei Pre-Send-Crash": { "main": [[{ "node": "IF resume? (sonst 409)", "type": "main", "index": 0 }]] },
-    "IF resume? (sonst 409)": { "main": [[{ "node": "Odoo write status=confirmed", "type": "main", "index": 0 }], [{ "node": "Respond 409 (bereits bestätigt)", "type": "main", "index": 0 }]] },
-    "Odoo write status=confirmed": { "main": [[{ "node": "Odoo create crm.lead (Spiegel, idempotent via Vertriebsregel)", "type": "main", "index": 0 }]] },
+    "IF Claim-Konflikt?": { "main": [[{ "node": "Respond 409 (bereits bestätigt)", "type": "main", "index": 0 }], [{ "node": "Odoo write status=confirmed", "type": "main", "index": 0 }]] },
+    "Odoo write status=confirmed": { "main": [[{ "node": "IF confirmed-Write-Fehler?", "type": "main", "index": 0 }]] },
+    "IF confirmed-Write-Fehler?": { "main": [[{ "node": "Respond 502 (technischer Fehler)", "type": "main", "index": 0 }], [{ "node": "Odoo create crm.lead (Spiegel, idempotent via Vertriebsregel)", "type": "main", "index": 0 }]] },
     "Odoo create crm.lead (Spiegel, idempotent via Vertriebsregel)": { "main": [[{ "node": "Build ICS (Luxon Europe/Berlin, UID, SEQUENCE, 60min)", "type": "main", "index": 0 }]] },
     "Build ICS (Luxon Europe/Berlin, UID, SEQUENCE, 60min)": { "main": [[{ "node": "Graph sendMail Einladung + ICS", "type": "main", "index": 0 }]] },
     "Graph sendMail Einladung + ICS": { "main": [[{ "node": "Odoo write outbox invite state=sent", "type": "main", "index": 0 }], [{ "node": "Odoo write outbox invite state=failed_unknown", "type": "main", "index": 0 }]] },

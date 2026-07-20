@@ -59,8 +59,17 @@ Outbox je Mail: (kein Row) ──create──▶ sending ──Graph ok──▶
 ```
 
 **Reconciliation-Query** (Betrieb/Abnahme): `state = sending AND ts < now-15min`
-→ manuell prüfen (Graph-Postausgang), dann auf `sent` oder `failed_unknown` setzen. **Kein**
-Auto-Retry (bei transaktionalen Event-Mails ist ein Zweifelsfall besser als Doppelmail).
+→ manuell prüfen (Graph-Postausgang):
+- Mail nachweislich zugestellt → auf `sent` setzen.
+- Mail nachweislich NICHT zugestellt → Row **löschen** (nicht nur `failed_unknown` setzen), damit
+  ein späterer Confirm-/Anmelde-Retry den Claim (`invite:<id>`/`doi:<id>`) neu anlegen und senden
+  kann. Sonst blockiert der Unique-Constraint den Retry dauerhaft (Confirm-Verlierer bekommt sonst
+  immer 409, Anmelde-Recovery sendet nicht neu, weil eine Row existiert).
+
+**Kein Auto-Retry** (bei transaktionalen Event-Mails ist ein Zweifelsfall besser als Doppelmail).
+Der Confirm-Verlierer bei echtem Parallel-Confirm sendet **nie** (immer 409) — der Unique-Constraint
+lässt genau einen Gewinner senden; ein abgestürzter Gewinner wird über diese Reconciliation
+(Row löschen) wieder retry-fähig. Für harte Inline-Atomizität die Odoo-Custom-Method (unten).
 
 ## Modell `x_infotermin_audit` (Cleanup-Nachweis, PII-frei)
 

@@ -32,7 +32,7 @@
         "method": "POST",
         "url": "={{CONFIG:ODOO_URL}}/jsonrpc",
         "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"crm.lead\",\"create\",[{\"name\":\"Interessent Infotermin\",\"contact_name\":\"{{ $json.body.name }}\",\"partner_name\":\"{{ $json.body.unternehmen }}\",\"email_from\":\"{{ $json.body.email }}\",\"description\":\"{{ $json.body.info }}\"}]] } }",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"crm.lead\",\"create\",[{\"name\":\"Interessent Infotermin\",\"contact_name\":{{ JSON.stringify($json.body.name) }},\"partner_name\":{{ JSON.stringify($json.body.unternehmen) }},\"email_from\":{{ JSON.stringify($json.body.email) }},\"description\":{{ JSON.stringify($json.body.info || '') }}}]] } }",
         "options": {}
       },
       "id": "wf4-odoo-lead",
@@ -64,7 +64,7 @@
         "authentication": "genericCredentialType",
         "genericAuthType": "oAuth2Api",
         "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"message\": { \"subject\": \"Neuer Interessent (Infotermin)\", \"body\": { \"contentType\": \"Text\", \"content\": \"{{ $('Webhook Interessent').item.json.body.name }} / {{ $('Webhook Interessent').item.json.body.unternehmen }} / {{ $('Webhook Interessent').item.json.body.email }} / {{ $('Webhook Interessent').item.json.body.info }}\" }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{CONFIG:TEAM_NOTIFY_TO}}\" } }] } }",
+        "jsonBody": "={ \"message\": { \"subject\": \"Neuer Interessent (Infotermin)\", \"body\": { \"contentType\": \"Text\", \"content\": {{ JSON.stringify([$('Webhook Interessent').item.json.body.name, $('Webhook Interessent').item.json.body.unternehmen, $('Webhook Interessent').item.json.body.email, ($('Webhook Interessent').item.json.body.info || '')].join(' / ')) }} }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{CONFIG:TEAM_NOTIFY_TO}}\" } }] } }",
         "options": {}
       },
       "id": "wf4-graph-intern",
@@ -105,8 +105,8 @@
     "IF Secret ok (X-Manibase-Secret)": { "main": [[{ "node": "Odoo create crm.lead (Interessent)", "type": "main", "index": 0 }], [{ "node": "Respond 401", "type": "main", "index": 0 }]] },
     "Odoo create crm.lead (Interessent)": { "main": [[{ "node": "IF crm.lead-Fehler? (JSON-RPC error in 200)", "type": "main", "index": 0 }]] },
     "IF crm.lead-Fehler? (JSON-RPC error in 200)": { "main": [[{ "node": "Respond 502 (CRM-Write fehlgeschlagen)", "type": "main", "index": 0 }], [{ "node": "Graph interne Benachrichtigung", "type": "main", "index": 0 }]] },
-    "Graph interne Benachrichtigung": { "main": [[{ "node": "Graph Bestätigung an Interessent", "type": "main", "index": 0 }]] },
-    "Graph Bestätigung an Interessent": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }]] }
+    "Graph interne Benachrichtigung": { "main": [[{ "node": "Graph Bestätigung an Interessent", "type": "main", "index": 0 }], [{ "node": "Respond 200", "type": "main", "index": 0 }]] },
+    "Graph Bestätigung an Interessent": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }], [{ "node": "Respond 200", "type": "main", "index": 0 }]] }
   },
   "settings": { "executionOrder": "v1" }
 }
