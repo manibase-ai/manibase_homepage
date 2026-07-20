@@ -22,6 +22,16 @@ function respond(int $code, array $body): void {
     exit;
 }
 
+// Unicode-sicher messen/kleinschreiben, aber ohne harte mbstring-Abhängigkeit:
+// fehlt die (optionale) Extension, fällt es auf byteweise Funktionen zurück,
+// statt mit einem Fatal Error abzubrechen (wie newsletter.php ohne mb_*).
+function slen(string $s): int {
+    return function_exists('mb_strlen') ? mb_strlen($s) : strlen($s);
+}
+function slower(string $s): string {
+    return function_exists('mb_strtolower') ? mb_strtolower($s) : strtolower($s);
+}
+
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     respond(405, ['ok' => false, 'error' => 'method_not_allowed']);
 }
@@ -100,7 +110,7 @@ $email       = trim($in['email']);
 if ($name === '' || $unternehmen === '') {
     respond(422, ['ok' => false, 'error' => 'missing_fields']);
 }
-if (mb_strlen($name) > 120 || mb_strlen($unternehmen) > 120 || mb_strlen($email) > 254) {
+if (slen($name) > 120 || slen($unternehmen) > 120 || slen($email) > 254) {
     respond(422, ['ok' => false, 'error' => 'field_too_long']);
 }
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -110,11 +120,14 @@ if (($in['kenntnisnahme'] ?? false) !== true) {
     respond(422, ['ok' => false, 'error' => 'consent_required']);
 }
 
+// kenntnisnahme wird mitgesendet: die n8n-Workflows revalidieren sie und
+// dokumentieren sie als Einwilligungs-/Kenntnisnahme-Nachweis im CRM.
 $payload = [
-    'form'        => $form,
-    'name'        => $name,
-    'unternehmen' => $unternehmen,
-    'email'       => mb_strtolower($email),
+    'form'          => $form,
+    'name'          => $name,
+    'unternehmen'   => $unternehmen,
+    'email'         => slower($email),
+    'kenntnisnahme' => true,
 ];
 
 if ($form === 'anmeldung') {
@@ -130,7 +143,7 @@ if ($form === 'anmeldung') {
         respond(422, ['ok' => false, 'error' => 'invalid_info']);
     }
     $info = trim($info);
-    if (mb_strlen($info) > 2000) {
+    if (slen($info) > 2000) {
         respond(422, ['ok' => false, 'error' => 'field_too_long']);
     }
     $payload['info'] = $info;
