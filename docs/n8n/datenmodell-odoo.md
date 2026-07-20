@@ -20,6 +20,13 @@ Feldern** angelegt (keine Constraints, keine Methoden).
   braucht: **Upgrade auf Odoo.sh / on-prem** ermöglicht ein Modul mit Unique-Constraints +
   transaktionaler `confirm`-Methode (Upgrade-Pfad, hier bewusst nicht umgesetzt).
 
+> **⚠️ Technische Feldnamen (Studio):** Odoo Studio vergibt für Custom-Felder eigene technische
+> Namen (oft `x_studio_<name>`). Die hier und in den Workflow-JSONs genutzten **logischen** Namen
+> (`email_norm`, `termin`, `token_digest`, `mail_key`, `state`, `ts`, `status`, `name`,
+> `unternehmen`) müssen beim Anlegen entweder exakt als technischer Name gesetzt oder **vor dem
+> Import** in den JSONs per Suchen-und-Ersetzen an die von Studio erzeugten Namen angeglichen
+> werden — sonst „Invalid field". Siehe [`README.md`](README.md#odoo-studio-feldnamen).
+
 ## Modell `x_infotermin_reg` (Registrierung = Quelle der Wahrheit)
 
 | Feld | Typ | Zweck |

@@ -105,7 +105,7 @@
     "IF Secret ok (X-Manibase-Secret)": { "main": [[{ "node": "Odoo create crm.lead (Interessent)", "type": "main", "index": 0 }], [{ "node": "Respond 401", "type": "main", "index": 0 }]] },
     "Odoo create crm.lead (Interessent)": { "main": [[{ "node": "IF crm.lead-Fehler? (JSON-RPC error in 200)", "type": "main", "index": 0 }]] },
     "IF crm.lead-Fehler? (JSON-RPC error in 200)": { "main": [[{ "node": "Respond 502 (CRM-Write fehlgeschlagen)", "type": "main", "index": 0 }], [{ "node": "Graph interne Benachrichtigung", "type": "main", "index": 0 }]] },
-    "Graph interne Benachrichtigung": { "main": [[{ "node": "Graph Bestätigung an Interessent", "type": "main", "index": 0 }], [{ "node": "Respond 200", "type": "main", "index": 0 }]] },
+    "Graph interne Benachrichtigung": { "main": [[{ "node": "Graph Bestätigung an Interessent", "type": "main", "index": 0 }], [{ "node": "Graph Bestätigung an Interessent", "type": "main", "index": 0 }]] },
     "Graph Bestätigung an Interessent": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }], [{ "node": "Respond 200", "type": "main", "index": 0 }]] }
   },
   "settings": { "executionOrder": "v1" }

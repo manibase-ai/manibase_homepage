@@ -37,7 +37,7 @@
     { "parameters": {}, "id": "wf3-done", "name": "Fertig (alle gesendet)", "type": "n8n-nodes-base.noOp", "typeVersion": 1, "position": [960, 160] },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"create\",[{\"mail_key\":\"{{ $json.kind }}:{{ $json.reg_id }}\",\"reg_id\":{{ $json.reg_id }},\"state\":\"sending\",\"ts\":\"{{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}\"}]] } }",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"create\",[{\"mail_key\":\"{{ $('Loop je Teilnehmer').item.json.kind }}:{{ $('Loop je Teilnehmer').item.json.reg_id }}\",\"reg_id\":{{ $('Loop je Teilnehmer').item.json.reg_id }},\"state\":\"sending\",\"ts\":\"{{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}\"}]] } }",
         "options": {} },
       "id": "wf3-outbox", "name": "Claim outbox mail_key reminder (unique)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1160, 340]
     },

@@ -50,4 +50,18 @@ bestandenen Abnahme geschlossen.
 
 - Secrets nur als n8n-Credentials / `{{CONFIG:*}}` — nie literal im JSON (Gate erzwingt das).
 - Graph-App RBAC-scoped auf eine Mailbox; Negativtest Pflicht.
-- Korrektheit der Nebenläufigkeit = Odoo-DB-Constraints, nicht n8n-Concurrency.
+- **Nebenläufigkeit = Best-Effort** (Odoo Online, keine DB-Constraints): n8n **Concurrency 1**
+  je Workflow (im UI setzen) + **search-before-create**. Innerhalb eines Workflows kollisionsfrei;
+  ein workflow-**übergreifendes** Race (z. B. Cleanup ↔ Confirm) ist nicht hart ausgeschlossen,
+  bei eurer Größenordnung aber praktisch irrelevant. Harte Garantien nur mit Odoo.sh-Modul.
+
+## ⚠️ Odoo-Studio-Feldnamen (vor dem Import prüfen!)
+
+Beim Anlegen der Modelle/Felder in Odoo **Studio** vergibt Odoo technische Namen (Modelle
+`x_...`, Studio-Felder oft `x_studio_...`). Die Workflow-JSONs verwenden die **logischen**
+Namen aus `datenmodell-odoo.md` (`email_norm`, `termin`, `token_digest`, `mail_key`, `state`,
+`ts`, `status`, `name`, `unternehmen`). **Vor dem Import** die tatsächlich von Studio erzeugten
+technischen Namen ermitteln (Studio → Feld → „Technischer Name") und in den sechs JSONs per
+Suchen-und-Ersetzen angleichen — sonst brechen die RPC-Aufrufe mit „Invalid field" ab. Tipp:
+Beim Feld-Anlegen in Studio den technischen Namen möglichst genau auf den logischen Namen setzen,
+dann ist der Aufwand minimal.
