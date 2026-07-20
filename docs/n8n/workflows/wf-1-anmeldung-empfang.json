@@ -49,7 +49,7 @@
     },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"create\",[{\"mail_key\":\"doi:{{ $json.reg_id }}\",\"reg_id\":{{ $json.reg_id }},\"state\":\"sending\"}]] } }",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"create\",[{\"mail_key\":\"doi:{{ $json.reg_id }}\",\"reg_id\":{{ $json.reg_id }},\"state\":\"sending\",\"ts\":\"{{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}\"}]] } }",
         "options": {} },
       "id": "wf1-outbox-doi", "name": "Claim outbox mail_key doi (unique)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1360, 220]
     },
@@ -73,9 +73,9 @@
     },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"search_read\",[[[\"mail_key\",\"=\",\"doi:\"+{{ 0 }}]]],{\"fields\":[\"id\",\"state\"]}]] } }",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"search_read\",[[[\"email_norm\",\"=\",\"{{ $('Normalize + Token/Digest').item.json.email_norm }}\"],[\"termin\",\"=\",\"{{ $('Normalize + Token/Digest').item.json.termin }}\"]]],{\"fields\":[\"id\",\"token_digest\"]}]] } }",
         "options": {} },
-      "id": "wf1-recover-find", "name": "Recovery: doi-outbox-Zustand lesen", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1360, 460]
+      "id": "wf1-recover-find", "name": "Recovery: bestehende reg per email+termin lesen", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1360, 460]
     },
     {
       "parameters": { "jsCode": "// Recovery mit NUTZBAREM Token (kein Dauer-Lockout):\n// Ist noch kein doi-Outbox 'sent' vorhanden (Erstlauf scheiterte vor Versand),\n// wird ein NEUER Token+Digest erzeugt, per write in reg rotiert und die DOI-Mail\n// (re)gesendet; der alte, nie zugestellte Link wird damit ersetzt. War 'sent',\n// idempotent 200 ohne Aktion. Details siehe README (recover-and-rotate).\nconst crypto=require('crypto');\nconst rows=($json.result)||[];\nconst sent=rows.some(r=>r.state==='sent');\nif(sent) return [{ json:{ resend:false } }];\nconst token=crypto.randomBytes(24).toString('base64url');\nconst token_digest=crypto.createHash('sha256').update(token).digest('hex');\nreturn [{ json:{ resend:true, token, token_digest } }];" },

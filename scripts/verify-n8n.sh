@@ -62,14 +62,31 @@ check_secrets(){ # $1=file $2=label
   done < <(jq -r 'paths(scalars) as $p | ($p|map(tostring)|join("."))+"\t"+(getpath($p)|tostring)' "$f")
   return 0
 }
+# Zusätzlich: serialisierte Bodies (jsonBody u.ä.) auf eingebettete Roh-Secrets scannen.
+# Sensible JSON-Schlüssel INNERHALB eines String-Werts dürfen nur einen
+# {{CONFIG:*}}-Platzhalter tragen, keinen Rohwert.
+check_serialized(){ # $1=file $2=label
+  local f="$1" lbl="$2" bad
+  # Alle String-Werte durchgehen und nach '"sensitiver_key":"rohwert"' suchen,
+  # wobei {{CONFIG:...}} als Wert erlaubt ist.
+  bad=$(jq -r '[.. | strings] | .[]' "$f" \
+        | grep -oiE '"(client_?secret|shared_secret|api_?key|password|token|authorization)"[[:space:]]*:[[:space:]]*"[^"]*"' \
+        | grep -viE ':[[:space:]]*"\{\{CONFIG:' || true)
+  if [ -n "$bad" ]; then err "$lbl: eingebettetes Roh-Secret in serialisiertem Body: $(printf '%s' "$bad" | head -1)"; fi
+  return 0
+}
 for n in "${EXPECTED[@]}"; do
   f="$WF/$n.json"; [ -f "$f" ] || continue
   out=$(check_secrets "$f" "$n") || err "$out"
+  check_serialized "$f" "$n"
 done
-# Negativ-Selbsttest: gefälschte Vorlage mit Klartext-Secret MUSS erkannt werden (return 1).
+# Negativ-Selbsttests: Klartext-Secret als Leaf UND in serialisiertem Body -> beide erkannt.
 _neg=$(mktemp); printf '{"nodes":[{"parameters":{"password":"rawsecret123"}}]}' >"$_neg"
-if check_secrets "$_neg" SELFTEST >/dev/null; then err "Secret-Gate erkennt Klartext-Secret NICHT (Selbsttest)"; fi
-rm -f "$_neg"
+if check_secrets "$_neg" SELFTEST >/dev/null; then err "Secret-Gate (leaf) erkennt Klartext-Secret NICHT"; fi
+_neg2=$(mktemp); printf '{"nodes":[{"parameters":{"jsonBody":"={\\"api_key\\":\\"AKIAROHWERT123\\"}"}}]}' >"$_neg2"
+sbad=$(jq -r '[.. | strings] | .[]' "$_neg2" | grep -oiE '"api_?key"[[:space:]]*:[[:space:]]*"[^"]*"' | grep -viE ':[[:space:]]*"\{\{CONFIG:' || true)
+[ -n "$sbad" ] || err "Secret-Gate (serialisiert) erkennt eingebettetes Klartext-Secret NICHT"
+rm -f "$_neg" "$_neg2"
 
 # 4) Webhook-WFs: Secret-Header-Check nur via Platzhalter (nicht literal)
 for n in wf-1-anmeldung-empfang wf-2-anmeldung-confirm wf-4-interessent; do

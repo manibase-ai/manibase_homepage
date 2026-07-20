@@ -11,7 +11,11 @@
         "options": {} },
       "id": "wf6-find", "name": "Odoo suchen (received create_date<now-14d OR termin<now; confirmed termin<now-30d)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [380, 300]
     },
-    { "parameters": { "jsCode": "// IDs aus dem JSON-RPC-Result (nicht $json.ids).\nconst ids=($json.result)||[];\nreturn [{ json:{ ids, count:ids.length } }];" }, "id": "wf6-ids", "name": "IDs aus result", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [600, 300] },
+    {
+      "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } },
+      "id": "wf6-if-error", "name": "IF Cleanup-RPC-Fehler? (JSON-RPC error in 200)", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [560, 300]
+    },
+    { "parameters": { "jsCode": "// IDs aus dem JSON-RPC-Result (nicht $json.ids).\nconst ids=($json.result)||[];\nreturn [{ json:{ ids, count:ids.length } }];" }, "id": "wf6-ids", "name": "IDs aus result", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [760, 380] },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
         "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"search\",[[[\"reg_id\",\"in\",{{ JSON.stringify($json.ids) }}]]]]] } }",
@@ -45,7 +49,8 @@
   ],
   "connections": {
     "Schedule täglich (Europe/Berlin)": { "main": [[{ "node": "Odoo suchen (received create_date<now-14d OR termin<now; confirmed termin<now-30d)", "type": "main", "index": 0 }]] },
-    "Odoo suchen (received create_date<now-14d OR termin<now; confirmed termin<now-30d)": { "main": [[{ "node": "IDs aus result", "type": "main", "index": 0 }]] },
+    "Odoo suchen (received create_date<now-14d OR termin<now; confirmed termin<now-30d)": { "main": [[{ "node": "IF Cleanup-RPC-Fehler? (JSON-RPC error in 200)", "type": "main", "index": 0 }]] },
+    "IF Cleanup-RPC-Fehler? (JSON-RPC error in 200)": { "main": [[{ "node": "Graph Alarm bei Fehler", "type": "main", "index": 0 }], [{ "node": "IDs aus result", "type": "main", "index": 0 }]] },
     "IDs aus result": { "main": [[{ "node": "Zugehörige outbox-Rows suchen", "type": "main", "index": 0 }]] },
     "Zugehörige outbox-Rows suchen": { "main": [[{ "node": "outbox unlink (erst Kinder)", "type": "main", "index": 0 }]] },
     "outbox unlink (erst Kinder)": { "main": [[{ "node": "reg unlink/anonymisieren (dann Eltern)", "type": "main", "index": 0 }], [{ "node": "Graph Alarm bei Fehler", "type": "main", "index": 0 }]] },

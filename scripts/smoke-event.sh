@@ -34,9 +34,8 @@ chk "bademail-422" 422 "$(code -X POST "$EP" -H 'Content-Type: application/json'
 chk "noconsent-422" 422 "$(code -X POST "$EP" -H 'Content-Type: application/json' \
   -d "{\"form\":\"anmeldung\",\"name\":\"T\",\"unternehmen\":\"T\",\"email\":\"$TESTMAIL\",\"kenntnisnahme\":false,\"termin\":\"$TERMIN\"}")"
 
-# 5) Rate-Limit: viele schnelle Requests -> irgendwann 429/503 (nur Hinweis, nicht hart)
-rl="n/a"; for _ in $(seq 1 25); do rl=$(code -X POST "$EP" -H 'Content-Type: application/json' -d '{"form":"x"}'); done
-printf 'INFO rate-limit letzter Code: %s (erwartet zeitweise 429/503 unter Last)\n' "$rl"
+# (Rate-Limit-Probe läuft bewusst ZULETZT, damit sie nicht das Kontingent der
+#  funktionalen Tests aufbraucht — siehe Ende.)
 
 # 6) GET auf Confirm ändert nichts (neutrales Interstitial mit POST-Form)
 if curl -s "$CONFIRM?t=smoketoken123" | grep -q 'method="post"'; then ok "confirm-get-interstitial"; else no "confirm-get-interstitial" "kein POST-Form"; fi
@@ -56,6 +55,11 @@ chk "interessent-200" 200 "$(code -X POST "$EP" -H 'Content-Type: application/js
 # 10) Confirm-POST mit unbekanntem Token -> 410 (bzw. 409), nie 5xx
 c=$(code -X POST "$CONFIRM" -d 't=unbekannt-oder-abgelaufen-000')
 if [ "$c" = 410 ] || [ "$c" = 409 ]; then ok "confirm-unknown-410"; else no "confirm-unknown-410" "$c"; fi
+
+# 11) Rate-Limit ZULETZT: viele schnelle Requests -> irgendwann 429/503 (nur Hinweis).
+#     Am Ende, damit die funktionalen Tests oben nicht durch das Limit scheitern.
+rl="n/a"; for _ in $(seq 1 25); do rl=$(code -X POST "$EP" -H 'Content-Type: application/json' -d '{"form":"x"}'); done
+printf 'INFO rate-limit letzter Code: %s (erwartet zeitweise 429/503 unter Last)\n' "$rl"
 
 printf '\n== Smoke: %d PASS, %d FAIL ==\n' "$pass" "$failn"
 printf 'Hinweis: parallel-confirm, crash-reconcile, cleanup-confirm-race, ics-clients sind\n'

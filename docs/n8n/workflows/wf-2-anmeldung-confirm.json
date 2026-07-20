@@ -7,12 +7,12 @@
     { "parameters": { "jsCode": "const crypto=require('crypto');\nconst token=String(($json.body||{}).token||'');\nreturn [{ json: { token_digest: crypto.createHash('sha256').update(token).digest('hex') } }];" }, "id": "wf2-code-digest", "name": "SHA-256(token)", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [500, 340] },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"search_read\",[[[\"token_digest\",\"=\",\"{{ $json.token_digest }}\"]]],{\"fields\":[\"id\",\"status\",\"termin\",\"email_norm\",\"name\",\"unternehmen\"]}]] } }",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"search_read\",[[[\"token_digest\",\"=\",\"{{ $json.token_digest }}\"]]],{\"fields\":[\"id\",\"status\",\"termin\",\"email_norm\",\"name\",\"unternehmen\",\"create_date\"]}]] } }",
         "options": {} },
       "id": "wf2-odoo-find", "name": "Odoo search_read reg by token_digest", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [700, 340]
     },
     {
-      "parameters": { "jsCode": "// Result auspacken + TTL. Odoo-Fehler NICHT als 410 behandeln.\nif ($json.error !== undefined) return [{ json: { outcome: 'error' } }];\nconst rows=($json.result)||[];\nif(rows.length===0) return [{ json:{ outcome:'not_found' } }];\nconst r=rows[0];\nconst expired=new Date(r.termin).getTime() < Date.now();\nif(r.status==='confirmed') return [{ json:{ outcome:'already', reg_id:r.id } }];\nif(expired) return [{ json:{ outcome:'expired', reg_id:r.id } }];\nreturn [{ json:{ outcome:'received', reg_id:r.id, termin:r.termin, email_norm:r.email_norm, name:r.name, unternehmen:r.unternehmen } }];" },
+      "parameters": { "jsCode": "// Result auspacken + TTL. Odoo-Fehler NICHT als 410 behandeln.\n// Abgelaufen = Termin vorbei ODER >7 Tage seit Anlage (create_date), was zuerst.\nif ($json.error !== undefined) return [{ json: { outcome: 'error' } }];\nconst rows=($json.result)||[];\nif(rows.length===0) return [{ json:{ outcome:'not_found' } }];\nconst r=rows[0];\nconst terminPast=new Date(r.termin).getTime() < Date.now();\nconst createdMs=r.create_date ? new Date((r.create_date+'').replace(' ','T')+'Z').getTime() : 0;\nconst ttlOver=createdMs>0 && (Date.now()-createdMs)/86400000 > 7;\nconst expired=terminPast || ttlOver;\nif(r.status==='confirmed') return [{ json:{ outcome:'already', reg_id:r.id } }];\nif(expired) return [{ json:{ outcome:'expired', reg_id:r.id } }];\nreturn [{ json:{ outcome:'received', reg_id:r.id, termin:r.termin, email_norm:r.email_norm, name:r.name, unternehmen:r.unternehmen } }];" },
       "id": "wf2-map", "name": "Result auspacken + TTL", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [900, 340]
     },
     {
@@ -29,7 +29,7 @@
     { "parameters": { "respondWith": "json", "responseCode": 502, "responseBody": "={ \"ok\": false, \"error\": \"upstream\" }" }, "id": "wf2-resp-502", "name": "Respond 502 (technischer Fehler)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [1340, 400] },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"create\",[{\"mail_key\":\"invite:{{ $json.reg_id }}\",\"reg_id\":{{ $json.reg_id }},\"state\":\"sending\"}]] } }",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"create\",[{\"mail_key\":\"invite:{{ $json.reg_id }}\",\"reg_id\":{{ $json.reg_id }},\"state\":\"sending\",\"ts\":\"{{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}\"}]] } }",
         "options": {} },
       "id": "wf2-outbox-invite", "name": "Claim outbox mail_key invite (unique = CAS)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1340, 560]
     },
