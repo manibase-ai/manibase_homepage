@@ -116,6 +116,44 @@ sval wf-2-anmeldung-confirm 'TZID=Europe/Berlin' || err "wf-2: ICS TZID fehlt"
 sval wf-6-cleanup 'termin'      || err "wf-6: Termin-Löschpfad fehlt"
 sval wf-6-cleanup 'create_date' || err "wf-6: create_date-Löschpfad fehlt"
 
+# 8b) Connection-Integrität: eindeutige Node-Namen; jede Connection-Quelle UND
+#     jedes -Ziel muss ein existierender Node sein (fängt Dangling-Connections
+#     nach Umbenennungen). Plus: jeder Webhook-WF erreicht mind. einen
+#     respondToWebhook-Node über die Connections.
+check_connections(){ # $1=file $2=label
+  local f="$1" lbl="$2" names dupe src tgt
+  names=$(jq -r '.nodes[].name' "$f")
+  dupe=$(printf '%s\n' "$names" | sort | uniq -d | head -1)
+  [ -n "$dupe" ] && err "$lbl: doppelter Node-Name: $dupe"
+  while IFS= read -r src; do
+    [ -z "$src" ] && continue
+    printf '%s\n' "$names" | grep -qxF "$src" || err "$lbl: Connection-Quelle '$src' ist kein Node"
+  done < <(jq -r '.connections | keys[]' "$f")
+  while IFS= read -r tgt; do
+    [ -z "$tgt" ] && continue
+    printf '%s\n' "$names" | grep -qxF "$tgt" || err "$lbl: Connection-Ziel '$tgt' ist kein Node"
+  done < <(jq -r '[.connections[].main[]?[]?.node] | .[]' "$f" | sort -u)
+  return 0
+}
+for n in "${EXPECTED[@]}"; do
+  f="$WF/$n.json"; [ -f "$f" ] || continue
+  check_connections "$f" "$n"
+done
+# Webhook-WFs: Trigger erreicht (über Connections) einen respondToWebhook-Node.
+for n in wf-1-anmeldung-empfang wf-2-anmeldung-confirm wf-4-interessent; do
+  f="$WF/$n.json"
+  # BFS vom/von den Trigger-Node(s) aus über die Connections; erreicht ein respondToWebhook?
+  reach=$(jq -r '
+    . as $doc
+    | def targets($src): [$doc.connections[$src].main[]?[]?.node];
+      def expand($seen): ($seen + [ $seen[] as $s | targets($s)[] ]) | unique;
+      [ $doc.nodes[] | select(.type|test("webhook")) | .name ] as $start
+    | (reduce range(0; ($doc.nodes|length)) as $_ ($start; expand(.))) as $reach
+    | [ $doc.nodes[] | select(.type|test("respondToWebhook")) | select(.name as $nm | $reach | index($nm)) ] | length
+  ' "$f")
+  [ "${reach:-0}" -gt 0 ] || err "$n: kein respondToWebhook vom Webhook-Trigger aus erreichbar"
+done
+
 # 9) Platzhalter <-> config-schema BIDIREKTIONAL (Mengengleichheit)
 json_ph=$(grep -rhoE '\{\{CONFIG:[A-Za-z0-9_]+\}\}' "$WF" | sed -E 's/.*CONFIG:([A-Za-z0-9_]+)\}\}/\1/' | sort -u)
 doc_ph=$(grep -oE 'CONFIG:[A-Za-z0-9_]+' "$SCHEMA" | sed 's/CONFIG://' | sort -u)

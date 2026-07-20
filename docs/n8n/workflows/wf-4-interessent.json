@@ -42,6 +42,22 @@
       "position": [580, 320]
     },
     {
+      "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } },
+      "id": "wf4-if-leaderr",
+      "name": "IF crm.lead-Fehler? (JSON-RPC error in 200)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [740, 320]
+    },
+    {
+      "parameters": { "respondWith": "json", "responseCode": 502, "responseBody": "={ \"ok\": false, \"error\": \"upstream\" }" },
+      "id": "wf4-resp-502",
+      "name": "Respond 502 (CRM-Write fehlgeschlagen)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [740, 560]
+    },
+    {
       "parameters": {
         "method": "POST",
         "url": "https://graph.microsoft.com/v1.0/users/{{CONFIG:SENDER}}/sendMail",
@@ -87,7 +103,8 @@
   "connections": {
     "Webhook Interessent": { "main": [[{ "node": "IF Secret ok (X-Manibase-Secret)", "type": "main", "index": 0 }]] },
     "IF Secret ok (X-Manibase-Secret)": { "main": [[{ "node": "Odoo create crm.lead (Interessent)", "type": "main", "index": 0 }], [{ "node": "Respond 401", "type": "main", "index": 0 }]] },
-    "Odoo create crm.lead (Interessent)": { "main": [[{ "node": "Graph interne Benachrichtigung", "type": "main", "index": 0 }]] },
+    "Odoo create crm.lead (Interessent)": { "main": [[{ "node": "IF crm.lead-Fehler? (JSON-RPC error in 200)", "type": "main", "index": 0 }]] },
+    "IF crm.lead-Fehler? (JSON-RPC error in 200)": { "main": [[{ "node": "Respond 502 (CRM-Write fehlgeschlagen)", "type": "main", "index": 0 }], [{ "node": "Graph interne Benachrichtigung", "type": "main", "index": 0 }]] },
     "Graph interne Benachrichtigung": { "main": [[{ "node": "Graph Bestätigung an Interessent", "type": "main", "index": 0 }]] },
     "Graph Bestätigung an Interessent": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }]] }
   },

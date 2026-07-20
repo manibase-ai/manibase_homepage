@@ -38,8 +38,24 @@
       "id": "wf2-if-claim", "name": "IF Claim-Konflikt?", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [1540, 560]
     },
     {
-      "parameters": { "jsCode": "// Read-after-Conflict: bestehenden reg-Status lesen (aus dem Map-Node).\n// received (Pre-Send-Crash) -> weitertreiben (200), confirmed -> 409.\n// Hier: der invite-Claim existierte schon; ein früherer Lauf hängt bei received\n// -> wir treiben weiter. (Konservativ: 200 nach Sicherstellen von confirmed+Versand.)\nreturn [{ json: { resume: true } }];" },
-      "id": "wf2-claim-recover", "name": "Claim-Konflikt: Read-after-Conflict (resume)", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [1540, 760]
+      "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"search_read\",[[[\"id\",\"=\",{{ $('Result auspacken + TTL').item.json.reg_id }}]]],{\"fields\":[\"id\",\"status\"]}]] } }",
+        "options": {} },
+      "id": "wf2-conflict-read", "name": "Claim-Konflikt: reg-Status neu lesen", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1540, 760]
+    },
+    {
+      "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"search_read\",[[[\"mail_key\",\"=\",\"invite:{{ $('Result auspacken + TTL').item.json.reg_id }}\"]]],{\"fields\":[\"id\",\"state\"]}]] } }",
+        "options": {} },
+      "id": "wf2-conflict-read-outbox", "name": "Claim-Konflikt: invite-outbox-Zustand lesen", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1740, 760]
+    },
+    {
+      "parameters": { "jsCode": "// Nur ein nachweisbarer Pre-Send-Crash darf fortgesetzt werden:\n// reg noch 'received' UND invite-outbox NICHT 'sent' -> resume (weitertreiben).\n// Sonst (confirmed ODER outbox sent) -> ein anderer Lauf hat gewonnen -> 409.\nconst reg=($json.result&&$json.result[0])||{};\nconst outbox=$('Claim-Konflikt: invite-outbox-Zustand lesen').item.json.result||[];\nconst sent=outbox.some(r=>r.state==='sent');\nconst resume = reg.status==='received' && !sent;\nreturn [{ json:{ resume } }];" },
+      "id": "wf2-conflict-decide", "name": "Claim-Konflikt: resume nur bei Pre-Send-Crash", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [1940, 760]
+    },
+    {
+      "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.resume }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } },
+      "id": "wf2-if-resume", "name": "IF resume? (sonst 409)", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [2140, 760]
     },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
@@ -85,8 +101,11 @@
     "Result auspacken + TTL": { "main": [[{ "node": "Switch (gone|expired|already|error|received)", "type": "main", "index": 0 }]] },
     "Switch (gone|expired|already|error|received)": { "main": [[{ "node": "Respond 410 (nicht gefunden ODER abgelaufen)", "type": "main", "index": 0 }], [{ "node": "Respond 410 (nicht gefunden ODER abgelaufen)", "type": "main", "index": 0 }], [{ "node": "Respond 409 (bereits bestätigt)", "type": "main", "index": 0 }], [{ "node": "Respond 502 (technischer Fehler)", "type": "main", "index": 0 }], [{ "node": "Claim outbox mail_key invite (unique = CAS)", "type": "main", "index": 0 }]] },
     "Claim outbox mail_key invite (unique = CAS)": { "main": [[{ "node": "IF Claim-Konflikt?", "type": "main", "index": 0 }]] },
-    "IF Claim-Konflikt?": { "main": [[{ "node": "Claim-Konflikt: Read-after-Conflict (resume)", "type": "main", "index": 0 }], [{ "node": "Odoo write status=confirmed", "type": "main", "index": 0 }]] },
-    "Claim-Konflikt: Read-after-Conflict (resume)": { "main": [[{ "node": "Odoo write status=confirmed", "type": "main", "index": 0 }]] },
+    "IF Claim-Konflikt?": { "main": [[{ "node": "Claim-Konflikt: reg-Status neu lesen", "type": "main", "index": 0 }], [{ "node": "Odoo write status=confirmed", "type": "main", "index": 0 }]] },
+    "Claim-Konflikt: reg-Status neu lesen": { "main": [[{ "node": "Claim-Konflikt: invite-outbox-Zustand lesen", "type": "main", "index": 0 }]] },
+    "Claim-Konflikt: invite-outbox-Zustand lesen": { "main": [[{ "node": "Claim-Konflikt: resume nur bei Pre-Send-Crash", "type": "main", "index": 0 }]] },
+    "Claim-Konflikt: resume nur bei Pre-Send-Crash": { "main": [[{ "node": "IF resume? (sonst 409)", "type": "main", "index": 0 }]] },
+    "IF resume? (sonst 409)": { "main": [[{ "node": "Odoo write status=confirmed", "type": "main", "index": 0 }], [{ "node": "Respond 409 (bereits bestätigt)", "type": "main", "index": 0 }]] },
     "Odoo write status=confirmed": { "main": [[{ "node": "Odoo create crm.lead (Spiegel, idempotent via Vertriebsregel)", "type": "main", "index": 0 }]] },
     "Odoo create crm.lead (Spiegel, idempotent via Vertriebsregel)": { "main": [[{ "node": "Build ICS (Luxon Europe/Berlin, UID, SEQUENCE, 60min)", "type": "main", "index": 0 }]] },
     "Build ICS (Luxon Europe/Berlin, UID, SEQUENCE, 60min)": { "main": [[{ "node": "Graph sendMail Einladung + ICS", "type": "main", "index": 0 }]] },
