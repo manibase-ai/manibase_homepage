@@ -501,3 +501,27 @@ section[id]{scroll-margin-top:84px;}
   .menu-mobile__panel{position:absolute;left:0;right:0;top:100%;background:var(--color-surface);border-bottom:1px solid var(--color-border);padding:12px clamp(1.25rem,4vw,2.5rem) 20px;display:flex;flex-direction:column;gap:4px;box-shadow:var(--shadow-md);}
   .menu-mobile__panel a{padding:12px 4px;text-decoration:none;color:var(--color-text-primary);font-weight:var(--fw-medium);border-bottom:1px solid var(--color-border);}
 }
+
+/* Infotermin-Seiten (infotermin.html / interessent.html) --------------------- */
+.eventpage { min-height: 60vh; }
+.eventpage__flag {
+  display: inline-block; font-family: var(--font-mono, monospace);
+  font-size: .78rem; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--color-primary, #2F3FDB); margin: 0 0 .6rem;
+}
+.eventform { max-width: 640px; }
+.eventform__hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.eventform .field, .eventform .consent { margin-top: 1rem; }
+.eventform__actions { margin-top: 1.5rem; }
+.eventform__err { margin-top: 1rem; color: #b3261e; }
+.eventform__ok { padding: 1rem 0; }
+.eventform textarea {
+  width: 100%; font: inherit; padding: .7rem .8rem;
+  border: 1px solid var(--color-border, #E2DBCB); border-radius: 10px;
+  background: var(--color-surface, #FCFAF4); resize: vertical; min-width: 0;
+}
+/* DOI-Bestätigungsseite (event-confirm.php) --------------------------------- */
+.confirm { padding: clamp(3rem, 2rem + 6vw, 7rem) 0; }
+.confirm__inner { max-width: 640px; }
+.confirm .wordmark { display: inline-block; margin-bottom: 1.5rem; }
+.confirm form { margin-top: 1.5rem; }

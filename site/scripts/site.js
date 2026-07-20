@@ -86,6 +86,89 @@
     });
   }
 
+  /* 3b) Infotermin-Formulare (Anmeldung / Interessent) ---------------------- */
+  var eventForms = Array.prototype.slice.call(document.querySelectorAll('.eventform'));
+  eventForms.forEach(initEventForm);
+
+  function initEventForm(form) {
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var err = form.querySelector('.eventform__err');
+      var btn = form.querySelector('button[type="submit"]');
+      if (err) { err.hidden = true; }
+
+      var kind = form.getAttribute('data-form'); // "anmeldung" | "interessent"
+      var name = form.querySelector('[name="name"]');
+      var firma = form.querySelector('[name="unternehmen"]');
+      var mail = form.querySelector('[name="email"]');
+      var consent = form.querySelector('[name="kenntnisnahme"]');
+      var hp = form.querySelector('[name="website"]');
+
+      function fail(msg, el) { if (err) { err.hidden = false; err.textContent = msg; } if (el) { el.focus(); } }
+
+      if (!name.value.trim()) { return fail('Bitte geben Sie Ihren Namen an.', name); }
+      if (!firma.value.trim()) { return fail('Bitte geben Sie Ihr Unternehmen an.', firma); }
+      if (!EMAIL_RE.test(mail.value.trim())) { return fail('Bitte geben Sie eine gültige E-Mail-Adresse an.', mail); }
+
+      var payload = {
+        form: kind,
+        name: name.value.trim(),
+        unternehmen: firma.value.trim(),
+        email: mail.value.trim(),
+        kenntnisnahme: !!(consent && consent.checked),
+        website: hp ? hp.value : ''
+      };
+      if (!payload.kenntnisnahme) { return fail('Bitte bestätigen Sie die Kenntnisnahme.', consent); }
+
+      if (kind === 'anmeldung') {
+        var termin = form.querySelector('[name="termin"]:checked');
+        if (!termin) { return fail('Bitte wählen Sie einen Termin.', form.querySelector('[name="termin"]')); }
+        payload.termin = termin.value;
+      } else {
+        var info = form.querySelector('[name="info"]');
+        payload.info = info ? info.value.trim() : '';
+      }
+
+      // Fehlermeldung mit echtem mailto-Fallback (nur statische Strings -> innerHTML sicher).
+      var MAILTO = '<a href="mailto:kontakt@manibase.de">kontakt@manibase.de</a>';
+      function failHtml(html) { if (err) { err.hidden = false; err.innerHTML = html; } }
+
+      if (btn) { btn.disabled = true; }
+      fetch('/api/event.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload)
+      }).then(function (res) {
+        // Body als JSON lesen; nur echtes {ok:true} zählt als Erfolg.
+        // Schützt gegen einen fehlenden PHP-Endpunkt (nginx liefert dann die
+        // Datei statisch mit 200 oder 404): res.ok allein würde sonst fälschlich
+        // Erfolg anzeigen.
+        return res.text().then(function (txt) {
+          var data = null; try { data = JSON.parse(txt); } catch (e) {}
+          return { status: res.status, data: data };
+        });
+      }).then(function (r) {
+        if (r.data && r.data.ok === true) {
+          var body = form.querySelector('.eventform__body');
+          var okEl = form.querySelector('.eventform__ok');
+          if (body) { body.hidden = true; }
+          if (okEl) { okEl.hidden = false; if (okEl.focus) { okEl.focus(); } }
+          return;
+        }
+        if (btn) { btn.disabled = false; }
+        if (r.status === 503) {
+          // Kill-Switch: Formular bewusst geschlossen (Spec: eigener Text + mailto).
+          failHtml('Die Anmeldung ist gerade nicht möglich. Bitte schreiben Sie uns kurz an ' + MAILTO + '.');
+        } else {
+          failHtml('Das hat gerade nicht geklappt. Bitte versuchen Sie es erneut oder schreiben Sie an ' + MAILTO + '.');
+        }
+      }).catch(function () {
+        if (btn) { btn.disabled = false; }
+        failHtml('Das hat gerade nicht geklappt. Bitte versuchen Sie es erneut oder schreiben Sie an ' + MAILTO + '.');
+      });
+    });
+  }
+
   /* 4) Qualifizierungs-Maske ----------------------------------------------- */
   var wiz = document.getElementById('qualify');
   if (wiz) initWizard(wiz);
