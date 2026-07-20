@@ -114,9 +114,56 @@ END:VCALENDAR
 Als Base64 (`contentBytes`) in `sendMail` anhängen. Vor Go-live in Outlook, Apple Calendar und
 Google Calendar prüfen (Abnahme `ics-clients`).
 
-## Optionaler Upgrade-Pfad: Hart-Atomizität
+## Pflicht: transaktionale Bestätigungsmethode `confirm_by_digest`
 
-Statt Read-after-Conflict eine Odoo-Custom-Methode `confirm_registration(token_digest)`, die in
-**einer** DB-Transaktion Status-Wechsel + `invite`-Claim macht und einen Zustands-Enum
-zurückgibt (`confirmed` / `already` / `expired` / `not_found`). n8n ruft sie via `execute_kw`.
-Für die Veranstaltungsgröße nicht nötig; die Read-after-Conflict-Recovery + Reconciliation reicht.
+Die Confirm-WF (WF-2) ruft **eine** atomare Odoo-Methode auf, die in **einer** DB-Transaktion
+TTL prüft, den `invite`-Claim setzt und den Status auf `confirmed` bringt. Das ist der einzige
+robuste Weg, parallele Bestätigungen (genau 1× senden) UND Crash-Recovery (Pre-Send-Crash bzw.
+confirmed-aber-nicht-versandt → erneut senden) korrekt zu behandeln — ohne race-anfällige
+Mehrfach-RPCs in n8n. Als kleines Odoo-Modul auf `x_infotermin_reg` ergänzen:
+
+```python
+from odoo import api, fields, models
+from datetime import timedelta
+
+class InfoterminReg(models.Model):
+    _inherit = 'x_infotermin_reg'   # bzw. _name im eigenen Modul
+
+    @api.model
+    def confirm_by_digest(self, digest):
+        rec = self.search([('token_digest', '=', digest)], limit=1)
+        if not rec:
+            return {'outcome': 'not_found'}
+        now = fields.Datetime.now()
+        # TTL: Termin vorbei ODER >7 Tage seit Anlage
+        termin_dt = fields.Datetime.from_string((rec.termin or '').replace('T', ' ')[:19])
+        expired = (termin_dt and termin_dt < now) or \
+                  (rec.create_date and rec.create_date < now - timedelta(days=7))
+        if expired:
+            return {'outcome': 'expired'}
+        Outbox = self.env['x_infotermin_outbox']
+        key = 'invite:%d' % rec.id
+        ob = Outbox.search([('mail_key', '=', key)], limit=1)
+        if ob and ob.state == 'sent':
+            return {'outcome': 'already', 'reg_id': rec.id}
+        if ob and ob.state in ('sending', 'failed_unknown'):
+            # frischer Claim eines parallelen Gewinners -> dieser Aufrufer sendet NICHT
+            if ob.ts and ob.ts > now - timedelta(minutes=15):
+                return {'outcome': 'already', 'reg_id': rec.id}
+            ob.write({'state': 'sending', 'ts': now})       # stale -> übernehmen
+        elif not ob:
+            # Unique-Constraint auf mail_key: bei echtem Parallel-Create gewinnt genau
+            # einer; der Verlierer wiederholt die RPC (Odoo-Serialisierung) und sieht
+            # dann den frischen Claim -> 'already'.
+            Outbox.create({'mail_key': key, 'reg_id': rec.id, 'state': 'sending', 'ts': now})
+        if rec.status != 'confirmed':
+            rec.status = 'confirmed'
+        return {'outcome': 'confirm_now', 'reg_id': rec.id, 'outbox_id':
+                Outbox.search([('mail_key', '=', key)], limit=1).id,
+                'email_norm': rec.email_norm, 'name': rec.name,
+                'unternehmen': rec.unternehmen, 'termin': rec.termin}
+```
+
+**Rückgabe-Enum → HTTP:** `not_found`/`expired` → 410, `already` → 409, `confirm_now` → WF-2
+sendet die Einladung und markiert die `invite`-Outbox `sent`/`failed_unknown`. Idempotent:
+`confirmed`-aber-nicht-`sent` liefert erneut `confirm_now` (Recovery), erst `sent` → `already`.
