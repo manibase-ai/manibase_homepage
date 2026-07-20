@@ -24,7 +24,11 @@
 - **Modify** `site/datenschutz.html` — neuer Abschnitt „8. Veranstaltungsanmeldung und Interessentenerfassung"; bestehende 8/9/10 → 9/10/11.
 - **Create** `docs/deploy/nginx-event-locations.conf` — versioniertes nginx-Snippet (zwei `location =`-Blöcke mit `limit_req` + `client_max_body_size` + PHP-FPM), das beim Provisionieren in den `manibase.de`-vhost aufgenommen werden MUSS. Grund: produktiv wird laut [`CLAUDE.md`](../../CLAUDE.md) nur die exakt konfigurierte PHP-Route ausgeführt — ohne diesen Block sind `event.php`/`event-confirm.php` nach Merge weder ausführbar noch rate-limitiert.
 
-> **Deploy-Gating (wichtig):** PR1 ist **nicht eigenständig produktiv lauffähig**. Der Site-Deploy kopiert nur `site/`; die PHP-Endpunkte werden erst nach Aufnahme des nginx-Snippets + Anlegen von `/etc/manibase/n8n.php` (`enabled=true`) aktiv. Bis dahin greift der Kill-Switch (Frontend zeigt `mailto`-Fallback). Der Go-live ist damit technisch von der Provisionierung (Server-seitig / PR2) abhängig — im PR-Body als Merge-Hinweis vermerken.
+> **Deploy-Gating (technisch, nicht nur PR-Hinweis):** `deploy.yml` deployt `site/` bei **jedem** Merge nach `main` automatisch. Ohne PHP-Location liefert nginx `event.php` je nach Catch-all als 404 **oder statisch mit 200** — Letzteres würde ohne Schutz „Erfolg" vortäuschen. Zwei Absicherungen, die zusammen greifen müssen:
+> 1. **In-Repo-Schutz (in diesem PR umgesetzt):** Das Frontend wertet **nur** eine echte JSON-Antwort `{ok:true}` als Erfolg (Task 4). Eine statisch ausgelieferte `.php` (kein JSON) oder ein 404 führt daher **nie** zum Erfolgs-Block, sondern zur Fehlermeldung mit `mailto`. Zusätzlich sind beide Seiten `noindex` und **nicht** verlinkt → vor Provisionierung erreicht sie praktisch kein Traffic.
+> 2. **Betriebs-Gate (harte Go-live-Bedingung, Server-seitig / PR2):** Vor dem Bekanntgeben der Links MUSS das nginx-Snippet (Task 9) im vhost aktiv sein, mit `nginx -t` geprüft, und ein echter Request gegen die Prod-URL `POST /api/event.php` (ohne Config) muss **503** liefern (nicht 404, nicht die PHP-Quelle). Erst danach `/etc/manibase/n8n.php` mit `enabled=true` scharfstellen. Diese Prüfung ist Teil des Abnahmeprotokolls in PR2; der Link geht erst nach bestandener Prüfung an die Innungen.
+>
+> So ist der irreführende Zustand technisch (nicht nur per Notiz) ausgeschlossen: Selbst wenn PR1 vor der Provisionierung gemergt/deployt wird, kann das Frontend keinen falschen Erfolg zeigen, und die Endpunkte sind erst nach verifizierter nginx-Route + `enabled=true` wirklich scharf.
 
 **Payload-Kontrakt** (auch in PR2 dokumentiert):
 - Anmeldung: `{form:"anmeldung", termin:"2026-07-29T19:30:00+02:00"|"2026-07-31T19:30:00+02:00", name, unternehmen, email, kenntnisnahme:true, website:""}`
@@ -563,15 +567,24 @@ Nach dem Newsletter-Block (nach Zeile 87) den Init-Aufruf ergänzen:
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(payload)
       }).then(function (res) {
-        if (res.ok) {
+        // Body als JSON lesen; nur echtes {ok:true} zählt als Erfolg.
+        // Schützt gegen einen fehlenden PHP-Endpunkt (nginx liefert dann die
+        // Datei statisch mit 200 oder 404): res.ok allein würde sonst fälschlich
+        // Erfolg anzeigen.
+        return res.text().then(function (txt) {
+          var data = null; try { data = JSON.parse(txt); } catch (e) {}
+          return { status: res.status, data: data };
+        });
+      }).then(function (r) {
+        if (r.data && r.data.ok === true) {
           var body = form.querySelector('.eventform__body');
-          var ok = form.querySelector('.eventform__ok');
+          var okEl = form.querySelector('.eventform__ok');
           if (body) { body.hidden = true; }
-          if (ok) { ok.hidden = false; if (ok.focus) { ok.focus(); } }
+          if (okEl) { okEl.hidden = false; if (okEl.focus) { okEl.focus(); } }
           return;
         }
         if (btn) { btn.disabled = false; }
-        if (res.status === 503) {
+        if (r.status === 503) {
           // Kill-Switch: Formular bewusst geschlossen (Spec: eigener Text + mailto).
           failHtml('Die Anmeldung ist gerade nicht möglich. Bitte schreiben Sie uns kurz an ' + MAILTO + '.');
         } else {
@@ -646,7 +659,11 @@ git commit -m "feat(infotermin): initEventForm JSON-POST-Handler"
         <p class="lead">Wir zeigen in einer knappen Stunde per MS Teams, wie KI-Helfer den Büro- und Doku-Kram übernehmen. Wir nehmen aktuell nur noch <b>3 Projektpartner</b> auf, die Plätze vergeben wir nach Eingang und einer kurzen Eignung.</p>
       </div>
 
-      <form class="eventform" data-form="anmeldung" novalidate>
+      <noscript><p class="eventform__err">Für die Anmeldung bitte JavaScript aktivieren, oder schreiben Sie uns an <a href="mailto:kontakt@manibase.de">kontakt@manibase.de</a>.</p></noscript>
+      <!-- method/action gesetzt, damit ein Submit ohne JS als POST geht (keine
+           Personendaten in der URL). Ohne JS antwortet der Proxy 400; das JS
+           unterbindet den nativen Submit via preventDefault. -->
+      <form class="eventform" data-form="anmeldung" method="post" action="/api/event.php" novalidate>
         <div class="eventform__body">
           <div class="eventform__hp" aria-hidden="true"><label>Website (bitte frei lassen)<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
 
@@ -756,7 +773,8 @@ git commit -m "feat(infotermin): Anmeldeseite infotermin.html"
         <p class="lead">Tragen Sie sich hier ein, dann kommen wir in den nächsten Tagen auf Sie zu. Wir nehmen aktuell nur noch <b>3 Projektpartner</b> auf, die Plätze vergeben wir nach Eingang und einer kurzen Eignung.</p>
       </div>
 
-      <form class="eventform" data-form="interessent" novalidate>
+      <noscript><p class="eventform__err">Für die Eintragung bitte JavaScript aktivieren, oder schreiben Sie uns an <a href="mailto:kontakt@manibase.de">kontakt@manibase.de</a>.</p></noscript>
+      <form class="eventform" data-form="interessent" method="post" action="/api/event.php" novalidate>
         <div class="eventform__body">
           <div class="eventform__hp" aria-hidden="true"><label>Website (bitte frei lassen)<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
 
@@ -960,15 +978,25 @@ Expected: gültige Anmeldung → Erfolg-Block „Fast geschafft." sichtbar, Body
 Run: denselben Server mit `MANIBASE_N8N_CONFIG=/nonexistent` starten, gültiges Formular absenden.
 Expected: `event.php` liefert 503 → Frontend zeigt **exakt** den 503-Text „Die Anmeldung ist gerade nicht möglich." mit klickbarem `mailto:kontakt@manibase.de`-Link (nicht der generische Fehlertext, kein „Fast geschafft."-Erfolgsblock). Der Unterschied zum generischen Fehler wird bewusst geprüft.
 
-- [ ] **Step 4: Responsive-Check** 320 / 768 / 1024 (Browser-Resize)
+- [ ] **Step 4: No-JS-Fallback (kein PII-URL-Leak)**
+
+Run: `grep -o 'method="post" action="/api/event.php"' site/infotermin.html site/interessent.html` und `grep -c '<noscript>' site/infotermin.html site/interessent.html`.
+Expected: beide Formulare haben `method="post" action="/api/event.php"` (ohne JS ein POST, kein GET → keine Personendaten in der URL) und je einen `<noscript>`-mailto-Hinweis. Optional im Browser mit deaktiviertem JS: Submit erzeugt einen **POST** (Netzwerk-Tab), keinen GET mit Query-String.
+
+- [ ] **Step 5: JSON-only-Erfolg (kein False-Positive ohne PHP)**
+
+Run: Seite über einen simplen statischen Server ausliefern, bei dem `/api/event.php` als **statische Datei** (PHP-Quelltext, 200) zurückkommt (z. B. `python -m http.server 8000 --directory site`), Formular absenden.
+Expected: **kein** Erfolgs-Block — da die Antwort kein JSON `{ok:true}` ist, zeigt das Frontend die Fehlermeldung mit `mailto`. Belegt, dass ein fehlender/statischer Endpunkt nie „Erfolg" vortäuscht.
+
+- [ ] **Step 6: Responsive-Check** 320 / 768 / 1024 (Browser-Resize)
 Expected: kein horizontaler Overflow, Terminkarten und Felder umbrechen sauber.
 
-- [ ] **Step 5: Impeccable-Markenscan**
+- [ ] **Step 7: Impeccable-Markenscan**
 
 Run: `npx impeccable detect site/infotermin.html site/interessent.html site/styles/site.css`
 Expected: keine **neuen** Flags außer den bekannten/akzeptierten (`cream-palette`, container-bedingte cramped-padding). Neue echte Flags beheben.
 
-- [ ] **Step 6: Abschluss-Commit (falls Fixes)**
+- [ ] **Step 8: Abschluss-Commit (falls Fixes)**
 
 ```bash
 git add -A && git commit -m "fix(infotermin): Verifikations-Anpassungen Frontend/Proxy"
@@ -990,3 +1018,10 @@ git add -A && git commit -m "fix(infotermin): Verifikations-Anpassungen Frontend
 3. **[P2] Größen-Cap nach Lesen** → `CONTENT_LENGTH`-Vorabprüfung + gedeckeltes Lesen (8001) + Übergrößen-Test + nginx `client_max_body_size` (Task 2/9).
 4. **[P2] Stilles Feld-Kürzen** → Überlänge/Nicht-String → 422, `mb_strlen`, `JSON_THROW_ON_ERROR`; Grenz-/Typtests (Task 2).
 5. **[P2] 503-Frontendpfad** → eigener 503-Text + `mailto`-Fallback, Browsertest prüft exakt diesen Zustand (Task 4/10).
+
+### Eingearbeitete Plan-Review-Findings (Codex, Runde 2 — abschließend)
+
+6. **[P1] Deploy-Gate nur per Notiz** → In-Repo-Schutz: Frontend akzeptiert nur JSON `{ok:true}` als Erfolg (Task 4) → statisch ausgelieferte `.php`/404 täuscht nie Erfolg vor; Seiten `noindex`+unverlinkt; harte Betriebs-Go-live-Prüfung (`nginx -t` + echter 503) im Deploy-Gate/Abnahmeprotokoll (File Structure, Task 9/10).
+7. **[P1] PII-URL-Leak ohne JS** → beide Formulare `method="post" action="/api/event.php"` (POST statt GET, kein URL-Leak) + `<noscript>`-mailto-Fallback; Verifikation Task 10 Step 4 (Tasks 5/6/10).
+
+**Plan-Review-Phase abgeschlossen** (harte 2-Runden-Grenze). Keine bewusst offengelassenen Blocker.
