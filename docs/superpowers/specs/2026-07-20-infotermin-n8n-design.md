@@ -23,7 +23,8 @@ docs/n8n/
   README.md                     Runbook: Reihenfolge, Import, Credentials, Go-live-Gate
   config-schema.md              Alle Config-Werte (Webhooks, Secret, Odoo-IDs, Teams-Links, Graph)
   entra-graph-rbac.md           Schritt-für-Schritt: App ohne Tenant-Consent + Exchange RBAC scope
-  datenmodell-odoo.md           crm.lead-Felder/Tags, Statusmodell, Outbox/Versand-Keys, ICS-Semantik
+  datenmodell-odoo.md           Odoo-Modelle x_infotermin_reg + x_infotermin_outbox (mit
+                                _sql_constraints), crm.lead-Spiegel, Statusmodell, ICS-Semantik
   abnahme-protokoll.md          Go-live-Checkliste (13 Punkte aus Master-Spec §9) + Negativtests
   workflows/
     wf-1-anmeldung-empfang.json      Webhook: Secret-Check, Validierung, Odoo-Upsert (received),
@@ -48,12 +49,21 @@ Gemeinsame Konventionen in allen Workflows:
 
 - **Secret-Check** (Webhook-WFs): erster Node prüft Header `X-Manibase-Secret` gegen Config; Mismatch → 401.
 - **Odoo JSON-RPC** über HTTP-Request-Nodes (`authenticate` → `execute_kw`), Muster wie `newsletter.php`. Upsert = `search_read` → `write`/`create`.
-- **Serialisierung statt verteiltem CAS (Kern-Invariante, Review-Finding 1+2):** Odoo-RPC bietet keinen einfachen atomaren Compare-and-swap über `search_read → write/create`. Statt einen verteilten Outbox-Store mit DB-Unique-Constraint zu bauen (unverhältnismäßig für wenige Dutzend Anmeldungen), laufen **ALLE zustandsändernden Workflows** (Anmeldung-Empfang, Anmeldung-Confirm, Reminder, Interessent, Dankes, Cleanup) mit n8n-Setting **„Limit execution to 1"** (Concurrency 1). Dadurch ist jeder „prüfen → schreiben"-Schritt de facto serialisiert = atomar; zwei gleichzeitige Requests können nicht beide denselben Lead anlegen oder denselben Token verbrauchen. Das ist die bewusst gewählte, dem Maßstab angemessene Umsetzung der Master-Spec-Invariante.
-- **Outbox-Zustandsmodell (persistent, je Mail-Key):** pro Lead und Mailtyp (`doi`, `invite`, `reminder1d`, `reminder1h`, `thanks`) ein Zustand `pending → sending → sent | failed-unknown` mit Zeitstempel (als strukturiertes Feld/Notiz am Lead, z. B. JSON im `x_mail_state`-Feld). Ablauf je Versand: Zustand lesen; nur wenn `pending`/leer → auf `sending` schreiben → Graph-`sendMail` → auf `sent` (mit Zeit). Bei Abbruch nach Graph-Erfolg vor `sent`-Write bleibt `sending`/`failed-unknown` → **kein Auto-Retry**, sondern Reconciliation (Abnahme/Betrieb, §abnahme). Dank Concurrency 1 kein Doppel-Claim.
-- **Dedup-Key:** normalisierte E-Mail (lowercase/trim) **+ Termin**; `search_read` vor `create`; die Serialisierung (Concurrency 1) verhindert die Race, da Odoo-RPC keine einfache Unique-Constraint-Durchsetzung bietet.
+- **DB-atomare Claims statt n8n-Serialisierung (Kern-Invariante, Review-Finding R1.1+R2.1):** n8n „Limit execution to 1" serialisiert nur **innerhalb eines** Workflows, **nicht** zwischen Confirm/Reminder/Cleanup — die geben also **keine** workflowübergreifende Atomizität. Die Atomizität kommt daher aus **Odoo-Datenbank-Constraints**, nicht aus n8n. Zwei dedizierte Odoo-Modelle (per Odoo Studio / kleines Modul anzulegen, §datenmodell):
+  - **`x_infotermin_reg`** (Registrierung, Quelle der Wahrheit für den Status): Felder `email_norm`, `termin`, `status` (`received`/`confirmed`), `token_digest`, `created_at`. **`_sql_constraints`: unique(email_norm, termin)**. WF-1 macht `create`; eine parallele Doublette scheitert an der DB-Constraint → WF fängt die Unique-Violation ab und liest den bestehenden Datensatz (idempotent). Kein `search→create`-Race.
+  - **`x_infotermin_outbox`** (Versand-Jobs, je Mail): Felder `mail_key`, `reg_id`, `state` (`sending`/`sent`/`failed_unknown`), `ts`. **`_sql_constraints`: unique(mail_key)** mit `mail_key = "<typ>:<reg_id>"` (`doi`/`invite`/`reminder1d`/`reminder1h`/`thanks`). **Claim = `create`**: gelingt der Insert → dieser Lauf sendet; wirft er Unique-Violation → ein anderer Lauf hat den Versand bereits beansprucht → **überspringen**. Das ist workflowübergreifend atomar (DB-Ebene), unabhängig davon, welcher der sechs Workflows gerade läuft.
+- **Versandablauf:** Outbox-Claim (`create` mail_key, `state=sending`) → Graph-`sendMail` → `write state=sent, ts`. Abbruch nach Graph-Erfolg vor `sent`-Write → Row bleibt `sending` → **kein Auto-Retry**, Reconciliation-Query (`state=sending AND ts<now-15min`) im Betrieb/Abnahme.
+- **crm.lead = CRM-Spiegel** für den Vertrieb (aus `x_infotermin_reg` erzeugt/aktualisiert), **nicht** der race-kritische Speicher.
+- **n8n Concurrency 1** an allen sechs Workflows zusätzlich als Defense-in-Depth (reduziert Last/Kollisionen), aber **nicht** der Korrektheitsmechanismus.
+- **Cleanup-Schutz:** Cleanup läuft zeitlich getrennt (nächtlich) und löscht nur nach den Fristen; ein `received`-Datensatz in aktiver Bestätigung ist entweder jung (nicht >14d) oder hat Zukunfts-Termin — der Grenzfall „späte Bestätigung nach Cleanup" wird über die 410-Antwort abgefangen (siehe DOI-Token unten), nicht über eine Sperre.
 - **Graph-Versand** über HTTP-Request-Node (POST `https://graph.microsoft.com/v1.0/users/kontakt@manibase.de/sendMail`) mit OAuth2-Credential (Client-Credentials, RBAC-scoped, §entra-graph-rbac). **Kein** Secret im JSON.
 - **Zeitzone:** Schedule-Trigger explizit `Europe/Berlin`. Termine offset-behaftet (`+02:00`).
-- **DOI-Token (Review-Finding 2):** kryptografisch zufällig, **≥128 bit Entropie**; im Lead nur als **SHA-256-Digest** gespeichert (nie Klartext), **an Lead + Termin gebunden**. **TTL** = bis zum Termin, längstens 7 Tage. **Single-Use** über die serialisierte confirm-WF (Concurrency 1): Digest suchen → wenn gefunden und nicht verbraucht und nicht abgelaufen → als verbraucht markieren + Status `confirmed` + Einladung. **Exakte Antwortzuordnung:** 200 = jetzt bestätigt; **409 = Token bereits verbraucht**; **410 = Token abgelaufen (TTL überschritten)**; sonstiger Fehler → 5xx. `event-confirm.php` (PR1) mappt 409/410 auf „bereits genutzt/abgelaufen".
+- **DOI-Token (Review-Finding R1.2+R2.2):** kryptografisch zufällig, **≥128 bit Entropie**; nur als **SHA-256-Digest** in `x_infotermin_reg.token_digest` gespeichert (nie Klartext), **an Registrierung + Termin gebunden**. **TTL** = bis zum Termin, längstens 7 Tage. **Single-Use** über atomaren Claim: confirm-WF sucht den Digest und setzt `status=confirmed` **bedingt** (`write` nur wenn noch `received`); der Insert des `invite`-Outbox-Keys (unique) entscheidet, welcher paralleler Lauf tatsächlich die Einladung sendet. **Antwort-Taxonomie (widerspruchsfrei zu Cleanup, R2.2):**
+  - **200** = jetzt bestätigt (Digest gefunden, `received`, TTL ok).
+  - **409** = bereits bestätigt (Digest gefunden, schon `confirmed`).
+  - **410** = abgelaufen **ODER Digest nicht (mehr) gefunden** (z. B. nach Cleanup gelöscht) — bewusst zusammengefasst als „Link ungültig/abgelaufen", damit ein legitimer alter Link nach dem Löschen **nicht** in 5xx fällt und zugleich nicht verraten wird, ob der Token je existierte.
+  - **5xx** nur bei echten technischen Fehlern (Odoo/Graph nicht erreichbar).
+  `event-confirm.php` (PR1) mappt 409/410 bereits auf die neutrale „bereits genutzt/abgelaufen"-Seite; 200 auf „bestätigt". **Abnahmetest:** DOI-Link nach Cleanup aufrufen → 410 (kein 5xx).
 - **ICS** (invite): `VCALENDAR`/`METHOD:REQUEST`/`VTIMEZONE Europe/Berlin`/stabile `UID`/`DTSTAMP`/`SEQUENCE`/`ORGANIZER kontakt@manibase.de`, `DTSTART;TZID=Europe/Berlin`, 60 min. Als Base64-Anhang in `sendMail`.
 
 Payload-Kontrakt (aus PR1, verbindlich):
@@ -93,7 +103,7 @@ WF-6 (täglich, Europe/Berlin, Concurrency 1) löscht/anonymisiert:
 Was **im Repo** prüfbar ist (statische Gates, kein Ausführungsbeweis, Review-Finding 4):
 
 - `jq empty` auf jede Workflow-JSON (valides JSON) **und n8n-Version gepinnt** (`meta.instanceId`/erwartete `typeVersion` je Node dokumentiert, damit klar ist, gegen welche n8n-Version importiert wird).
-- Struktur-Check je WF: erwartete Node-Typen vorhanden (`n8n-nodes-base.webhook`/`.scheduleTrigger`/`.httpRequest`/`.set`/`.if`/`.code`), Trigger vorhanden, mind. eine Connection, **Concurrency-1-Setting** (`settings.executionOrder`/`executionTimeout` bzw. `settings` mit Limit) an allen sechs.
+- Struktur-Check je WF: erwartete Node-Typen vorhanden (`n8n-nodes-base.webhook`/`.scheduleTrigger`/`.httpRequest`/`.set`/`.if`/`.code`), Trigger vorhanden, mind. eine Connection. **Hinweis:** Concurrency 1 ist Defense-in-Depth, NICHT der Korrektheitsmechanismus (der sind die Odoo-Unique-Constraints) — das statische Gate behandelt es daher nur als Empfehlung und behauptet keine Atomizität daraus. Stattdessen prüft das Gate, dass die Versand-WFs den **Outbox-Claim per `create` auf `x_infotermin_outbox`** referenzieren (Grep auf Modellname/`mail_key`) und WF-1 ein `create` auf `x_infotermin_reg` mit Unique-Violation-Fehlerzweig hat.
 - **Platzhalter-Konsistenz:** jeder `{{CONFIG:x}}` in den JSONs hat genau einen Eintrag in `config-schema.md` und umgekehrt (Skript-Check) → keine undokumentierten/unaufgelösten Platzhalter.
 - **Kein Inline-Secret:** grep stellt sicher, dass Graph-Client-Secret/Shared-Secret **nicht** im JSON stehen (nur Credential-Referenzen).
 - **Response-Code-Assertions:** confirm-WF enthält die Zweige/Response-Nodes für 200/409/410; Webhook-WFs den 401-Zweig bei Secret-Mismatch.
@@ -103,9 +113,18 @@ Was **im Repo** prüfbar ist (statische Gates, kein Ausführungsbeweis, Review-F
 
 **Bewusst NICHT im Repo** (unverhältnismäßig für ein statisches Marketing-Site-Repo ohne CI-Testinfrastruktur): eine echte n8n-Instanz in CI hochfahren, importieren und gegen Mock-Odoo/Mock-Graph ausführen. Der ausführbare Nachweis wird **einmalig in der Zielinstanz** über das Abnahmeprotokoll erbracht (Import + Mock-/Testlauf-Schritte dort beschrieben), bevor `enabled=true` gesetzt wird. Das ist die ehrliche Gate-Verortung: Repo = Struktur/Konsistenz, Zielinstanz = Ausführung.
 
+**Dynamischer Pflicht-Abnahmetest (Zielinstanz, wegen R2.1):** ein **paralleler Cross-Workflow-Test** — denselben confirm-Request doppelt/parallel abfeuern (→ genau 1× 200, sonst 409, genau 1 Einladung dank Unique `mail_key`) und Cleanup gleichzeitig mit einer laufenden Bestätigung (→ keine inkonsistente Registrierung; späte Bestätigung nach Cleanup → 410). Steht als eigener Punkt im Abnahmeprotokoll.
+
 ## §Review — eingearbeitete Findings (Runde 1)
 
 1. **[P1] Outbox nicht atomar** → Concurrency 1 an ALLEN sechs Workflows (serialisierter Claim statt verteiltem CAS), konkretes Outbox-Zustandsmodell (`pending→sending→sent|failed-unknown`) + Reconciliation.
 2. **[P1] DOI/Upsert TOCTOU** → Concurrency 1 auch für Anmelde-/Confirm-Webhook; Token als SHA-256-Digest, ≥128 bit, an Lead+Termin gebunden, 409=verbraucht/410=abgelaufen exakt.
 3. **[P1] Cleanup-Frist unvollständig** → `received AND (created<now-14d OR termin<now)` + `confirmed AND termin<now-30d`, lead-unabhängiges Audit, zwei Abnahmetests.
 4. **[P1] Repo-Checks belegen nicht „import-fertig"** → Umbenannt in „import-startbare Vorlagen"; stärkere statische Gates (Platzhalter↔Config-Konsistenz, kein Inline-Secret, Response-Code-/Failure-Path-Asserts, n8n-Version gepinnt). Volles n8n-in-CI bewusst außerhalb dieses Repos; Abnahmeprotokoll = verbindliches ausführbares Gate.
+
+## §Review — eingearbeitete Findings (Runde 2, abschließend)
+
+1. **[P1] Concurrency 1 nicht workflowübergreifend** → Korrektheit kommt jetzt aus Odoo-DB-Constraints: `x_infotermin_reg` unique(email_norm, termin) + `x_infotermin_outbox` unique(mail_key); Claim = `create`, Unique-Violation = überspringen. n8n-Concurrency nur noch Defense-in-Depth. Statisches Gate prüft Modell-/mail_key-Referenzen statt fälschlich `executionOrder`; dynamischer Cross-Workflow-Paralleltest im Abnahmeprotokoll.
+2. **[P1] Cleanup vs. 410** → Antwort-Taxonomie konsistent: Digest nicht gefunden (auch nach Cleanup) → **410**, nicht 5xx; 409 = bereits bestätigt; Abnahmetest „DOI-Link nach Cleanup → 410".
+
+**Spec-Review-Phase abgeschlossen** (harte 2-Runden-Grenze). Zusatzkosten bewusst akzeptiert: zwei kleine Odoo-Custom-Modelle (Odoo Studio) statt einer Feld-Notiz — der korrekte Preis für echte Atomizität; dokumentiert in datenmodell-odoo.md.
