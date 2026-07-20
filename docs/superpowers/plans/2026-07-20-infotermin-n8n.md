@@ -80,14 +80,29 @@ has_type wf-4-interessent       n8n-nodes-base.webhook          || err "wf-4: we
 has_type wf-5-dankesmail        n8n-nodes-base.manualTrigger    || err "wf-5: manualTrigger fehlt"
 has_type wf-6-cleanup           n8n-nodes-base.scheduleTrigger  || err "wf-6: scheduleTrigger fehlt"
 
-# 3) Kein Inline-Secret: jeder String-Wert mit Secret-Bezug MUSS {{CONFIG:*}} sein
+# 3) Kein Inline-Secret: PFADBASIERT — sensible SCHLÜSSEL dürfen nur {{CONFIG:*}}
+#    oder eine n8n-Credential-/Expression-Referenz ("={{...}}") tragen, nie einen Rohwert.
+#    check_secrets gibt den Fund aus und liefert 1; der Aufrufer entscheidet (keine
+#    fail-Verschmutzung -> nutzbar für den Negativ-Selbsttest).
+check_secrets(){ # $1=file $2=label
+  local f="$1" lbl="$2"
+  while IFS=$'\t' read -r keypath val; do
+    printf '%s' "$keypath" | grep -qiE 'password|secret|token|api_?key|authorization|bearer' || continue
+    case "$val" in
+      *'{{CONFIG:'*'}}'*|'='*|''|'true'|'false') : ;;   # Platzhalter/Expression/leer/Bool ok
+      *) printf '%s: sensitiver Schlüssel mit Rohwert: %s=%s' "$lbl" "$keypath" "$val"; return 1 ;;
+    esac
+  done < <(jq -r 'paths(scalars) as $p | ($p|map(tostring)|join("."))+"\t"+(getpath($p)|tostring)' "$f")
+  return 0
+}
 for n in "${EXPECTED[@]}"; do
   f="$WF/$n.json"; [ -f "$f" ] || continue
-  bad=$(jq -r '[.. | strings] | .[]' "$f" \
-        | grep -Ei '(client_?secret|shared_secret|api_?key|password)' \
-        | grep -v '{{CONFIG:' || true)
-  [ -n "$bad" ] && err "$n: mögliches Inline-Secret: $(printf '%s' "$bad" | head -1)"
+  out=$(check_secrets "$f" "$n") || err "$out"
 done
+# Negativ-Selbsttest: gefälschte Vorlage mit Klartext-Secret MUSS erkannt werden (return 1).
+_neg=$(mktemp); printf '{"nodes":[{"parameters":{"password":"rawsecret123"}}]}' >"$_neg"
+if check_secrets "$_neg" SELFTEST >/dev/null; then err "Secret-Gate erkennt Klartext-Secret NICHT (Selbsttest)"; fi
+rm -f "$_neg"
 
 # 4) Webhook-WFs: Secret-Header-Check nur via Platzhalter (nicht literal)
 for n in wf-1-anmeldung-empfang wf-2-anmeldung-confirm wf-4-interessent; do
@@ -200,17 +215,25 @@ Jede Datei ist ein valides n8n-Export-Objekt `{"name","nodes":[...],"connections
 
 - [ ] **Step 1: wf-1-anmeldung-empfang.json** (idempotent, Review-R1.1) — Webhook(POST) → IF(Header `X-Manibase-Secret` == `{{CONFIG:SHARED_SECRET}}` sonst Respond 401) → Set(normalisieren email_norm/termin) → Code(Token generieren, SHA-256-Digest berechnen) → HTTP(Odoo `create` `x_infotermin_reg` **mit** token_digest).
   - **Create-Erfolg (Neuanmeldung):** HTTP(Odoo `create` `x_infotermin_outbox` mail_key `doi:<reg_id>`) → HTTP(Graph sendMail DOI-Link `{{CONFIG:BASE_URL}}/api/event-confirm.php?t=<token>`) → HTTP(outbox state=sent) → Respond 200.
-  - **Unique-Violation (Doppelanmeldung):** **NICHT** neuen Digest schreiben, **NICHT** neuen DOI-Versand auslösen (der erste DOI-Link bleibt gültig) → idempotent Respond 200 (neutral „E-Mail unterwegs"). So wird der bereits versandte Token nicht entwertet.
-  - Abnahmetest (§abnahme, Test-ID `dup-anmeldung`): zweite Anmeldung derselben email+termin → genau 1 gültiger DOI-Link, keine zweite DOI-Mail.
+  - **Unique-Violation (Doppelanmeldung / Recovery, Review-R2.2):** bestehenden reg-Datensatz lesen und den **`doi:<reg_id>`-Outbox-Zustand** prüfen — NICHT pauschal „nie erneut senden":
+    - `doi`-Outbox `state=sent` → bereits sicher versandt → Digest NICHT ändern, idempotent Respond 200 (erster Link bleibt gültig).
+    - `doi`-Outbox **fehlt** (Erstlauf scheiterte vor dem Claim) → Claim `create doi:<reg_id>` → DOI-Mail senden (mit dem am reg gespeicherten Digest) → `state=sent` → 200. So sperrt ein transienter Fehler die email+termin-Kombination NICHT dauerhaft aus.
+    - `doi`-Outbox `state=sending` und `ts` alt (Graph-Ausgang unbekannt) → NICHT blind neu senden → Reconciliation (Test `crash-reconcile-presend`), idempotent 200.
+  - Token/Digest wird nur **einmal** (beim ersten reg-`create`) erzeugt; Recovery nutzt den bestehenden Digest, erzeugt keinen neuen (sonst würde ein evtl. doch zugestellter erster Link entwertet).
+  - Abnahmetests: `dup-anmeldung` (zweite Anmeldung → 1 gültiger Link, keine 2. Mail bei bereits `sent`); `presend-crash-wf1` (Abbruch nach reg-create vor DOI-`sent` → spätere Anmeldung liefert einen nutzbaren DOI-Link, keine Dauersperre).
 
 - [ ] **Step 2: wf-2-anmeldung-confirm.json** (atomarer Claim, Review-R1.2) — Webhook(POST `{token}`) → IF Secret → Code(SHA-256 des Tokens) → HTTP(Odoo `search_read` reg by token_digest).
   - IF **nicht gefunden** (auch nach Cleanup) → Respond **410**.
   - IF **status==confirmed** → Respond **409**.
   - IF **TTL überschritten** (`termin < now` bzw. >7 Tage) → Respond **410**.
-  - Sonst (`received`, TTL ok): **atomarer Entscheidungspunkt = HTTP(Odoo `create` outbox `invite:<reg_id>`)**:
-    - **Create-Erfolg (Gewinner):** HTTP(write status=confirmed) → Code(ICS: VTIMEZONE Europe/Berlin, UID `<reg_id>@manibase.de`, DTSTAMP, SEQUENCE 0, DTSTART;TZID, 60min) → HTTP(Graph sendMail Einladung + ICS-Base64 + Teams-Link des Termins) → HTTP(outbox `invite` state=sent) → Respond **200**.
-    - **Unique-Violation (Verlierer / paralleler Zweitklick):** ein anderer Lauf bestätigt bereits → Respond **409** (keine zweite Einladung).
-  - Damit: bei parallelem Doppel-Confirm genau **1×200, sonst 409**, genau 1 Einladung (Outbox-Unique = CAS). Abnahmetest-ID `parallel-confirm`.
+  - Sonst (`received`, TTL ok): **atomarer Entscheidungspunkt = HTTP(Odoo `create` outbox `invite:<reg_id>`)** — die Reihenfolge ist bewusst **Claim → Status-Write → Versand**, damit ein Crash keinen „bestätigt ohne Einladung"-Zustand erzeugt:
+    - **Create-Erfolg (Gewinner):** HTTP(write status=confirmed) → Code(ICS: VTIMEZONE Europe/Berlin, UID `<reg_id>@manibase.de`, DTSTAMP, SEQUENCE 0, DTSTART;TZID, 60min) → HTTP(Graph sendMail Einladung + ICS-Base64 + Teams-Link) → HTTP(outbox `invite` state=sent) → Respond **200**.
+    - **Unique-Violation (bestehender Claim) — Read-after-Conflict statt pauschal 409 (Review-R2.1):** tatsächlichen Zustand lesen:
+      - reg `status=confirmed` UND `invite`-Outbox `state=sent` → echte Bestätigung → Respond **409**.
+      - reg `status=received` (Claim existiert, aber Status-Write/Versand hing) → **weitertreiben**: status=confirmed setzen (falls nötig), Einladung senden falls `invite` noch nicht `sent`, dann Respond **200** (idempotent). Kein Dauer-409.
+      - `invite`-Outbox `state=sending` und `ts` alt → Reconciliation (Test `crash-reconcile`), neutral Respond 200/409 je nach ermitteltem Zustand.
+  - Damit: paralleler Doppel-Confirm → genau **1×200, sonst 409**, genau 1 Einladung; ein Crash zwischen Claim und Status-Write sperrt den Token NICHT dauerhaft. n8n-Concurrency 1 deckt die Rest-Mikrorace. **Alternative Hart-Atomizität** (optional, wenn gewünscht): eine Odoo-Custom-Methode `confirm_registration(digest)`, die Claim + Status in einer DB-Transaktion macht und einen Zustands-Enum zurückgibt (§datenmodell als Upgrade-Pfad dokumentiert).
+  - Abnahmetests: `parallel-confirm` (1×200/sonst 409, 1 Einladung); `presend-crash-wf2` (Abbruch nach `invite`-Claim vor Status-Write → Retry liefert 200 + Einladung, kein Dauer-409).
 
 - [ ] **Step 3: wf-3-reminder.json** — ScheduleTrigger(Europe/Berlin, 4 Cron: `30 19 28 7 *`, `30 18 29 7 *`, `30 19 30 7 *`, `30 18 31 7 *`) → Set(bestimmt Termin + reminder-Typ aus Datum) → HTTP(Odoo `search_read` reg `status=confirmed AND termin=<T>` ohne outbox-Key) → SplitInBatches → HTTP(create outbox `reminder1d|1h:<reg_id>`; Violation→skip) → HTTP(Graph sendMail Reminder + Teams-Link) → HTTP(outbox sent). settings: Concurrency 1.
 
@@ -258,7 +281,9 @@ Expected: „verify-n8n: alle statischen Gates bestanden" (Exit 0). Falls FAIL: 
   - `dup-anmeldung` zweite Anmeldung email+termin → genau 1 gültiger DOI-Link, keine 2. DOI-Mail.
   - `parallel-confirm` gleichzeitiger Doppel-Confirm → **genau 1×200, sonst 409**, genau 1 Einladung.
   - `doi-after-cleanup` DOI-Link nach Cleanup des Datensatzes → **410** (nicht 5xx).
-  - `crash-reconcile` Versand-Abbruch nach Graph-Erfolg vor `sent`-Write simulieren → Outbox-Row bleibt `sending`; Reconciliation-Query (`state=sending AND ts<now-15min`) findet sie; **kein** Auto-Retry/Doppelmail; manuelle Auflösung dokumentiert.
+  - `crash-reconcile` Versand-Abbruch nach Graph-Erfolg vor `sent`-Write → Outbox-Row bleibt `sending`; Reconciliation-Query (`state=sending AND ts<now-15min`) findet sie; **kein** Auto-Retry/Doppelmail; manuelle Auflösung dokumentiert.
+  - `presend-crash-wf1` Abbruch in wf-1 nach reg-`create` vor DOI-`sent` → spätere Anmeldung (email+termin) liefert einen nutzbaren DOI-Link (Recovery), **keine** Dauersperre.
+  - `presend-crash-wf2` Abbruch in wf-2 nach `invite`-Claim vor Status-Write → Retry liefert **200 + Einladung** (Read-after-Conflict), **kein** Dauer-409.
   - `cleanup-confirm-race` Cleanup läuft gleichzeitig mit aktiver Bestätigung → keine inkonsistente Registrierung; späte Bestätigung nach Löschung → `doi-after-cleanup`-Verhalten (410). Erwartete DB-Zustände + Mailanzahl notiert.
   - `ics-clients` ICS-Zeit in Outlook/Apple/Google = 19:30 Europe/Berlin.
   - `cleanup-both-paths` Cleanup-Testlauf für `created<now-14d` UND `termin<now`, Audit-Zählwerte ohne PII.
@@ -271,8 +296,8 @@ Expected: „verify-n8n: alle statischen Gates bestanden" (Exit 0). Falls FAIL: 
 Run:
 ```bash
 for id in odoo-models graph-rbac teams-links config-disabled nginx-503 import-wire smoke \
-          dup-anmeldung parallel-confirm doi-after-cleanup crash-reconcile cleanup-confirm-race \
-          ics-clients cleanup-both-paths go-live; do
+          dup-anmeldung parallel-confirm doi-after-cleanup crash-reconcile presend-crash-wf1 \
+          presend-crash-wf2 cleanup-confirm-race ics-clients cleanup-both-paths go-live; do
   grep -q "$id" docs/n8n/abnahme-protokoll.md || echo "FEHLT: $id"
 done; echo "check done"
 ```
@@ -305,3 +330,11 @@ Expected: nur „check done", **keine** `FEHLT:`-Zeile.
 4. **[P1] Laufzeit-Gate unvollständig** → Abnahme-IDs `crash-reconcile` + `cleanup-confirm-race` ergänzt; Vollständigkeitsprüfung als exakte Test-ID-Liste statt Grep-Schwelle.
 
 **Hinweis Task 6 (smoke):** `crash-reconcile` und `cleanup-confirm-race` sind DB-/timing-basiert und stehen als manuelle Abnahmepunkte im Protokoll; `smoke-event.sh` deckt die curl-testbaren Fälle ab.
+
+### Eingearbeitete Plan-Review-Findings (Codex, Runde 2 — abschließend)
+
+1. **[P1] Confirm-CAS nicht atomar mit Status-Write** → wf-2 Read-after-Conflict: bei bestehendem `invite`-Claim tatsächlichen Zustand lesen (confirmed→409; received-hängt→weitertreiben→200), kein Dauer-409; Reihenfolge Claim→Status→Versand; optionaler Odoo-Custom-Method-Upgrade-Pfad; Test `presend-crash-wf2`.
+2. **[P1] DOI-Recovery vor Erstversand** → wf-1 Duplicate-Zweig prüft `doi`-Outbox-Zustand: `sent`→idempotent, fehlt→(re)senden, `sending`-alt→reconcile; keine Dauersperre bei transientem Fehler; Test `presend-crash-wf1`.
+3. **[P1] Secret-Gate wertbasiert** → `check_secrets` pfadbasiert (`jq paths(scalars)`, Key+Wert), sensible Schlüssel nur `{{CONFIG:*}}`/Expression; Negativ-Selbsttest mit Klartext-Secret erwartet Exit 1.
+
+**Plan-Review-Phase abgeschlossen** (harte 2-Runden-Grenze). Verbleibende Hart-Atomizität (Odoo-Custom-Method) ist als optionaler Upgrade-Pfad dokumentiert; die Read-after-Conflict-Recovery + Concurrency 1 + Reconciliation ist die proportionale Umsetzung für die Veranstaltungsgröße.
