@@ -22,6 +22,9 @@
 - **Modify** `site/scripts/site.js` — `initEventForm()` für beide Seiten (JSON-POST, Fehler-/Erfolgspfade).
 - **Modify** `site/styles/site.css` — minimale Ergänzungen (`.eventform`-Rhythmus, `.eventpage`-Hero, `.confirm`-Seite). Reuse `.field/.qcard/.consent/.btn/.container`.
 - **Modify** `site/datenschutz.html` — neuer Abschnitt „8. Veranstaltungsanmeldung und Interessentenerfassung"; bestehende 8/9/10 → 9/10/11.
+- **Create** `docs/deploy/nginx-event-locations.conf` — versioniertes nginx-Snippet (zwei `location =`-Blöcke mit `limit_req` + `client_max_body_size` + PHP-FPM), das beim Provisionieren in den `manibase.de`-vhost aufgenommen werden MUSS. Grund: produktiv wird laut [`CLAUDE.md`](../../CLAUDE.md) nur die exakt konfigurierte PHP-Route ausgeführt — ohne diesen Block sind `event.php`/`event-confirm.php` nach Merge weder ausführbar noch rate-limitiert.
+
+> **Deploy-Gating (wichtig):** PR1 ist **nicht eigenständig produktiv lauffähig**. Der Site-Deploy kopiert nur `site/`; die PHP-Endpunkte werden erst nach Aufnahme des nginx-Snippets + Anlegen von `/etc/manibase/n8n.php` (`enabled=true`) aktiv. Bis dahin greift der Kill-Switch (Frontend zeigt `mailto`-Fallback). Der Go-live ist damit technisch von der Provisionierung (Server-seitig / PR2) abhängig — im PR-Body als Merge-Hinweis vermerken.
 
 **Payload-Kontrakt** (auch in PR2 dokumentiert):
 - Anmeldung: `{form:"anmeldung", termin:"2026-07-29T19:30:00+02:00"|"2026-07-31T19:30:00+02:00", name, unternehmen, email, kenntnisnahme:true, website:""}`
@@ -136,12 +139,26 @@ if (!$enabled || empty($cfg['shared_secret'])
     respond(503, ['ok' => false, 'error' => 'unavailable']);
 }
 
-// ---- Body lesen + Größen-Cap ----
-$raw = file_get_contents('php://input');
-if ($raw === false || strlen($raw) > 8000) {
+// ---- Body lesen + Größen-Cap (VOR dem Lesen prüfen) ----
+$len = isset($_SERVER['CONTENT_LENGTH']) ? (int) $_SERVER['CONTENT_LENGTH'] : 0;
+if ($len > 8000) {
     respond(413, ['ok' => false, 'error' => 'too_large']);
 }
-$in = json_decode($raw, true);
+// Höchstens 8001 Bytes lesen (fängt chunked/fehlende Content-Length ab).
+$stream = fopen('php://input', 'rb');
+$raw = $stream ? stream_get_contents($stream, 8001) : false;
+if ($stream) { fclose($stream); }
+if ($raw === false) {
+    respond(400, ['ok' => false, 'error' => 'bad_request']);
+}
+if (strlen($raw) > 8000) {
+    respond(413, ['ok' => false, 'error' => 'too_large']);
+}
+try {
+    $in = json_decode($raw, true, 32, JSON_THROW_ON_ERROR);
+} catch (\JsonException $e) {
+    respond(400, ['ok' => false, 'error' => 'bad_request']);
+}
 if (!is_array($in)) {
     respond(400, ['ok' => false, 'error' => 'bad_request']);
 }
@@ -151,31 +168,33 @@ if (!empty($in['website'])) {
     respond(200, ['ok' => true]);
 }
 
-// ---- Validierung ----
+// ---- Validierung (strikt: nur Strings, Überlänge => 422, kein stilles Kürzen) ----
 $TERMINE = ['2026-07-29T19:30:00+02:00', '2026-07-31T19:30:00+02:00'];
 
-function s(array $in, string $k, int $max): string {
-    $v = trim((string) ($in[$k] ?? ''));
-    return strlen($v) > $max ? substr($v, 0, $max) : $v;
-}
-
-$form = (string) ($in['form'] ?? '');
-if ($form !== 'anmeldung' && $form !== 'interessent') {
+$form = $in['form'] ?? '';
+if (!is_string($form) || ($form !== 'anmeldung' && $form !== 'interessent')) {
     respond(422, ['ok' => false, 'error' => 'invalid_form']);
 }
 
-$name        = s($in, 'name', 120);
-$unternehmen = s($in, 'unternehmen', 120);
-$email       = s($in, 'email', 254);
-$kenntnis    = ($in['kenntnisnahme'] ?? false) === true;
+foreach (['name', 'unternehmen', 'email'] as $req) {
+    if (!isset($in[$req]) || !is_string($in[$req])) {
+        respond(422, ['ok' => false, 'error' => 'missing_fields']);
+    }
+}
+$name        = trim($in['name']);
+$unternehmen = trim($in['unternehmen']);
+$email       = trim($in['email']);
 
 if ($name === '' || $unternehmen === '') {
     respond(422, ['ok' => false, 'error' => 'missing_fields']);
 }
-if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+if (mb_strlen($name) > 120 || mb_strlen($unternehmen) > 120 || mb_strlen($email) > 254) {
+    respond(422, ['ok' => false, 'error' => 'field_too_long']);
+}
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     respond(422, ['ok' => false, 'error' => 'invalid_email']);
 }
-if (!$kenntnis) {
+if (($in['kenntnisnahme'] ?? false) !== true) {
     respond(422, ['ok' => false, 'error' => 'consent_required']);
 }
 
@@ -183,19 +202,35 @@ $payload = [
     'form'        => $form,
     'name'        => $name,
     'unternehmen' => $unternehmen,
-    'email'       => strtolower($email),
+    'email'       => mb_strtolower($email),
 ];
 
 if ($form === 'anmeldung') {
-    $termin = (string) ($in['termin'] ?? '');
-    if (!in_array($termin, $TERMINE, true)) {
+    $termin = $in['termin'] ?? '';
+    if (!is_string($termin) || !in_array($termin, $TERMINE, true)) {
         respond(422, ['ok' => false, 'error' => 'invalid_termin']);
     }
     $payload['termin'] = $termin;
     $webhook = $cfg['webhook_anmeldung'];
 } else {
-    $payload['info'] = s($in, 'info', 2000);
+    $info = $in['info'] ?? '';
+    if (!is_string($info)) {
+        respond(422, ['ok' => false, 'error' => 'invalid_info']);
+    }
+    $info = trim($info);
+    if (mb_strlen($info) > 2000) {
+        respond(422, ['ok' => false, 'error' => 'field_too_long']);
+    }
+    $payload['info'] = $info;
     $webhook = $cfg['webhook_interessent'];
+}
+
+// Payload sicher serialisieren (fehlgeschlagene Kodierung => kein falscher Erfolg).
+try {
+    $body = json_encode($payload, JSON_THROW_ON_ERROR);
+} catch (\JsonException $e) {
+    error_log('event.php: payload encode failed: ' . $e->getMessage());
+    respond(500, ['ok' => false, 'error' => 'server_error']);
 }
 
 // ---- An n8n weiterreichen (Shared-Secret-Header) ----
@@ -207,7 +242,7 @@ curl_setopt_array($ch, [
         'Content-Type: application/json',
         'X-Manibase-Secret: ' . $cfg['shared_secret'],
     ],
-    CURLOPT_POSTFIELDS     => json_encode($payload),
+    CURLOPT_POSTFIELDS     => $body,
     CURLOPT_CONNECTTIMEOUT => 8,
     CURLOPT_TIMEOUT        => 15,
 ]);
@@ -226,12 +261,18 @@ respond(200, ['ok' => true]);
 
 - [ ] **Step 2: Test-Harness anlegen (Scratchpad, nicht committen)**
 
-Stub-Webhook, der jeden Request loggt und 200 zurückgibt:
+Stub-Webhook (Port 9099) läuft die **ganze** Task 2+3 durch und wird NICHT zwischendurch beendet. Der zu testende Proxy läuft getrennt auf 9098 und wird bei Config-Wechsel gezielt per eigener PID beendet.
 
 ```bash
+set -u
 SP="$TMPDIR/manibase-stub"; mkdir -p "$SP"
+# Stub, der Hits zählt und 200 liefert:
 cat > "$SP/stub.php" <<'PHP'
-<?php file_put_contents('php://stderr', "STUB HIT: ".file_get_contents('php://input')."\n"); echo '{"ok":true}';
+<?php file_put_contents(getenv('STUB_LOG'), file_get_contents('php://input')."\n", FILE_APPEND); echo '{"ok":true}';
+PHP
+# Stub, der einen wählbaren Statuscode liefert (für DOI 409/410/502-Tests): ?code=409
+cat > "$SP/status.php" <<'PHP'
+<?php $c=(int)($_GET['code']??200); http_response_code($c); echo '{"code":'.$c.'}';
 PHP
 cat > "$SP/n8n.php" <<'PHP'
 <?php return ['enabled'=>true,'shared_secret'=>'testsecret',
@@ -239,8 +280,10 @@ cat > "$SP/n8n.php" <<'PHP'
   'webhook_interessent'=>'http://127.0.0.1:9099/stub.php',
   'webhook_confirm'=>'http://127.0.0.1:9099/stub.php'];
 PHP
-php -S 127.0.0.1:9099 -t "$SP" >/dev/null 2>"$SP/stub.log" &
+: > "$SP/hits.log"
+STUB_LOG="$SP/hits.log" php -S 127.0.0.1:9099 -t "$SP" >/dev/null 2>&1 &
 echo $! > "$SP/stub.pid"
+sleep 1
 ```
 
 - [ ] **Step 3: `php -l` + Kill-Switch-Test (Config fehlt) — muss 503 liefern**
@@ -249,34 +292,39 @@ Run:
 ```bash
 php -l site/api/event.php
 MANIBASE_N8N_CONFIG=/nonexistent php -S 127.0.0.1:9098 -t site/api >/dev/null 2>&1 &
-sleep 1
-curl -s -o /dev/null -w '%{http_code}\n' -X POST http://127.0.0.1:9098/event.php \
+echo $! > "$SP/proxy.pid"; sleep 1
+curl -s -o /dev/null -w 'killswitch->%{http_code}\n' -XPOST http://127.0.0.1:9098/event.php \
   -H 'Content-Type: application/json' -d '{"form":"anmeldung"}'
+kill "$(cat "$SP/proxy.pid")" 2>/dev/null   # NUR den Proxy beenden, Stub läuft weiter
 ```
-Expected: `No syntax errors detected` und HTTP `503`.
+Expected: `No syntax errors detected` und `killswitch->503`.
 
-- [ ] **Step 4: Positiv-/Negativmatrix gegen Stub**
+- [ ] **Step 4: Positiv-/Negativmatrix gegen Stub (Proxy neu mit Stub-Config)**
 
-Run (Config auf Stub zeigend):
+Run:
 ```bash
-kill $(cat $TMPDIR/manibase-stub/stub.pid 2>/dev/null) 2>/dev/null
-MANIBASE_N8N_CONFIG=$TMPDIR/manibase-stub/n8n.php php -S 127.0.0.1:9098 -t site/api >/dev/null 2>&1 &
-sleep 1
+MANIBASE_N8N_CONFIG="$SP/n8n.php" php -S 127.0.0.1:9098 -t site/api >/dev/null 2>&1 &
+echo $! > "$SP/proxy.pid"; sleep 1
 B=http://127.0.0.1:9098/event.php
-echo -n "GET->405 ";      curl -s -o /dev/null -w '%{http_code}\n' $B
-echo -n "honeypot->200 "; curl -s -o /dev/null -w '%{http_code}\n' -XPOST $B -d '{"form":"anmeldung","website":"x"}'
-echo -n "bademail->422 "; curl -s -o /dev/null -w '%{http_code}\n' -XPOST $B -d '{"form":"anmeldung","name":"A","unternehmen":"B","email":"nope","kenntnisnahme":true,"termin":"2026-07-29T19:30:00+02:00"}'
-echo -n "badtermin->422 ";curl -s -o /dev/null -w '%{http_code}\n' -XPOST $B -d '{"form":"anmeldung","name":"A","unternehmen":"B","email":"a@b.de","kenntnisnahme":true,"termin":"2026-01-01T00:00:00+01:00"}'
-echo -n "noconsent->422 ";curl -s -o /dev/null -w '%{http_code}\n' -XPOST $B -d '{"form":"anmeldung","name":"A","unternehmen":"B","email":"a@b.de","kenntnisnahme":false,"termin":"2026-07-29T19:30:00+02:00"}'
-echo -n "valid->200 ";    curl -s -o /dev/null -w '%{http_code}\n' -XPOST $B -d '{"form":"anmeldung","name":"A","unternehmen":"B","email":"a@b.de","kenntnisnahme":true,"termin":"2026-07-29T19:30:00+02:00"}'
+: > "$SP/hits.log"
+echo -n "GET->405 ";       curl -s -o /dev/null -w '%{http_code}\n' $B
+echo -n "honeypot->200 ";  curl -s -o /dev/null -w '%{http_code}\n' -XPOST $B -d '{"form":"anmeldung","website":"x"}'
+echo -n "bademail->422 ";  curl -s -o /dev/null -w '%{http_code}\n' -XPOST $B -d '{"form":"anmeldung","name":"A","unternehmen":"B","email":"nope","kenntnisnahme":true,"termin":"2026-07-29T19:30:00+02:00"}'
+echo -n "badtermin->422 "; curl -s -o /dev/null -w '%{http_code}\n' -XPOST $B -d '{"form":"anmeldung","name":"A","unternehmen":"B","email":"a@b.de","kenntnisnahme":true,"termin":"2026-01-01T00:00:00+01:00"}'
+echo -n "noconsent->422 "; curl -s -o /dev/null -w '%{http_code}\n' -XPOST $B -d '{"form":"anmeldung","name":"A","unternehmen":"B","email":"a@b.de","kenntnisnahme":false,"termin":"2026-07-29T19:30:00+02:00"}'
+echo -n "longname->422 ";  curl -s -o /dev/null -w '%{http_code}\n' -XPOST $B -d "{\"form\":\"anmeldung\",\"name\":\"$(printf 'x%.0s' {1..121})\",\"unternehmen\":\"B\",\"email\":\"a@b.de\",\"kenntnisnahme\":true,\"termin\":\"2026-07-29T19:30:00+02:00\"}"
+echo -n "nonstring->422 "; curl -s -o /dev/null -w '%{http_code}\n' -XPOST $B -d '{"form":"anmeldung","name":123,"unternehmen":"B","email":"a@b.de","kenntnisnahme":true,"termin":"2026-07-29T19:30:00+02:00"}'
+echo -n "oversize->413 ";  curl -s -o /dev/null -w '%{http_code}\n' -XPOST $B --data-binary "{\"form\":\"interessent\",\"name\":\"A\",\"unternehmen\":\"B\",\"email\":\"a@b.de\",\"kenntnisnahme\":true,\"info\":\"$(printf 'y%.0s' {1..9000})\"}"
+echo -n "valid->200 ";     curl -s -o /dev/null -w '%{http_code}\n' -XPOST $B -d '{"form":"anmeldung","name":"A","unternehmen":"B","email":"A@B.de","kenntnisnahme":true,"termin":"2026-07-29T19:30:00+02:00"}'
 echo -n "interessent->200 "; curl -s -o /dev/null -w '%{http_code}\n' -XPOST $B -d '{"form":"interessent","name":"A","unternehmen":"B","email":"a@b.de","kenntnisnahme":true,"info":"hallo"}'
+echo "--- stub hits (soll: 2) ---"; grep -c . "$SP/hits.log"; grep -o '"email":"[^"]*"' "$SP/hits.log"
 ```
-Expected: `405, 200, 422, 422, 422, 200, 200`. Stub-Log (`$TMPDIR/manibase-stub/stub.log`) zeigt zwei `STUB HIT`-Zeilen (nur die validen), Payload-`email` lowercase.
+Expected Codes: `405, 200, 422, 422, 422, 422, 422, 413, 200, 200`. Stub-Hit-Zähler = **2** (nur die validen); `email` in den Hits ist lowercase (`a@b.de`).
 
-- [ ] **Step 5: Stub/Server stoppen, committen**
+- [ ] **Step 5: Proxy stoppen (Stub für Task 3 weiterlaufen lassen), committen**
 
 ```bash
-kill $(jobs -p) 2>/dev/null; kill $(cat $TMPDIR/manibase-stub/stub.pid) 2>/dev/null
+kill "$(cat "$SP/proxy.pid")" 2>/dev/null   # Stub 9099 bleibt für Task 3 aktiv
 git add site/api/event.php
 git commit -m "feat(infotermin): event.php Proxy (Honeypot, Validierung, Kill-Switch, n8n-Forward)"
 ```
@@ -399,31 +447,53 @@ page(502, 'Gerade nicht möglich',
   . 'später erneut oder schreiben Sie an <a href="mailto:kontakt@manibase.de">kontakt@manibase.de</a>.</p>');
 ```
 
-- [ ] **Step 2: `php -l` + GET-Interstitial ändert nichts**
+- [ ] **Step 2: `php -l` + GET-Interstitial ändert nichts (linkscanner-fest)**
 
-Run:
+Run (Stub 9099 aus Task 2 läuft noch):
 ```bash
+SP="$TMPDIR/manibase-stub"
 php -l site/api/event-confirm.php
-MANIBASE_N8N_CONFIG=$TMPDIR/manibase-stub/n8n.php php -S 127.0.0.1:9097 -t site/api >/dev/null 2>&1 &
-sleep 1
-# GET zeigt Interstitial mit POST-Form, KEIN Stub-Hit:
+MANIBASE_N8N_CONFIG="$SP/n8n.php" php -S 127.0.0.1:9097 -t site/api >/dev/null 2>&1 &
+echo $! > "$SP/confirm.pid"; sleep 1
+: > "$SP/hits.log"
+echo -n "get-interstitial(method=post vorhanden): "
 curl -s 'http://127.0.0.1:9097/event-confirm.php?t=abc123' | grep -c 'method="post"'
+echo -n "get-hits(soll 0): "; grep -c . "$SP/hits.log"
 ```
-Expected: `No syntax errors detected` und Ausgabe `1` (Interstitial vorhanden). Stub-Log bekommt durch den GET **keinen** neuen `STUB HIT`.
+Expected: `No syntax errors detected`, `get-interstitial…: 1`, `get-hits(soll 0): 0` — der **GET** löst KEINEN Stub-Hit aus (Safe-Links/Prefetch bestätigen nicht).
 
-- [ ] **Step 3: POST löst Weiterleitung aus**
+- [ ] **Step 3: POST bestätigt; ungültige/abgelaufene/wiederverwendete Token**
 
 Run:
 ```bash
-curl -s -o /dev/null -w '%{http_code}\n' -XPOST http://127.0.0.1:9097/event-confirm.php -d 't=abc123'
-curl -s -o /dev/null -w '%{http_code}\n' 'http://127.0.0.1:9097/event-confirm.php?t=<>bad'
+B=http://127.0.0.1:9097/event-confirm.php
+echo -n "post-ok->200 ";    curl -s -o /dev/null -w '%{http_code}\n' -XPOST $B -d 't=abc123'
+echo -n "post-hits(soll 1): "; grep -c . "$SP/hits.log"; grep -o '"token":"[^"]*"' "$SP/hits.log"
+echo -n "badchar->400 ";    curl -s -o /dev/null -w '%{http_code}\n' 'http://127.0.0.1:9097/event-confirm.php?t=%3C%3Ebad'
+# Confirm-Webhook auf Statuscodes umbiegen: 409/410 -> "bereits genutzt"-Seite (200), 502 -> Fehlerseite (502)
+cat > "$SP/n8n409.php" <<'PHP'
+<?php return ['enabled'=>true,'shared_secret'=>'testsecret','webhook_confirm'=>'http://127.0.0.1:9099/status.php?code=409'];
+PHP
+cat > "$SP/n8n502.php" <<'PHP'
+<?php return ['enabled'=>true,'shared_secret'=>'testsecret','webhook_confirm'=>'http://127.0.0.1:9099/status.php?code=502'];
+PHP
+kill "$(cat "$SP/confirm.pid")" 2>/dev/null
+MANIBASE_N8N_CONFIG="$SP/n8n409.php" php -S 127.0.0.1:9097 -t site/api >/dev/null 2>&1 & echo $! > "$SP/confirm.pid"; sleep 1
+echo -n "used->200 ";       curl -s -o /dev/null -w '%{http_code}\n' -XPOST http://127.0.0.1:9097/event-confirm.php -d 't=abc123'
+kill "$(cat "$SP/confirm.pid")" 2>/dev/null
+MANIBASE_N8N_CONFIG="$SP/n8n502.php" php -S 127.0.0.1:9097 -t site/api >/dev/null 2>&1 & echo $! > "$SP/confirm.pid"; sleep 1
+echo -n "upstreamfail->502 "; curl -s -o /dev/null -w '%{http_code}\n' -XPOST http://127.0.0.1:9097/event-confirm.php -d 't=abc123'
+kill "$(cat "$SP/confirm.pid")" 2>/dev/null
+# Kill-Switch: keine Config -> 503-Seite
+MANIBASE_N8N_CONFIG=/nonexistent php -S 127.0.0.1:9097 -t site/api >/dev/null 2>&1 & echo $! > "$SP/confirm.pid"; sleep 1
+echo -n "killswitch->503 "; curl -s -o /dev/null -w '%{http_code}\n' -XPOST http://127.0.0.1:9097/event-confirm.php -d 't=abc123'
 ```
-Expected: `200` (POST → Stub → Erfolgsseite) und `400` (ungültiges Token-Zeichen). Stub-Log zeigt jetzt einen `STUB HIT` mit `{"token":"abc123"}`.
+Expected: `post-ok->200`, `post-hits(soll 1): 1` mit `{"token":"abc123"}`, `badchar->400`, `used->200`, `upstreamfail->502`, `killswitch->503`.
 
-- [ ] **Step 4: Stoppen + committen**
+- [ ] **Step 4: Alle Test-Server stoppen + committen**
 
 ```bash
-kill $(jobs -p) 2>/dev/null
+kill "$(cat "$SP/confirm.pid")" 2>/dev/null; kill "$(cat "$SP/stub.pid")" 2>/dev/null
 git add site/api/event-confirm.php
 git commit -m "feat(infotermin): event-confirm.php DOI (GET-Interstitial, POST bestätigt)"
 ```
@@ -483,20 +553,33 @@ Nach dem Newsletter-Block (nach Zeile 87) den Init-Aufruf ergänzen:
         payload.info = info ? info.value.trim() : '';
       }
 
+      // Fehlermeldung mit echtem mailto-Fallback (nur statische Strings -> innerHTML sicher).
+      var MAILTO = '<a href="mailto:kontakt@manibase.de">kontakt@manibase.de</a>';
+      function failHtml(html) { if (err) { err.hidden = false; err.innerHTML = html; } }
+
       if (btn) { btn.disabled = true; }
       fetch('/api/event.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(payload)
       }).then(function (res) {
-        if (!res.ok) { throw new Error('HTTP ' + res.status); }
-        var body = form.querySelector('.eventform__body');
-        var ok = form.querySelector('.eventform__ok');
-        if (body) { body.hidden = true; }
-        if (ok) { ok.hidden = false; ok.focus && ok.focus(); }
+        if (res.ok) {
+          var body = form.querySelector('.eventform__body');
+          var ok = form.querySelector('.eventform__ok');
+          if (body) { body.hidden = true; }
+          if (ok) { ok.hidden = false; if (ok.focus) { ok.focus(); } }
+          return;
+        }
+        if (btn) { btn.disabled = false; }
+        if (res.status === 503) {
+          // Kill-Switch: Formular bewusst geschlossen (Spec: eigener Text + mailto).
+          failHtml('Die Anmeldung ist gerade nicht möglich. Bitte schreiben Sie uns kurz an ' + MAILTO + '.');
+        } else {
+          failHtml('Das hat gerade nicht geklappt. Bitte versuchen Sie es erneut oder schreiben Sie an ' + MAILTO + '.');
+        }
       }).catch(function () {
         if (btn) { btn.disabled = false; }
-        fail('Das hat gerade nicht geklappt. Bitte versuchen Sie es erneut oder schreiben Sie an kontakt@manibase.de.');
+        failHtml('Das hat gerade nicht geklappt. Bitte versuchen Sie es erneut oder schreiben Sie an ' + MAILTO + '.');
       });
     });
   }
@@ -814,7 +897,51 @@ git commit -m "feat(infotermin): Datenschutz-Abschnitt Veranstaltungsanmeldung"
 
 ---
 
-## Task 9: Integrations-/Browser-Verifikation + Markencheck
+## Task 9: nginx-Location-Snippet + Deploy-Abhängigkeit (versioniert)
+
+**Files:**
+- Create: `docs/deploy/nginx-event-locations.conf`
+
+- [ ] **Step 1: Snippet schreiben** (Muster wie die bestehende `/api/newsletter.php`-Location; exakte `location =`-Pfade, Rate-Limit, kleiner Body-Cap, PHP-FPM)
+
+```nginx
+# manibase.de — Infotermin-Endpunkte. In den server{}-Block des vhost aufnehmen.
+# Die limit_req_zone gehört in den http{}-Kontext (einmalig, ggf. schon für den
+# Newsletter vorhanden — dann NICHT doppelt anlegen, Namen wiederverwenden):
+#   limit_req_zone $binary_remote_addr zone=manibase_forms:10m rate=5r/m;
+#
+# Produktiv wird NUR exakt diese beiden Pfade als PHP ausgeführt (Rest kein PHP).
+
+location = /api/event.php {
+    limit_req zone=manibase_forms burst=3 nodelay;
+    client_max_body_size 8k;
+    include snippets/fastcgi-php.conf;         # bzw. die im vhost genutzte PHP-FPM-Include
+    fastcgi_pass unix:/run/php/php8.4-fpm.sock; # Socket wie beim Newsletter-Endpunkt
+}
+
+location = /api/event-confirm.php {
+    limit_req zone=manibase_forms burst=5 nodelay;
+    client_max_body_size 8k;
+    include snippets/fastcgi-php.conf;
+    fastcgi_pass unix:/run/php/php8.4-fpm.sock;
+}
+```
+
+- [ ] **Step 2: Syntax grob prüfen** (Klammern/Semikolons)
+
+Run: `grep -c 'location =' docs/deploy/nginx-event-locations.conf`
+Expected: `2`. (Vollständige `nginx -t`-Prüfung erfolgt server-seitig beim Provisionieren, nicht im Repo.)
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add docs/deploy/nginx-event-locations.conf
+git commit -m "feat(infotermin): nginx-Location-Snippet für event-Endpunkte (Deploy-Gate)"
+```
+
+---
+
+## Task 10: Integrations-/Browser-Verifikation + Markencheck
 
 **Files:** keine (nur Verifikation)
 
@@ -828,10 +955,10 @@ Expected: keine Konsolenfehler; Layout markenkonform; Terminkarten wählbar; For
 Run: `event.php` via `php -S` mit Stub-Config (wie Task 2) auf Port 8000 einbinden — einfachste Variante: `php -S 127.0.0.1:8000 -t site` mit `MANIBASE_N8N_CONFIG` auf die Stub-Config; Seite über `http://127.0.0.1:8000/infotermin.html` absenden.
 Expected: gültige Anmeldung → Erfolg-Block „Fast geschafft." sichtbar, Body versteckt; Stub-Log zeigt korrekten Payload (termin/name/unternehmen/email lowercase). Ungültige/fehlende Felder → Fehlermeldung, kein Request.
 
-- [ ] **Step 3: Kill-Switch-Pfad im Frontend**
+- [ ] **Step 3: Kill-Switch-Pfad im Frontend (503-spezifisch)**
 
-Run: denselben Server mit `MANIBASE_N8N_CONFIG=/nonexistent` starten, Formular absenden.
-Expected: `event.php` liefert 503 → Frontend zeigt Fehlermeldung mit `kontakt@manibase.de`-Hinweis (kein „Erfolg").
+Run: denselben Server mit `MANIBASE_N8N_CONFIG=/nonexistent` starten, gültiges Formular absenden.
+Expected: `event.php` liefert 503 → Frontend zeigt **exakt** den 503-Text „Die Anmeldung ist gerade nicht möglich." mit klickbarem `mailto:kontakt@manibase.de`-Link (nicht der generische Fehlertext, kein „Fast geschafft."-Erfolgsblock). Der Unterschied zum generischen Fehler wird bewusst geprüft.
 
 - [ ] **Step 4: Responsive-Check** 320 / 768 / 1024 (Browser-Resize)
 Expected: kein horizontaler Overflow, Terminkarten und Felder umbrechen sauber.
@@ -855,3 +982,11 @@ git add -A && git commit -m "fix(infotermin): Verifikations-Anpassungen Frontend
 - **Kill-Switch = Go-live-Gate:** `enabled=false`/fehlende Config → 503, Frontend-Fallback (verhindert „sendet nichts, zeigt aber Erfolg"). Öffnen erst nach Prod-Smoke (PR2).
 - **Keine Platzhalter:** alle PHP/JS/HTML-Blöcke vollständig; Token-/Feldnamen konsistent (`kenntnisnahme`, `unternehmen`, `termin`, `website`, `info`) zwischen Frontend, Proxy und Payload-Kontrakt.
 - **Testbarkeit:** `php -l`/`node --check` (Syntax), `php -S`+curl-Matrix (Proxy), Browser (Frontend), impeccable (Marke) — angepasst an die statische Site ohne Testframework.
+
+### Eingearbeitete Plan-Review-Findings (Codex, Runde 1)
+
+1. **[P1] Test-Harness fehlerhaft** → Stub (9099) läuft durchgehend, nur der Proxy (9098/9097) wird per eigener PID beendet; Hit-Zähler vor/nach jedem Fall; DOI-Tests für 503/409-410/502 ergänzt (Task 2/3).
+2. **[P1] Keine Prod-Route/Rate-Limit** → versioniertes nginx-Snippet als Lieferbestandteil (Task 9) + explizites Deploy-Gating (PR1 nicht eigenständig deploybar; Go-live hängt an Provisionierung + `enabled=true`).
+3. **[P2] Größen-Cap nach Lesen** → `CONTENT_LENGTH`-Vorabprüfung + gedeckeltes Lesen (8001) + Übergrößen-Test + nginx `client_max_body_size` (Task 2/9).
+4. **[P2] Stilles Feld-Kürzen** → Überlänge/Nicht-String → 422, `mb_strlen`, `JSON_THROW_ON_ERROR`; Grenz-/Typtests (Task 2).
+5. **[P2] 503-Frontendpfad** → eigener 503-Text + `mailto`-Fallback, Browsertest prüft exakt diesen Zustand (Task 4/10).
