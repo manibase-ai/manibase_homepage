@@ -46,16 +46,17 @@ foreach ([
     'username' => 'MANIBASE_ODOO_USERNAME',
     'api_key'  => 'MANIBASE_ODOO_API_KEY',
     'list_id'  => 'MANIBASE_ODOO_LIST_ID',
+    'campaign_id' => 'MANIBASE_ODOO_CAMPAIGN_ID', // optional: DOI-Kampagne (id), für Sofortversand
 ] as $k => $envName) {
     $v = getenv($envName);
     if ($v !== false && $v !== '') { $cfg[$k] = $v; }
 }
-if (count($cfg) < 5) {
-    $configPath = getenv('MANIBASE_ODOO_CONFIG') ?: '/etc/manibase/odoo.php';
-    if (is_file($configPath)) {
-        $fileCfg = require $configPath;
-        if (is_array($fileCfg)) { $cfg += $fileCfg; } // vorhandene (Env-)Keys bleiben
-    }
+// Datei immer laden (Env hat Vorrang via +=), sonst ginge z.B. campaign_id aus
+// der Datei verloren, wenn die 5 Pflicht-Keys bereits aus der Env kommen.
+$configPath = getenv('MANIBASE_ODOO_CONFIG') ?: '/etc/manibase/odoo.php';
+if (is_file($configPath)) {
+    $fileCfg = require $configPath;
+    if (is_array($fileCfg)) { $cfg += $fileCfg; } // vorhandene (Env-)Keys bleiben
 }
 foreach (['url', 'db', 'username', 'api_key', 'list_id'] as $k) {
     if (empty($cfg[$k])) {
@@ -140,25 +141,24 @@ try {
     }
 
     // Bestätigungsmail sofort auslösen statt auf die Cronjobs zu warten.
-    // Odoo verschickt die DOI-Mail sonst über drei nacheinander laufende
-    // Cronjobs (Teilnehmer synchronisieren -> Aktivitäten ausführen -> Mail-
-    // Warteschlange), im Ergebnis bis zu einer halben Stunde Verzögerung.
-    // Hier rufen wir dieselben ORM-Methoden direkt auf: Zustellung in Sekunden.
+    // Odoo verschickt die DOI-Mail sonst über nacheinander laufende Cronjobs
+    // (Teilnehmer synchronisieren -> Aktivitäten ausführen), im Ergebnis bis zu
+    // einer halben Stunde Verzögerung. Hier stoßen wir GEZIELT NUR die
+    // konfigurierte DOI-Kampagne an (campaign_id) — NICHT alle laufenden
+    // Kampagnen, und NICHT die globale Mail-Warteschlange (das würde fachfremde
+    // Kampagnen und wartende Mails ungeplant auslösen).
     //
-    // Bewusst in eigenem try/catch: Schlägt das fehl, ist die Adresse trotzdem
-    // eingetragen und der Nutzer bekommt seine Bestätigung, nur eben verzögert
-    // über die Cronjobs. Die bleiben als Sicherheitsnetz aktiv.
-    try {
-        $camps = $exec('marketing.campaign', 'search', [[['state', '=', 'running']]]);
-        if (is_array($camps) && count($camps) > 0) {
-            $exec('marketing.campaign', 'sync_participants', [$camps]);
-            $exec('marketing.campaign', 'execute_activities', [$camps]);
+    // Ohne campaign_id passiert nichts Sofortiges; die Odoo-Cronjobs holen den
+    // Versand als Sicherheitsnetz nach. Bewusst eigenes try/catch: schlägt es
+    // fehl, ist die Adresse trotzdem eingetragen.
+    if (!empty($cfg['campaign_id'])) {
+        try {
+            $campId = (int) $cfg['campaign_id'];
+            $exec('marketing.campaign', 'sync_participants', [[$campId]]);
+            $exec('marketing.campaign', 'execute_activities', [[$campId]]);
+        } catch (Throwable $e) {
+            error_log('newsletter: sofortversand fehlgeschlagen (cron holt nach): ' . $e->getMessage());
         }
-        // execute_activities versendet in der Praxis direkt; das hier ist nur
-        // Absicherung, falls eine Mail doch in der Warteschlange landet.
-        $exec('mail.mail', 'process_email_queue', [[]]);
-    } catch (Throwable $e) {
-        error_log('newsletter: sofortversand fehlgeschlagen (cron holt nach): ' . $e->getMessage());
     }
 } catch (Throwable $e) {
     error_log('newsletter: ' . $e->getMessage());
