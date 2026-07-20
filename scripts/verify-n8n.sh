@@ -96,8 +96,8 @@ sval wf-6-cleanup  'Europe/Berlin'               || err "wf-6: Europe/Berlin feh
 sval wf-2-anmeldung-confirm 'TZID=Europe/Berlin' || err "wf-2: ICS TZID fehlt"
 
 # 8) Cleanup: beide Löschpfade (termin + created)
-sval wf-6-cleanup 'termin'  || err "wf-6: Termin-Löschpfad fehlt"
-sval wf-6-cleanup 'created' || err "wf-6: created-Löschpfad fehlt"
+sval wf-6-cleanup 'termin'      || err "wf-6: Termin-Löschpfad fehlt"
+sval wf-6-cleanup 'create_date' || err "wf-6: create_date-Löschpfad fehlt"
 
 # 9) Platzhalter <-> config-schema BIDIREKTIONAL (Mengengleichheit)
 json_ph=$(grep -rhoE '\{\{CONFIG:[A-Za-z0-9_]+\}\}' "$WF" | sed -E 's/.*CONFIG:([A-Za-z0-9_]+)\}\}/\1/' | sort -u)

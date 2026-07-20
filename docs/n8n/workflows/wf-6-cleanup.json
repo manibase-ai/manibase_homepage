@@ -2,118 +2,54 @@
   "name": "manibase Infotermin – 6 Cleanup (DSGVO-Löschung)",
   "nodes": [
     {
-      "parameters": {
-        "rule": { "interval": [ { "field": "cronExpression", "expression": "0 3 * * *" } ] },
-        "options": { "timezone": "Europe/Berlin" }
-      },
-      "id": "wf6-sched",
-      "name": "Schedule täglich (Europe/Berlin)",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1,
-      "position": [180, 320]
+      "parameters": { "rule": { "interval": [ { "field": "cronExpression", "expression": "0 3 * * *" } ] }, "options": { "timezone": "Europe/Berlin" } },
+      "id": "wf6-sched", "name": "Schedule täglich (Europe/Berlin)", "type": "n8n-nodes-base.scheduleTrigger", "typeVersion": 1, "position": [160, 320]
     },
     {
-      "parameters": {
-        "method": "POST",
-        "url": "={{CONFIG:ODOO_URL}}/jsonrpc",
-        "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"search\",[[\"|\",\"&\",[\"status\",\"=\",\"received\"],\"|\",[\"created_at\",\"<\",\"{{ $now.minus({days:14}).toFormat('yyyy-MM-dd HH:mm:ss') }}\"],[\"termin\",\"<\",\"{{ $now.toISO() }}\"],\"&\",[\"status\",\"=\",\"confirmed\"],[\"termin\",\"<\",\"{{ $now.minus({days:30}).toISO() }}\"]]]]] } }",
-        "options": {}
-      },
-      "id": "wf6-find",
-      "name": "Odoo suchen (received created<now-14d OR termin<now; confirmed termin<now-30d)",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [400, 300]
+      "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"search\",[[\"|\",\"&\",[\"status\",\"=\",\"received\"],\"|\",[\"create_date\",\"<\",\"{{ $now.minus({days:14}).toFormat('yyyy-MM-dd HH:mm:ss') }}\"],[\"termin\",\"<\",\"{{ $now.toISO() }}\"],\"&\",[\"status\",\"=\",\"confirmed\"],[\"termin\",\"<\",\"{{ $now.minus({days:30}).toISO() }}\"]]]]] } }",
+        "options": {} },
+      "id": "wf6-find", "name": "Odoo suchen (received create_date<now-14d OR termin<now; confirmed termin<now-30d)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [380, 300]
     },
+    { "parameters": { "jsCode": "// IDs aus dem JSON-RPC-Result (nicht $json.ids).\nconst ids=($json.result)||[];\nreturn [{ json:{ ids, count:ids.length } }];" }, "id": "wf6-ids", "name": "IDs aus result", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [600, 300] },
     {
-      "parameters": {
-        "jsCode": "// IDs aus dem JSON-RPC-Result holen (nicht $json.ids).\nconst ids = ($json.result)||[];\nreturn [{ json: { ids, count: ids.length } }];"
-      },
-      "id": "wf6-ids",
-      "name": "IDs aus result",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [620, 300]
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "={{CONFIG:ODOO_URL}}/jsonrpc",
-        "sendBody": true, "specifyBody": "json",
+      "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
         "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"search\",[[[\"reg_id\",\"in\",{{ JSON.stringify($json.ids) }}]]]]] } }",
-        "options": {}
-      },
-      "id": "wf6-find-outbox",
-      "name": "Zugehörige outbox-Rows suchen",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [840, 220]
+        "options": {} },
+      "id": "wf6-find-outbox", "name": "Zugehörige outbox-Rows suchen", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [820, 220]
     },
     {
-      "parameters": {
-        "method": "POST",
-        "url": "={{CONFIG:ODOO_URL}}/jsonrpc",
-        "sendBody": true, "specifyBody": "json",
+      "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
         "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"unlink\",[{{ JSON.stringify($json.result) }}]] } }",
-        "options": {}
-      },
-      "id": "wf6-unlink-outbox",
-      "name": "outbox unlink (erst Kinder)",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [1060, 220],
-      "onError": "continueErrorOutput"
+        "options": {} },
+      "id": "wf6-unlink-outbox", "name": "outbox unlink (erst Kinder)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1040, 220], "onError": "continueErrorOutput"
     },
     {
-      "parameters": {
-        "method": "POST",
-        "url": "={{CONFIG:ODOO_URL}}/jsonrpc",
-        "sendBody": true, "specifyBody": "json",
+      "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
         "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"unlink\",[{{ JSON.stringify($('IDs aus result').item.json.ids) }}]] } }",
-        "options": {}
-      },
-      "id": "wf6-unlink-reg",
-      "name": "reg unlink/anonymisieren (dann Eltern)",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [1280, 300],
-      "onError": "continueErrorOutput"
+        "options": {} },
+      "id": "wf6-unlink-reg", "name": "reg unlink/anonymisieren (dann Eltern)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1260, 300], "onError": "continueErrorOutput"
     },
     {
-      "parameters": {
-        "jsCode": "// Audit lead-unabhängig: nur Zählwerte, keine PII.\nconst deleted = $('IDs aus result').item.json.count || 0;\nreturn [{ json: { audit: { deleted, at: 'run' } } }];"
-      },
-      "id": "wf6-audit",
-      "name": "Audit-Zählwerte (ohne PII)",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [1500, 300]
+      "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_audit\",\"create\",[{\"ts\":\"{{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}\",\"deleted\":{{ ($json.result === true) ? $('IDs aus result').item.json.count : 0 }}}]] } }",
+        "options": {} },
+      "id": "wf6-audit", "name": "Audit persistieren (x_infotermin_audit, PII-frei, aus unlink-Erfolg)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1480, 300]
     },
     {
-      "parameters": {
-        "method": "POST",
-        "url": "https://graph.microsoft.com/v1.0/users/{{CONFIG:SENDER}}/sendMail",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "oAuth2Api",
-        "sendBody": true, "specifyBody": "json",
+      "parameters": { "method": "POST", "url": "https://graph.microsoft.com/v1.0/users/{{CONFIG:SENDER}}/sendMail", "authentication": "genericCredentialType", "genericAuthType": "oAuth2Api", "sendBody": true, "specifyBody": "json",
         "jsonBody": "={ \"message\": { \"subject\": \"Cleanup-Fehler Infotermin\", \"body\": { \"contentType\": \"Text\", \"content\": \"Cleanup-Lauf meldet einen Fehler, bitte prüfen.\" }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{CONFIG:TEAM_NOTIFY_TO}}\" } }] } }",
-        "options": {}
-      },
-      "id": "wf6-alert",
-      "name": "Graph Alarm bei Fehler",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4,
-      "position": [1280, 480]
+        "options": {} },
+      "id": "wf6-alert", "name": "Graph Alarm bei Fehler", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1260, 500]
     }
   ],
   "connections": {
-    "Schedule täglich (Europe/Berlin)": { "main": [[{ "node": "Odoo suchen (received created<now-14d OR termin<now; confirmed termin<now-30d)", "type": "main", "index": 0 }]] },
-    "Odoo suchen (received created<now-14d OR termin<now; confirmed termin<now-30d)": { "main": [[{ "node": "IDs aus result", "type": "main", "index": 0 }]] },
+    "Schedule täglich (Europe/Berlin)": { "main": [[{ "node": "Odoo suchen (received create_date<now-14d OR termin<now; confirmed termin<now-30d)", "type": "main", "index": 0 }]] },
+    "Odoo suchen (received create_date<now-14d OR termin<now; confirmed termin<now-30d)": { "main": [[{ "node": "IDs aus result", "type": "main", "index": 0 }]] },
     "IDs aus result": { "main": [[{ "node": "Zugehörige outbox-Rows suchen", "type": "main", "index": 0 }]] },
     "Zugehörige outbox-Rows suchen": { "main": [[{ "node": "outbox unlink (erst Kinder)", "type": "main", "index": 0 }]] },
     "outbox unlink (erst Kinder)": { "main": [[{ "node": "reg unlink/anonymisieren (dann Eltern)", "type": "main", "index": 0 }], [{ "node": "Graph Alarm bei Fehler", "type": "main", "index": 0 }]] },
-    "reg unlink/anonymisieren (dann Eltern)": { "main": [[{ "node": "Audit-Zählwerte (ohne PII)", "type": "main", "index": 0 }], [{ "node": "Graph Alarm bei Fehler", "type": "main", "index": 0 }]] }
+    "reg unlink/anonymisieren (dann Eltern)": { "main": [[{ "node": "Audit persistieren (x_infotermin_audit, PII-frei, aus unlink-Erfolg)", "type": "main", "index": 0 }], [{ "node": "Graph Alarm bei Fehler", "type": "main", "index": 0 }]] }
   },
   "settings": { "executionOrder": "v1" }
 }

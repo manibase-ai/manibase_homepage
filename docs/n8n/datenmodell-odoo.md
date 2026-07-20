@@ -9,10 +9,14 @@ Anlegen per Odoo Studio (Felder + „SQL Constraints") oder als kleines Modul.
 | Feld | Typ | Zweck |
 |------|-----|-------|
 | `email_norm` | Char | normalisierte E-Mail (lowercase, trim) |
+| `name` | Char | Name (für crm.lead-Spiegel nach Bestätigung) |
+| `unternehmen` | Char | Firma (für crm.lead-Spiegel) |
 | `termin` | Char | offset-ISO, z. B. `2026-07-29T19:30:00+02:00` |
 | `status` | Selection | `received` → `confirmed` |
 | `token_digest` | Char | SHA-256-Hex des DOI-Tokens (nie Klartext) |
-| `created_at` | Datetime | Anlagezeit (für Cleanup-Frist) |
+
+Für die Cleanup-Frist wird Odoos **automatisches `create_date`** genutzt (kein eigenes Feld
+nötig — jedes Odoo-Modell hat es).
 
 **SQL-Constraint (Pflicht):**
 ```python
@@ -57,6 +61,16 @@ Outbox je Mail: (kein Row) ──create──▶ sending ──Graph ok──▶
 **Reconciliation-Query** (Betrieb/Abnahme): `state = sending AND ts < now-15min`
 → manuell prüfen (Graph-Postausgang), dann auf `sent` oder `failed_unknown` setzen. **Kein**
 Auto-Retry (bei transaktionalen Event-Mails ist ein Zweifelsfall besser als Doppelmail).
+
+## Modell `x_infotermin_audit` (Cleanup-Nachweis, PII-frei)
+
+| Feld | Typ | Zweck |
+|------|-----|-------|
+| `ts` | Datetime | Laufzeitpunkt |
+| `deleted` | Integer | Anzahl gelöschter/anonymisierter Registrierungen (aus den tatsächlichen unlink-Ergebnissen) |
+
+WF-6 schreibt je Lauf einen Datensatz (keine personenbezogenen Daten). Erfüllt die zugesagte,
+lead-unabhängige Löschdokumentation.
 
 ## crm.lead-Spiegel
 
