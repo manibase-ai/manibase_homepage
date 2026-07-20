@@ -39,10 +39,10 @@
         <div class="eventform__body">
           <div class="eventform__hp" aria-hidden="true"><label>Website (bitte frei lassen)<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
 
-          <div class="field"><label for="ip-name">Name</label><input id="ip-name" name="name" type="text" autocomplete="name" required></div>
-          <div class="field"><label for="ip-firma">Unternehmen</label><input id="ip-firma" name="unternehmen" type="text" autocomplete="organization" required></div>
-          <div class="field"><label for="ip-mail">E-Mail</label><input id="ip-mail" name="email" type="email" inputmode="email" autocomplete="email" required></div>
-          <div class="field"><label for="ip-info">Zusätzliche Info für uns: <span class="field__opt">(optional)</span></label><textarea id="ip-info" name="info" rows="3"></textarea></div>
+          <div class="field"><label for="ip-name">Name</label><input id="ip-name" name="name" type="text" autocomplete="name" maxlength="120" required></div>
+          <div class="field"><label for="ip-firma">Unternehmen</label><input id="ip-firma" name="unternehmen" type="text" autocomplete="organization" maxlength="120" required></div>
+          <div class="field"><label for="ip-mail">E-Mail</label><input id="ip-mail" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" required></div>
+          <div class="field"><label for="ip-info">Zusätzliche Info für uns: <span class="field__opt">(optional)</span></label><textarea id="ip-info" name="info" rows="3" maxlength="2000"></textarea></div>
 
           <label class="consent"><input type="checkbox" name="kenntnisnahme" required><span>Ich nehme zur Kenntnis, dass manibase meine Angaben verwendet, um mit mir Kontakt zur möglichen Zusammenarbeit aufzunehmen. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</span></label>
 

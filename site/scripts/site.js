@@ -156,9 +156,22 @@
           return;
         }
         if (btn) { btn.disabled = false; }
+        var code = r.data && r.data.error;
         if (r.status === 503) {
           // Kill-Switch: Formular bewusst geschlossen (Spec: eigener Text + mailto).
           failHtml('Die Anmeldung ist gerade nicht möglich. Bitte schreiben Sie uns kurz an ' + MAILTO + '.');
+        } else if (r.status === 422 || r.status === 413) {
+          // Validierungsfehler serverseitig: konkret sagen, was zu korrigieren ist
+          // (sonst versucht der Nutzer denselben ungültigen Wert erneut).
+          if (code === 'invalid_email') {
+            fail('Bitte prüfen Sie Ihre E-Mail-Adresse.', mail);
+          } else if (code === 'field_too_long' || r.status === 413) {
+            fail('Ihre Eingabe ist zu lang. Bitte kürzen Sie Name, Unternehmen oder Nachricht.');
+          } else if (code === 'consent_required') {
+            fail('Bitte bestätigen Sie die Kenntnisnahme.', consent);
+          } else {
+            fail('Bitte prüfen Sie Ihre Angaben und versuchen Sie es erneut.');
+          }
         } else {
           failHtml('Das hat gerade nicht geklappt. Bitte versuchen Sie es erneut oder schreiben Sie an ' + MAILTO + '.');
         }
