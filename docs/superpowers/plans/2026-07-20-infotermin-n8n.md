@@ -38,64 +38,93 @@ Die 6 n8n-JSONs sind umfangreiche Export-Strukturen. Der Plan spezifiziert je Wo
 
 ```bash
 #!/usr/bin/env bash
-# Statische Gates für die Infotermin-n8n-Artefakte. Kein Ausführungsbeweis
-# (der kommt aus dem Abnahmeprotokoll in der Zielinstanz), sondern Struktur-,
-# Konsistenz- und Sicherheits-Checks.
+# Strikte statische Gates für die Infotermin-n8n-Artefakte. Kein Ausführungs-
+# beweis (der kommt aus dem Abnahmeprotokoll in der Zielinstanz), aber echte
+# jq-Struktur-, Konsistenz- und Sicherheits-Checks, die semantisch kaputte
+# Vorlagen NICHT grün melden.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 WF=docs/n8n/workflows
+SCHEMA=docs/n8n/config-schema.md
+N8N_MIN_VERSION="1.60.0"   # Vorlagen gegen diese n8n-Version erstellt (Version-Pin)
 fail=0
-note(){ printf '%s\n' "$*"; }
 err(){ printf 'FAIL: %s\n' "$*"; fail=1; }
+note(){ printf '%s\n' "$*"; }
 
-# 1) Alle Workflow-JSONs valid + erwartete Struktur
-for f in "$WF"/wf-*.json; do
-  jq empty "$f" 2>/dev/null || { err "$f: kein valides JSON"; continue; }
-  jq -e '.nodes and (.nodes|length>0)' "$f" >/dev/null || err "$f: keine nodes"
-  jq -e '.connections' "$f" >/dev/null || err "$f: keine connections"
-  # mind. ein Trigger-Node (webhook | scheduleTrigger | manualTrigger)
-  jq -e '[.nodes[].type] | any(test("webhook|scheduleTrigger|manualTrigger"))' "$f" >/dev/null \
-    || err "$f: kein Trigger-Node"
+EXPECTED=(wf-1-anmeldung-empfang wf-2-anmeldung-confirm wf-3-reminder wf-4-interessent wf-5-dankesmail wf-6-cleanup)
+
+# 0) Genau die sechs erwarteten Dateien, keine zusätzlichen
+for n in "${EXPECTED[@]}"; do [ -f "$WF/$n.json" ] || err "$n.json fehlt"; done
+count=$(find "$WF" -maxdepth 1 -name '*.json' | wc -l | tr -d ' ')
+[ "$count" = "6" ] || err "erwartet 6 Workflow-JSONs, gefunden $count"
+
+# helper
+has_type(){ jq -e --arg t "$2" 'any(.nodes[]; .type==$t)' "$WF/$1.json" >/dev/null 2>&1; }
+sval(){ jq -e --arg s "$2" '[.. | strings] | any(contains($s))' "$WF/$1.json" >/dev/null 2>&1; }
+resp_code(){ jq -e --arg c "$2" 'any(.nodes[]; (.type|test("respondToWebhook")) and ((.parameters.responseCode // empty|tostring)==$c))' "$WF/$1.json" >/dev/null 2>&1; }
+
+# 1) Valides JSON + Grundstruktur + typeVersion an jedem Node (Version-Pin)
+for n in "${EXPECTED[@]}"; do
+  f="$WF/$n.json"; [ -f "$f" ] || continue
+  jq empty "$f" 2>/dev/null || { err "$n: kein valides JSON"; continue; }
+  jq -e '(.nodes|type=="array") and (.nodes|length>0)' "$f" >/dev/null || err "$n: nodes fehlen"
+  jq -e '(.connections|type=="object") and (.connections|length>0)' "$f" >/dev/null || err "$n: connections leer"
+  jq -e 'all(.nodes[]; has("typeVersion"))' "$f" >/dev/null || err "$n: Node ohne typeVersion"
 done
 
-# 2) Kein Inline-Secret in den JSONs (nur Credential-Referenzen erlaubt)
-if grep -RniE '"(client_secret|shared_secret|api_key|password)"\s*:\s*"[^"]+"' "$WF" ; then
-  err "Inline-Secret in Workflow-JSON gefunden"
-fi
+# 2) Trigger je WF (konkrete Node-Typen)
+has_type wf-1-anmeldung-empfang n8n-nodes-base.webhook          || err "wf-1: webhook-Trigger fehlt"
+has_type wf-2-anmeldung-confirm n8n-nodes-base.webhook          || err "wf-2: webhook-Trigger fehlt"
+has_type wf-3-reminder          n8n-nodes-base.scheduleTrigger  || err "wf-3: scheduleTrigger fehlt"
+has_type wf-4-interessent       n8n-nodes-base.webhook          || err "wf-4: webhook-Trigger fehlt"
+has_type wf-5-dankesmail        n8n-nodes-base.manualTrigger    || err "wf-5: manualTrigger fehlt"
+has_type wf-6-cleanup           n8n-nodes-base.scheduleTrigger  || err "wf-6: scheduleTrigger fehlt"
 
-# 3) Webhook-WFs: Secret-Check-Referenz (X-Manibase-Secret) vorhanden
-for f in wf-1-anmeldung-empfang wf-2-anmeldung-confirm wf-4-interessent; do
-  grep -q 'X-Manibase-Secret' "$WF/$f.json" || err "$f: Secret-Header-Check fehlt"
+# 3) Kein Inline-Secret: jeder String-Wert mit Secret-Bezug MUSS {{CONFIG:*}} sein
+for n in "${EXPECTED[@]}"; do
+  f="$WF/$n.json"; [ -f "$f" ] || continue
+  bad=$(jq -r '[.. | strings] | .[]' "$f" \
+        | grep -Ei '(client_?secret|shared_secret|api_?key|password)' \
+        | grep -v '{{CONFIG:' || true)
+  [ -n "$bad" ] && err "$n: mögliches Inline-Secret: $(printf '%s' "$bad" | head -1)"
 done
 
-# 4) Atomare Claims: Outbox-/Reg-Modell referenziert
-grep -q 'x_infotermin_reg' "$WF/wf-1-anmeldung-empfang.json" || err "wf-1: x_infotermin_reg fehlt"
-for f in wf-1-anmeldung-empfang wf-2-anmeldung-confirm wf-3-reminder wf-5-dankesmail; do
-  grep -q 'x_infotermin_outbox' "$WF/$f.json" || err "$f: x_infotermin_outbox (Versand-Claim) fehlt"
+# 4) Webhook-WFs: Secret-Header-Check nur via Platzhalter (nicht literal)
+for n in wf-1-anmeldung-empfang wf-2-anmeldung-confirm wf-4-interessent; do
+  sval "$n" 'X-Manibase-Secret'        || err "$n: X-Manibase-Secret-Check fehlt"
+  sval "$n" '{{CONFIG:SHARED_SECRET}}' || err "$n: SHARED_SECRET nur als Platzhalter erlaubt"
+  resp_code "$n" 401                   || err "$n: 401-Respond-Zweig fehlt"
 done
 
-# 5) Confirm-WF: 200/409/410-Response-Codes vorhanden
-for c in 200 409 410; do
-  grep -q "\"$c\"\|responseCode.*$c\|$c" "$WF/wf-2-anmeldung-confirm.json" || err "wf-2: Response $c fehlt"
+# 5) Atomare Claims (DB-Constraint-Muster)
+sval wf-1-anmeldung-empfang 'x_infotermin_reg' || err "wf-1: x_infotermin_reg fehlt"
+sval wf-1-anmeldung-empfang 'create'           || err "wf-1: Odoo create fehlt"
+for n in wf-1-anmeldung-empfang wf-2-anmeldung-confirm wf-3-reminder wf-5-dankesmail; do
+  sval "$n" 'x_infotermin_outbox' || err "$n: x_infotermin_outbox fehlt"
+  sval "$n" 'mail_key'            || err "$n: mail_key (Claim) fehlt"
+  sval "$n" 'failed_unknown'      || err "$n: failed_unknown-Pfad fehlt"
 done
 
-# 6) Reminder + ICS + Zeitzone
-grep -q 'Europe/Berlin' "$WF/wf-3-reminder.json" || err "wf-3: Europe/Berlin fehlt"
-grep -q 'Europe/Berlin' "$WF/wf-6-cleanup.json" || err "wf-6: Europe/Berlin fehlt"
-grep -q 'VTIMEZONE\|TZID=Europe/Berlin' "$WF/wf-2-anmeldung-confirm.json" || err "wf-2: ICS VTIMEZONE fehlt"
+# 6) Confirm-WF: echte respondToWebhook-Nodes mit 200/409/410
+for c in 200 409 410; do resp_code wf-2-anmeldung-confirm "$c" || err "wf-2: respondToWebhook $c fehlt"; done
 
-# 7) Platzhalter <-> config-schema.md Konsistenz
-ph=$(grep -rhoE '\{\{CONFIG:[A-Za-z0-9_]+\}\}' "$WF" | sort -u || true)
-for p in $ph; do
-  key=$(printf '%s' "$p" | sed -E 's/\{\{CONFIG:([A-Za-z0-9_]+)\}\}/\1/')
-  grep -q "$key" docs/n8n/config-schema.md || err "Platzhalter $key nicht in config-schema.md dokumentiert"
-done
+# 7) Zeitzone + ICS
+sval wf-3-reminder 'Europe/Berlin'          || err "wf-3: Europe/Berlin fehlt"
+sval wf-6-cleanup  'Europe/Berlin'          || err "wf-6: Europe/Berlin fehlt"
+sval wf-2-anmeldung-confirm 'TZID=Europe/Berlin' || err "wf-2: ICS TZID fehlt"
 
-# 8) Cleanup-Löschregel beider Pfade dokumentiert
-grep -q 'termin' "$WF/wf-6-cleanup.json" || err "wf-6: Termin-Löschpfad fehlt"
+# 8) Cleanup: beide Löschpfade (termin + created)
+sval wf-6-cleanup 'termin'      || err "wf-6: Termin-Löschpfad fehlt"
+sval wf-6-cleanup 'created'     || err "wf-6: created-Löschpfad fehlt"
 
-[ "$fail" -eq 0 ] && note "verify-n8n: alle statischen Gates bestanden" || { note "verify-n8n: FEHLGESCHLAGEN"; exit 1; }
-exit 0
+# 9) Platzhalter <-> config-schema BIDIREKTIONAL (Mengengleichheit)
+json_ph=$(grep -rhoE '\{\{CONFIG:[A-Za-z0-9_]+\}\}' "$WF" | sed -E 's/.*CONFIG:([A-Za-z0-9_]+)\}\}/\1/' | sort -u)
+doc_ph=$(grep -oE 'CONFIG:[A-Za-z0-9_]+' "$SCHEMA" | sed 's/CONFIG://' | sort -u)
+for k in $json_ph; do grep -qx "$k" <<<"$doc_ph" || err "Platzhalter $k nicht in config-schema.md dokumentiert"; done
+for k in $doc_ph; do grep -qx "$k" <<<"$json_ph" || err "config-schema-Key $k in keinem Workflow verwendet"; done
+
+[ "$fail" -eq 0 ] && { note "verify-n8n: alle statischen Gates bestanden (n8n>=$N8N_MIN_VERSION)"; exit 0; } \
+                  || { note "verify-n8n: FEHLGESCHLAGEN"; exit 1; }
 ```
 
 - [ ] **Step 2: `bash -n` + shellcheck**
@@ -169,9 +198,19 @@ Expected: ≥ 2.
 
 Jede Datei ist ein valides n8n-Export-Objekt `{"name","nodes":[...],"connections":{...},"settings":{...}}`. Platzhalter als `{{CONFIG:KEY}}` in Parameterwerten. Node-Graphen:
 
-- [ ] **Step 1: wf-1-anmeldung-empfang.json** — Webhook(POST) → IF(Header `X-Manibase-Secret` == `{{CONFIG:SHARED_SECRET}}` sonst Respond 401) → Set(normalisieren email_norm/termin) → HTTP(Odoo `create` `x_infotermin_reg`, Unique-Violation-Zweig → HTTP `search_read` bestehend) → Code(Token generieren, SHA-256-Digest, in reg schreiben) → HTTP(Odoo `create` `x_infotermin_outbox` mail_key `doi:<reg_id>`) → HTTP(Graph sendMail DOI-Link `{{CONFIG:...}}/api/event-confirm.php?t=<token>`) → HTTP(outbox state=sent) → Respond 200.
+- [ ] **Step 1: wf-1-anmeldung-empfang.json** (idempotent, Review-R1.1) — Webhook(POST) → IF(Header `X-Manibase-Secret` == `{{CONFIG:SHARED_SECRET}}` sonst Respond 401) → Set(normalisieren email_norm/termin) → Code(Token generieren, SHA-256-Digest berechnen) → HTTP(Odoo `create` `x_infotermin_reg` **mit** token_digest).
+  - **Create-Erfolg (Neuanmeldung):** HTTP(Odoo `create` `x_infotermin_outbox` mail_key `doi:<reg_id>`) → HTTP(Graph sendMail DOI-Link `{{CONFIG:BASE_URL}}/api/event-confirm.php?t=<token>`) → HTTP(outbox state=sent) → Respond 200.
+  - **Unique-Violation (Doppelanmeldung):** **NICHT** neuen Digest schreiben, **NICHT** neuen DOI-Versand auslösen (der erste DOI-Link bleibt gültig) → idempotent Respond 200 (neutral „E-Mail unterwegs"). So wird der bereits versandte Token nicht entwertet.
+  - Abnahmetest (§abnahme, Test-ID `dup-anmeldung`): zweite Anmeldung derselben email+termin → genau 1 gültiger DOI-Link, keine zweite DOI-Mail.
 
-- [ ] **Step 2: wf-2-anmeldung-confirm.json** — Webhook(POST `{token}`) → IF Secret → Code(SHA-256 des Tokens) → HTTP(Odoo `search_read` reg by token_digest) → IF nicht gefunden → Respond **410** ; IF status==confirmed → Respond **409** ; IF TTL überschritten → Respond **410** ; sonst → HTTP(write status=confirmed **nur wenn received**) → HTTP(create outbox `invite:<reg_id>`; Unique-Violation → skip) → Code(ICS bauen: VTIMEZONE Europe/Berlin, UID, DTSTAMP, SEQUENCE, DTSTART;TZID) → HTTP(Graph sendMail Einladung + ICS-Base64-Anhang + Teams-Link des Termins) → HTTP(outbox sent) → Respond **200**.
+- [ ] **Step 2: wf-2-anmeldung-confirm.json** (atomarer Claim, Review-R1.2) — Webhook(POST `{token}`) → IF Secret → Code(SHA-256 des Tokens) → HTTP(Odoo `search_read` reg by token_digest).
+  - IF **nicht gefunden** (auch nach Cleanup) → Respond **410**.
+  - IF **status==confirmed** → Respond **409**.
+  - IF **TTL überschritten** (`termin < now` bzw. >7 Tage) → Respond **410**.
+  - Sonst (`received`, TTL ok): **atomarer Entscheidungspunkt = HTTP(Odoo `create` outbox `invite:<reg_id>`)**:
+    - **Create-Erfolg (Gewinner):** HTTP(write status=confirmed) → Code(ICS: VTIMEZONE Europe/Berlin, UID `<reg_id>@manibase.de`, DTSTAMP, SEQUENCE 0, DTSTART;TZID, 60min) → HTTP(Graph sendMail Einladung + ICS-Base64 + Teams-Link des Termins) → HTTP(outbox `invite` state=sent) → Respond **200**.
+    - **Unique-Violation (Verlierer / paralleler Zweitklick):** ein anderer Lauf bestätigt bereits → Respond **409** (keine zweite Einladung).
+  - Damit: bei parallelem Doppel-Confirm genau **1×200, sonst 409**, genau 1 Einladung (Outbox-Unique = CAS). Abnahmetest-ID `parallel-confirm`.
 
 - [ ] **Step 3: wf-3-reminder.json** — ScheduleTrigger(Europe/Berlin, 4 Cron: `30 19 28 7 *`, `30 18 29 7 *`, `30 19 30 7 *`, `30 18 31 7 *`) → Set(bestimmt Termin + reminder-Typ aus Datum) → HTTP(Odoo `search_read` reg `status=confirmed AND termin=<T>` ohne outbox-Key) → SplitInBatches → HTTP(create outbox `reminder1d|1h:<reg_id>`; Violation→skip) → HTTP(Graph sendMail Reminder + Teams-Link) → HTTP(outbox sent). settings: Concurrency 1.
 
@@ -208,14 +247,36 @@ Expected: „verify-n8n: alle statischen Gates bestanden" (Exit 0). Falls FAIL: 
 **Files:**
 - Create: `docs/n8n/abnahme-protokoll.md`, `docs/n8n/README.md`
 
-- [ ] **Step 1: abnahme-protokoll.md** — nummerierte Go-live-Checkliste: (a) Odoo-Modelle + Constraints angelegt; (b) Entra/Graph RBAC + Negativtest bestanden; (c) Teams-Meetings angelegt, Links in Config; (d) `/etc/manibase/n8n.php` gesetzt, `enabled=false`; (e) nginx-Snippet aktiv, `nginx -t`, echter 503-Test; (f) 6 Workflows importiert + Credentials verdrahtet; (g) `smoke-event.sh` grün; (h) Cross-Workflow-Paralleltest (Doppel-Confirm→1×200/409, 1 Einladung); (i) DOI-Link nach Cleanup→410; (j) ICS-Zeit in Outlook/Apple/Google korrekt; (k) Graph Positiv/Negativ; (l) Cleanup-Testlauf beide Pfade; (m) erst dann `enabled=true` + Link an Innungen. Jede Zeile abhakbar.
+- [ ] **Step 1: abnahme-protokoll.md** — nummerierte, abhakbare Go-live-Checkliste mit **stabilen Test-IDs** (jeder Punkt: Setup / erwarteter DB-Zustand / HTTP-Code / Mailanzahl). Verbindliche, **nicht überspringbare** IDs:
+  - `odoo-models` Odoo-Modelle + `_sql_constraints` (reg unique(email_norm,termin), outbox unique(mail_key)) angelegt.
+  - `graph-rbac` Entra/Graph RBAC + `Test-ServicePrincipalAuthorization` positiv/negativ + echter Negativversand scheitert.
+  - `teams-links` zwei Teams-Meetings, Links in Config.
+  - `config-disabled` `/etc/manibase/n8n.php` gesetzt, `enabled=false`.
+  - `nginx-503` nginx-Snippet aktiv, `nginx -t`, echter `POST /api/event.php` → **503** (nicht 404/PHP-Quelle).
+  - `import-wire` 6 Workflows importiert, Credentials/Config verdrahtet, Concurrency 1 gesetzt.
+  - `smoke` `smoke-event.sh` grün (13 Fälle).
+  - `dup-anmeldung` zweite Anmeldung email+termin → genau 1 gültiger DOI-Link, keine 2. DOI-Mail.
+  - `parallel-confirm` gleichzeitiger Doppel-Confirm → **genau 1×200, sonst 409**, genau 1 Einladung.
+  - `doi-after-cleanup` DOI-Link nach Cleanup des Datensatzes → **410** (nicht 5xx).
+  - `crash-reconcile` Versand-Abbruch nach Graph-Erfolg vor `sent`-Write simulieren → Outbox-Row bleibt `sending`; Reconciliation-Query (`state=sending AND ts<now-15min`) findet sie; **kein** Auto-Retry/Doppelmail; manuelle Auflösung dokumentiert.
+  - `cleanup-confirm-race` Cleanup läuft gleichzeitig mit aktiver Bestätigung → keine inkonsistente Registrierung; späte Bestätigung nach Löschung → `doi-after-cleanup`-Verhalten (410). Erwartete DB-Zustände + Mailanzahl notiert.
+  - `ics-clients` ICS-Zeit in Outlook/Apple/Google = 19:30 Europe/Berlin.
+  - `cleanup-both-paths` Cleanup-Testlauf für `created<now-14d` UND `termin<now`, Audit-Zählwerte ohne PII.
+  - `go-live` erst nach allen obigen: `enabled=true` + Link an Innungen.
 
 - [ ] **Step 2: README.md** — Runbook: Reihenfolge (datenmodell → entra → config → import → smoke → abnahme), Import-Anleitung („Import from File" je WF), Credential-Zuordnung, Verweise auf die anderen Docs, Kill-Switch/`enabled`, Verweis auf PR1-Deploy-Gate.
 
-- [ ] **Step 3: Vollständigkeits-Check** — jeder Master-Spec-§9-Punkt im Protokoll?
+- [ ] **Step 3: Vollständigkeits-Check** — exakte Test-ID-Liste vorhanden (keine fehlt)
 
-Run: `grep -ciE 'nginx|503|honeypot|dedup|cleanup|graph|reminder|ics|409|410|parallel' docs/n8n/abnahme-protokoll.md`
-Expected: ≥ 8 (alle Kernpunkte referenziert).
+Run:
+```bash
+for id in odoo-models graph-rbac teams-links config-disabled nginx-503 import-wire smoke \
+          dup-anmeldung parallel-confirm doi-after-cleanup crash-reconcile cleanup-confirm-race \
+          ics-clients cleanup-both-paths go-live; do
+  grep -q "$id" docs/n8n/abnahme-protokoll.md || echo "FEHLT: $id"
+done; echo "check done"
+```
+Expected: nur „check done", **keine** `FEHLT:`-Zeile.
 
 - [ ] **Step 4: Commit** — `git commit -m "docs(infotermin-n8n): Abnahmeprotokoll + README-Runbook"`
 
@@ -235,3 +296,12 @@ Expected: ≥ 8 (alle Kernpunkte referenziert).
 - **Abdeckung:** 6 Workflows (Task 5), Odoo-Datenmodell mit Constraints (Task 2), Config (Task 3), Entra/Graph-RBAC (Task 4), Abnahme+Runbook (Task 7), Smoke (Task 6), statische Gates (Task 1). DB-atomare Claims, DOI-410-Taxonomie, Cleanup-Doppelpfad, ICS/Zeitzone, kein Inline-Secret — alle in den Tasks referenziert.
 - **Testbarkeit:** `verify-n8n.sh` ist der Repo-Test (Struktur/Konsistenz/Sicherheit); ausführbarer Nachweis via Abnahmeprotokoll (Zielinstanz) — ehrlich abgegrenzt.
 - **Keine Platzhalter im Plan-Sinn:** verify-Skript vollständig inline; JSON-Node-Graphen präzise spezifiziert (Adaptation-Hinweis oben); Doku-Inhalte konkret gelistet.
+
+### Eingearbeitete Plan-Review-Findings (Codex, Runde 1)
+
+1. **[P1] Doppelanmeldung entwertet DOI-Link** → wf-1: Token/DOI nur im Create-Erfolgszweig; Duplicate-Zweig idempotent ohne Neu-Digest (Test `dup-anmeldung`).
+2. **[P1] Parallel-Confirm ohne CAS** → wf-2: `create` des `invite:<reg_id>`-Outbox-Keys ist der atomare Entscheidungspunkt (Gewinner→200, Unique-Violation→409); Test `parallel-confirm` assertiert beide Codes.
+3. **[P1] verify-n8n.sh zu schwach** → jq-basierte Struktur (genau 6 Dateien, konkrete Node-Typen, typeVersion, echte respondToWebhook-Codes 200/401/409/410), Secret-Allowlist, mail_key/failed_unknown/create-Referenzen, bidirektionale Platzhalter↔Config-Mengengleichheit.
+4. **[P1] Laufzeit-Gate unvollständig** → Abnahme-IDs `crash-reconcile` + `cleanup-confirm-race` ergänzt; Vollständigkeitsprüfung als exakte Test-ID-Liste statt Grep-Schwelle.
+
+**Hinweis Task 6 (smoke):** `crash-reconcile` und `cleanup-confirm-race` sind DB-/timing-basiert und stehen als manuelle Abnahmepunkte im Protokoll; `smoke-event.sh` deckt die curl-testbaren Fälle ab.
