@@ -26,7 +26,11 @@ function respond(int $code, array $body): void {
 // fehlt die (optionale) Extension, fällt es auf byteweise Funktionen zurück,
 // statt mit einem Fatal Error abzubrechen (wie newsletter.php ohne mb_*).
 function slen(string $s): int {
-    return function_exists('mb_strlen') ? mb_strlen($s) : strlen($s);
+    if (function_exists('mb_strlen')) { return mb_strlen($s); }
+    // Ohne mbstring UTF-8-codepoint-genau zählen (nicht byteweise), damit z.B.
+    // Umlaute nicht doppelt zählen. Bei invalidem UTF-8 Byte-Fallback.
+    $n = preg_match_all('/./us', $s);
+    return $n === false ? strlen($s) : $n;
 }
 function slower(string $s): string {
     return function_exists('mb_strtolower') ? mb_strtolower($s) : strtolower($s);
@@ -43,6 +47,7 @@ foreach ([
     'shared_secret'       => 'MANIBASE_N8N_SECRET',
     'webhook_anmeldung'   => 'MANIBASE_N8N_WEBHOOK_ANMELDUNG',
     'webhook_interessent' => 'MANIBASE_N8N_WEBHOOK_INTERESSENT',
+    'webhook_confirm'     => 'MANIBASE_N8N_WEBHOOK_CONFIRM',
 ] as $k => $env) {
     $v = getenv($env);
     if ($v !== false && $v !== '') { $cfg[$k] = $v; }
@@ -131,6 +136,14 @@ $payload = [
 ];
 
 if ($form === 'anmeldung') {
+    // DOI-Kette nur annehmen, wenn auch der Bestätigungs-Webhook konfiguriert
+    // ist. Sonst würde die Anmeldung zwar angenommen und die DOI-Mail versandt,
+    // der spätere Bestätigungs-POST aber in event-confirm.php mit 503 enden
+    // (Nutzer sieht Erfolg, kann aber nie abschließen).
+    if (empty($cfg['webhook_confirm'])) {
+        error_log('event.php: webhook_confirm fehlt, Anmeldung nicht abschließbar');
+        respond(503, ['ok' => false, 'error' => 'unavailable']);
+    }
     $termin = $in['termin'] ?? '';
     if (!is_string($termin) || !in_array($termin, $TERMINE, true)) {
         respond(422, ['ok' => false, 'error' => 'invalid_termin']);
