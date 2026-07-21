@@ -162,6 +162,34 @@ doc_ph=$(grep -oE 'CONFIG:[A-Za-z0-9_]+' "$SCHEMA" | sed 's/CONFIG://' | sort -u
 for k in $json_ph; do grep -qx "$k" <<<"$doc_ph" || err "Platzhalter $k nicht in config-schema.md dokumentiert"; done
 for k in $doc_ph; do grep -qx "$k" <<<"$json_ph" || err "config-schema-Key $k in keinem Workflow verwendet"; done
 
+# 10c) Switch-Nodes: fallbackOutput gehoert bei v3 in .parameters.options. Auf oberster
+#      Ebene ignoriert n8n ihn still, der Extra-Ausgang entsteht nicht, und Items, die auf
+#      keine Regel passen, verschwinden ohne Antwort (Webhook haengt bis zum Timeout).
+#      Zusaetzlich: nie mehr Ausgaenge verdrahten, als der Node ueberhaupt hat.
+for f in "$WF"/wf-*.json; do
+  jq -e '[.nodes[] | select(.type|test("\\.switch$")) | select(.parameters.fallbackOutput != null)] | length == 0' \
+    "$f" >/dev/null 2>&1 || err "$(basename "$f"): switch mit fallbackOutput auf oberster Ebene (gehoert in options)"
+  bad=$(jq -r --arg dummy x '
+    . as $doc | [ $doc.nodes[] | select(.type|test("\\.switch$"))
+      | . as $n
+      | ((($n.parameters.rules.values // []) | length)
+         + (if $n.parameters.options.fallbackOutput == "extra" then 1 else 0 end)) as $outs
+      | (($doc.connections[$n.name].main // []) | length) as $wired
+      | select($wired > $outs) | "\($n.name): \($wired) verdrahtet, nur \($outs) Ausgaenge" ] | .[]' "$f")
+  [ -z "$bad" ] || err "$(basename "$f"): $bad"
+done
+
+# 10d) Odoo-Antworten werden mit x_-Praefix gelesen. Die Umbenennung auf technische
+#      Feldnamen hat am 21.07.2026 nur die ANFRAGEN erfasst; die Code-Nodes lasen die
+#      ANTWORTEN weiter als r.email_norm usw. Ergebnis: undefined statt Fehler - der
+#      Graph-Versand ging mit leerem Empfaenger raus und die TTL-Pruefung (Date.parse
+#      von undefined -> NaN, falsy) fiel stillschweigend aus. Konvention im Repo: eine
+#      Odoo-Zeile heisst in jsCode immer `r`.
+if grep -oE '\br\.(email_norm|unternehmen|token_digest|mail_key|termin|status|state|deleted)\b' "$WF"/wf-*.json >/dev/null 2>&1; then
+  grep -oE '\br\.(email_norm|unternehmen|token_digest|mail_key|termin|status|state|deleted)\b' "$WF"/wf-*.json
+  err "Odoo-Zeile ohne x_-Praefix gelesen (s. o.)"
+fi
+
 # 10a) $now-Lint. n8n wertet $now in der WORKFLOW-Zeitzone aus; Odoo speichert Datetime
 #      IMMER in UTC. Ohne explizites .toUTC() haengt der geschriebene Zeitstempel davon ab,
 #      ob settings.timezone gesetzt ist (sonst Instanz-Default, z. B. America/New_York).

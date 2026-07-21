@@ -24,7 +24,7 @@
       "id": "wf3-find", "name": "Odoo search_read confirmed + Termin", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [560, 340]
     },
     {
-      "parameters": { "jsCode": "// Result-Array in Einzel-Items je Teilnehmer aufspalten, kind/teams mitführen.\nconst rows=($json.result)||[];\nconst m=$('Termin + Reminder-Typ + Teams-Link').item.json;\nreturn rows.map(r=>({ json:{ reg_id:r.id, email_norm:r.email_norm, kind:m.kind, teams:m.teams } }));" },
+      "parameters": { "jsCode": "// Result-Array in Einzel-Items je Teilnehmer aufspalten, kind/teams mitführen.\nconst rows=($json.result)||[];\nconst m=$('Termin + Reminder-Typ + Teams-Link').item.json;\nreturn rows.map(r=>({ json:{ reg_id:r.id, email_norm:r.x_email_norm, kind:m.kind, teams:m.teams } }));" },
       "id": "wf3-expand", "name": "Result -> Items je Teilnehmer", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [760, 340]
     },
     { "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } }, "id": "wf3-if-finderr", "name": "IF Teilnehmer-Search-Fehler?", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [660, 500] },

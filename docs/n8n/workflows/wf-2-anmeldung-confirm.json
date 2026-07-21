@@ -12,7 +12,7 @@
       "id": "wf2-find-reg", "name": "Odoo search_read reg by token_digest", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [700, 380]
     },
     {
-      "parameters": { "jsCode": "// Result auspacken + TTL offset-korrekt (Termin-ISO trägt +02:00; create_date ist UTC).\nif($json.error!==undefined) return [{ json:{ outcome:'error' } }];\nconst rows=$json.result||[];\nif(rows.length===0) return [{ json:{ outcome:'not_found' } }];\nconst r=rows[0];\nconst terminMs=Date.parse(r.termin);\nconst createdMs=r.create_date?Date.parse((r.create_date+'').replace(' ','T')+'Z'):0;\nconst expired=(terminMs && terminMs<Date.now()) || (createdMs && (Date.now()-createdMs)/86400000>7);\nif(expired) return [{ json:{ outcome:'expired' } }];\nreturn [{ json:{ outcome:'proceed', reg_id:r.id, status:r.status, termin:r.termin, email_norm:r.email_norm, name:r.name, unternehmen:r.unternehmen } }];" },
+      "parameters": { "jsCode": "// Result auspacken + TTL offset-korrekt (Termin-ISO trägt +02:00; create_date ist UTC).\nif($json.error!==undefined) return [{ json:{ outcome:'error' } }];\nconst rows=$json.result||[];\nif(rows.length===0) return [{ json:{ outcome:'not_found' } }];\nconst r=rows[0];\nif(!r.x_termin){ return [{ json:{ outcome:'expired' } }]; }\nconst terminMs=Date.parse(r.x_termin);\nconst createdMs=r.create_date?Date.parse((r.create_date+'').replace(' ','T')+'Z'):0;\nconst expired=(terminMs && terminMs<Date.now()) || (createdMs && (Date.now()-createdMs)/86400000>7);\nif(expired) return [{ json:{ outcome:'expired' } }];\nreturn [{ json:{ outcome:'proceed', reg_id:r.id, status:r.x_status, termin:r.x_termin, email_norm:r.x_email_norm, name:r.x_name, unternehmen:r.x_unternehmen } }];" },
       "id": "wf2-map", "name": "Result + TTL (offset-korrekt)", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [900, 380]
     },
     {
@@ -20,7 +20,7 @@
         { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.outcome }}", "rightValue": "error", "operator": { "type": "string", "operation": "equals" } } ] }, "outputKey": "error" },
         { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.outcome }}", "rightValue": "not_found", "operator": { "type": "string", "operation": "equals" } } ] }, "outputKey": "gone" },
         { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.outcome }}", "rightValue": "expired", "operator": { "type": "string", "operation": "equals" } } ] }, "outputKey": "expired" }
-      ] }, "fallbackOutput": "extra" },
+      ] }, "options": { "fallbackOutput": "extra" } },
       "id": "wf2-switch1", "name": "Switch (error|gone|expired|proceed)", "type": "n8n-nodes-base.switch", "typeVersion": 3, "position": [1120, 380]
     },
     { "parameters": { "respondWith": "json", "options": { "responseCode": 502 }, "responseBody": "={ \"ok\": false, \"error\": \"upstream\" }" }, "id": "wf2-resp-502", "name": "Respond 502 (technischer Fehler)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [1360, 120] },
@@ -32,14 +32,14 @@
       "id": "wf2-find-outbox", "name": "search_read invite-outbox (mail_key)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1360, 460]
     },
     {
-      "parameters": { "jsCode": "// Best-Effort-Dedup (unter Concurrency 1): sent -> 409; sending/failed_unknown ->\n// KEIN Auto-Resend (unbekannter Zustand) -> 409+Reconciliation; keine Row -> senden.\nconst m=$('Result + TTL (offset-korrekt)').item.json;\nconst rows=$json.result||[];\nif($json.error!==undefined) return [{ json:{ decision:'error' } }];\nif(rows.some(r=>r.state==='sent')) return [{ json:{ decision:'already' } }];\nif(rows.length>0) return [{ json:{ decision:'reconcile' } }];\nreturn [{ json:{ decision:'send', reg_id:m.reg_id, termin:m.termin, email_norm:m.email_norm, name:m.name, unternehmen:m.unternehmen } }];" },
+      "parameters": { "jsCode": "// Best-Effort-Dedup (unter Concurrency 1): sent -> 409; sending/failed_unknown ->\n// KEIN Auto-Resend (unbekannter Zustand) -> 409+Reconciliation; keine Row -> senden.\nconst m=$('Result + TTL (offset-korrekt)').item.json;\nconst rows=$json.result||[];\nif($json.error!==undefined) return [{ json:{ decision:'error' } }];\nif(rows.some(r=>r.x_state==='sent')) return [{ json:{ decision:'already' } }];\nif(rows.length>0) return [{ json:{ decision:'reconcile' } }];\nreturn [{ json:{ decision:'send', reg_id:m.reg_id, termin:m.termin, email_norm:m.email_norm, name:m.name, unternehmen:m.unternehmen } }];" },
       "id": "wf2-decide", "name": "Dedup-Entscheidung", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [1580, 460]
     },
     {
       "parameters": { "rules": { "values": [
         { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.decision }}", "rightValue": "send", "operator": { "type": "string", "operation": "equals" } } ] }, "outputKey": "send" },
         { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.decision }}", "rightValue": "error", "operator": { "type": "string", "operation": "equals" } } ] }, "outputKey": "error" }
-      ] }, "fallbackOutput": "extra" },
+      ] }, "options": { "fallbackOutput": "extra" } },
       "id": "wf2-switch2", "name": "Switch (send|error|already/reconcile)", "type": "n8n-nodes-base.switch", "typeVersion": 3, "position": [1800, 460]
     },
     { "parameters": { "respondWith": "json", "options": { "responseCode": 409 }, "responseBody": "={ \"ok\": false, \"error\": \"already_confirmed\" }" }, "id": "wf2-resp-409", "name": "Respond 409 (bereits bestätigt/versandt)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [2020, 620] },
