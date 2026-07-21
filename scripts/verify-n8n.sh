@@ -162,6 +162,27 @@ doc_ph=$(grep -oE 'CONFIG:[A-Za-z0-9_]+' "$SCHEMA" | sed 's/CONFIG://' | sort -u
 for k in $json_ph; do grep -qx "$k" <<<"$doc_ph" || err "Platzhalter $k nicht in config-schema.md dokumentiert"; done
 for k in $doc_ph; do grep -qx "$k" <<<"$json_ph" || err "config-schema-Key $k in keinem Workflow verwendet"; done
 
+# 10a) $now-Lint. n8n wertet $now in der WORKFLOW-Zeitzone aus; Odoo speichert Datetime
+#      IMMER in UTC. Ohne explizites .toUTC() haengt der geschriebene Zeitstempel davon ab,
+#      ob settings.timezone gesetzt ist (sonst Instanz-Default, z. B. America/New_York).
+#      Am 21.07.2026 lag x_ts dadurch 4 Stunden daneben.
+if grep -o "\$now[^\"]*toFormat" "$WF"/wf-*.json | grep -v 'toUTC()' >/dev/null 2>&1; then
+  grep -o "\$now[^\"]*toFormat" "$WF"/wf-*.json | grep -v 'toUTC()'
+  err "\$now.toFormat ohne .toUTC() (Odoo-Datetime ist UTC)"
+fi
+# 10b) jede Workflow-Datei setzt ihre Zeitzone explizit (Schedules + $now).
+for f in "$WF"/wf-*.json; do
+  jq -e '.settings.timezone == "Europe/Berlin"' "$f" >/dev/null 2>&1 \
+    || err "$(basename "$f"): settings.timezone != Europe/Berlin"
+done
+
+# 10) jsonBody der HTTP-Nodes muss gueltiges JSON ergeben.
+#     Am 21.07.2026 waren 10 der 45 Payloads kaputt (eine Klammer zu viel schloss die
+#     execute_kw-args vor dem kwargs-Objekt). n8n meldet das erst zur Laufzeit als
+#     "JSON parameter needs to be valid JSON" — also erst, wenn ein Nutzer davorsteht.
+python3 "$(dirname "$0")/check-n8n-jsonbody.py" "$WF/wf-*.json" >/dev/null 2>&1 \
+  || { python3 "$(dirname "$0")/check-n8n-jsonbody.py" "$WF/wf-*.json"; err "ungueltige jsonBody-Payloads (s. o.)"; }
+
 if [ "$fail" -eq 0 ]; then
   note "verify-n8n: alle statischen Gates bestanden (n8n>=$N8N_MIN_VERSION)"; exit 0
 else

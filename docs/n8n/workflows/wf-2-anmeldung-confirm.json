@@ -7,7 +7,7 @@
     { "parameters": { "jsCode": "const crypto=require('crypto');\nconst token=String(($json.body||{}).token||'');\nreturn [{ json: { token_digest: crypto.createHash('sha256').update(token).digest('hex') } }];" }, "id": "wf2-digest", "name": "SHA-256(token)", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [480, 380] },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"search_read\",[[[\"x_token_digest\",\"=\",{{ JSON.stringify($json.token_digest) }}]]],{\"fields\":[\"id\",\"x_status\",\"x_termin\",\"x_email_norm\",\"x_name\",\"x_unternehmen\",\"create_date\"]}]] } }",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"search_read\",[[[\"x_token_digest\",\"=\",{{ JSON.stringify($json.token_digest) }}]]],{\"fields\":[\"id\",\"x_status\",\"x_termin\",\"x_email_norm\",\"x_name\",\"x_unternehmen\",\"create_date\"]}] } }",
         "options": {} },
       "id": "wf2-find-reg", "name": "Odoo search_read reg by token_digest", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [700, 380]
     },
@@ -27,7 +27,7 @@
     { "parameters": { "respondWith": "json", "options": { "responseCode": 410 }, "responseBody": "={ \"ok\": false, \"error\": \"gone\" }" }, "id": "wf2-resp-410", "name": "Respond 410 (nicht gefunden ODER abgelaufen)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [1360, 240] },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"search_read\",[[[\"x_mail_key\",\"=\",\"invite:{{ $json.reg_id }}\"]]],{\"fields\":[\"id\",\"x_state\"]}]] } }",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"search_read\",[[[\"x_mail_key\",\"=\",\"invite:{{ $json.reg_id }}\"]]],{\"fields\":[\"id\",\"x_state\"]}] } }",
         "options": {} },
       "id": "wf2-find-outbox", "name": "search_read invite-outbox (mail_key)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1360, 460]
     },
@@ -45,7 +45,7 @@
     { "parameters": { "respondWith": "json", "options": { "responseCode": 409 }, "responseBody": "={ \"ok\": false, \"error\": \"already_confirmed\" }" }, "id": "wf2-resp-409", "name": "Respond 409 (bereits bestätigt/versandt)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [2020, 620] },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"create\",[{\"x_mail_key\":\"invite:{{ $json.reg_id }}\",\"x_reg_id\":{{ $json.reg_id }},\"x_state\":\"sending\",\"x_ts\":\"{{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}\"}]] } }",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"create\",[{\"x_mail_key\":\"invite:{{ $json.reg_id }}\",\"x_reg_id\":{{ $json.reg_id }},\"x_state\":\"sending\",\"x_ts\":\"{{ $now.toUTC().toFormat('yyyy-MM-dd HH:mm:ss') }}\"}]] } }",
         "options": {} },
       "id": "wf2-claim", "name": "create invite-outbox (state=sending)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [2020, 380]
     },
@@ -125,5 +125,5 @@
     "Graph Alarm: CRM-Spiegel nachtragen": { "main": [[{ "node": "Respond 200 (bestätigt)", "type": "main", "index": 0 }], [{ "node": "Respond 200 (bestätigt)", "type": "main", "index": 0 }]] },
     "Graph Alarm (Reconciliation nötig)": { "main": [[{ "node": "Respond 200 (bestätigt)", "type": "main", "index": 0 }], [{ "node": "Respond 200 (bestätigt)", "type": "main", "index": 0 }]] }
   },
-  "settings": { "executionOrder": "v1" }
+  "settings": { "executionOrder": "v1", "timezone": "Europe/Berlin" }
 }
