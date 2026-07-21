@@ -515,6 +515,10 @@ section[id]{scroll-margin-top:84px;}
 .eventform__actions { margin-top: 1.5rem; }
 .eventform__err { margin-top: 1rem; color: #b3261e; }
 .eventform__ok { padding: 1rem 0; }
+/* Hinweis unter der Erfolgsmeldung: wo die Mail herkommt und dass sie im Spam landen kann.
+   Steht bewusst da, weil eine frisch registrierte Absenderdomain bei manchen Anbietern
+   erst einmal im Junk-Ordner ankommt, egal wie sauber sie signiert ist. */
+.eventform__hint { margin-top: .75rem; color: var(--color-text-secondary); font-size: .95rem; }
 .eventform textarea {
   width: 100%; font: inherit; padding: .7rem .8rem;
   border: 1px solid var(--color-border, #E2DBCB); border-radius: 10px;

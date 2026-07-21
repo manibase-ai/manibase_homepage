@@ -81,7 +81,7 @@
         "authentication": "genericCredentialType",
         "genericAuthType": "oAuth2Api",
         "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"message\": { \"subject\": \"Danke für Ihr Interesse\", \"body\": { \"contentType\": \"Text\", \"content\": \"Wir melden uns in den nächsten Tagen bei Ihnen.\" }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{ $('Webhook Interessent').item.json.body.email }}\" } }] } }",
+        "jsonBody": "={ \"message\": { \"subject\": \"Danke für Ihr Interesse\", \"body\": { \"contentType\": \"Text\", \"content\": \"Wir melden uns in den nächsten Tagen bei Ihnen.\" }, \"toRecipients\": [{ \"emailAddress\": { \"address\": {{ JSON.stringify($('Webhook Interessent').item.json.body.email) }} } }] } }",
         "options": {}
       },
       "id": "wf4-graph-bestaetigung",

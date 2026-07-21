@@ -224,6 +224,14 @@ done
 python3 "$(dirname "$0")/check-n8n-jsonbody.py" "$WF/wf-*.json" >/dev/null 2>&1 \
   || { python3 "$(dirname "$0")/check-n8n-jsonbody.py" "$WF/wf-*.json"; err "ungueltige jsonBody-Payloads (s. o.)"; }
 
+# 9b) Auch das Runbook muss JEDEN Platzhalter nennen. config-schema.md beschreibt sie,
+#     GO-LIVE.md ist aber die Liste, die beim Go-live abgearbeitet wird: fehlt dort einer,
+#     bleibt er in den Mails stehen und der Teilnehmer liest {{CONFIG:...}} (Review PR #9).
+GOLIVE=docs/n8n/GO-LIVE.md
+for k in $json_ph; do
+  grep -q "CONFIG:$k" "$GOLIVE" || err "Platzhalter $k fehlt in der Ersetzungsliste in GO-LIVE.md"
+done
+
 if [ "$fail" -eq 0 ]; then
   note "verify-n8n: alle statischen Gates bestanden (n8n>=$N8N_MIN_VERSION)"; exit 0
 else

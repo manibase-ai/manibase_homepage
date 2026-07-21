@@ -120,7 +120,7 @@ DTSTART;TZID=Europe/Berlin:20260729T193000
 DTEND;TZID=Europe/Berlin:20260729T203000   ← 60 min
 SUMMARY:manibase Infotermin
 ORGANIZER:mailto:kontakt@manibase.de
-LOCATION:<Teams-URL>
+LOCATION:<Meeting-URL>
 END:VEVENT
 END:VCALENDAR
 ```
