@@ -22,7 +22,9 @@ count=$(find "$WF" -maxdepth 1 -name '*.json' | wc -l | tr -d ' ')
 # helper
 has_type(){ jq -e --arg t "$2" 'any(.nodes[]; .type==$t)' "$WF/$1.json" >/dev/null 2>&1; }
 sval(){ jq -e --arg s "$2" '[.. | strings] | any(contains($s))' "$WF/$1.json" >/dev/null 2>&1; }
-resp_code(){ jq -e --arg c "$2" 'any(.nodes[]; (.type|test("respondToWebhook")) and ((.parameters.responseCode // empty|tostring)==$c))' "$WF/$1.json" >/dev/null 2>&1; }
+# Achtung: der Statuscode gehoert bei respondToWebhook in parameters.options.responseCode.
+# Auf oberster Ebene ignoriert n8n ihn stillschweigend und antwortet 200 (siehe Go-live 21.07.2026).
+resp_code(){ jq -e --arg c "$2" 'any(.nodes[]; (.type|test("respondToWebhook")) and ((.parameters.options.responseCode // empty|tostring)==$c))' "$WF/$1.json" >/dev/null 2>&1; }
 
 # 1) Valides JSON + Grundstruktur + typeVersion an jedem Node (Version-Pin)
 for n in "${EXPECTED[@]}"; do

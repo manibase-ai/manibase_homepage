@@ -3,7 +3,7 @@
   "nodes": [
     { "parameters": { "httpMethod": "POST", "path": "manibase-anmeldung", "responseMode": "responseNode", "options": {} }, "id": "wf1-webhook", "name": "Webhook Anmeldung", "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [120, 400] },
     { "parameters": { "conditions": { "options": { "caseSensitive": true }, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.headers['x-manibase-secret'] }}", "rightValue": "{{CONFIG:SHARED_SECRET}}", "operator": { "type": "string", "operation": "equals" } } ] } }, "id": "wf1-if-secret", "name": "IF Secret ok (X-Manibase-Secret)", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [300, 400] },
-    { "parameters": { "respondWith": "json", "responseCode": 401, "responseBody": "={ \"ok\": false }" }, "id": "wf1-resp-401", "name": "Respond 401", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [480, 660] },
+    { "parameters": { "respondWith": "json", "options": { "responseCode": 401 }, "responseBody": "={ \"ok\": false }" }, "id": "wf1-resp-401", "name": "Respond 401", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [480, 660] },
     { "parameters": { "jsCode": "const crypto=require('crypto');\nconst b=$json.body||{};\nconst email_norm=String(b.email||'').trim().toLowerCase();\nconst token=crypto.randomBytes(24).toString('base64url');\nconst token_digest=crypto.createHash('sha256').update(token).digest('hex');\nreturn [{ json: { email_norm, termin:String(b.termin||''), name:String(b.name||''), unternehmen:String(b.unternehmen||''), token, token_digest } }];" }, "id": "wf1-code", "name": "Normalize + Token/Digest", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [480, 400] },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
@@ -30,7 +30,7 @@
       "id": "wf1-create", "name": "Odoo create x_infotermin_reg", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1120, 300]
     },
     { "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } }, "id": "wf1-if-createerr", "name": "IF create-Fehler?", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [1320, 300] },
-    { "parameters": { "respondWith": "json", "responseCode": 502, "responseBody": "={ \"ok\": false, \"error\": \"upstream\" }" }, "id": "wf1-resp-502", "name": "Respond 502 (technischer Fehler)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [1540, 520] },
+    { "parameters": { "respondWith": "json", "options": { "responseCode": 502 }, "responseBody": "={ \"ok\": false, \"error\": \"upstream\" }" }, "id": "wf1-resp-502", "name": "Respond 502 (technischer Fehler)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [1540, 520] },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
         "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"create\",[{\"x_mail_key\":\"doi:{{ $json.result }}\",\"x_reg_id\":{{ $json.result }},\"x_state\":\"sending\",\"x_ts\":\"{{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}\"}]] } }",
@@ -56,8 +56,8 @@
         "options": {} },
       "id": "wf1-failed", "name": "Odoo write doi-outbox state=failed_unknown", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [2200, 300]
     },
-    { "parameters": { "respondWith": "json", "responseCode": 200, "responseBody": "={ \"ok\": true }" }, "id": "wf1-resp-200", "name": "Respond 200", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [2420, 60] },
-    { "parameters": { "respondWith": "json", "responseCode": 502, "responseBody": "={ \"ok\": false, \"error\": \"mail_failed\" }" }, "id": "wf1-resp-502-mail", "name": "Respond 502 (DOI-Mail fehlgeschlagen)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [2420, 300] },
+    { "parameters": { "respondWith": "json", "options": { "responseCode": 200 }, "responseBody": "={ \"ok\": true }" }, "id": "wf1-resp-200", "name": "Respond 200", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [2420, 60] },
+    { "parameters": { "respondWith": "json", "options": { "responseCode": 502 }, "responseBody": "={ \"ok\": false, \"error\": \"mail_failed\" }" }, "id": "wf1-resp-502-mail", "name": "Respond 502 (DOI-Mail fehlgeschlagen)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [2420, 300] },
 
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
@@ -70,7 +70,7 @@
       "id": "wf1-rec-decide", "name": "Recovery entscheiden (resend nur wenn keine Row)", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [1320, 560]
     },
     { "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.resend }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } }, "id": "wf1-if-resend", "name": "IF resend?", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [1540, 560] },
-    { "parameters": { "respondWith": "json", "responseCode": 200, "responseBody": "={ \"ok\": true }" }, "id": "wf1-resp-200-rec", "name": "Respond 200 (Recovery idempotent)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [1760, 700] },
+    { "parameters": { "respondWith": "json", "options": { "responseCode": 200 }, "responseBody": "={ \"ok\": true }" }, "id": "wf1-resp-200-rec", "name": "Respond 200 (Recovery idempotent)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [1760, 700] },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
         "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"write\",[[{{ $('search_read reg (email_norm+termin) [Dedup]').item.json.result[0].id }}],{\"x_token_digest\":{{ JSON.stringify($('Normalize + Token/Digest').item.json.token_digest) }}}]] } }",
@@ -103,8 +103,8 @@
         "options": {} },
       "id": "wf1-rec-failed", "name": "Recovery: doi-outbox state=failed_unknown", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [2860, 700]
     },
-    { "parameters": { "respondWith": "json", "responseCode": 200, "responseBody": "={ \"ok\": true }" }, "id": "wf1-resp-200-resend", "name": "Respond 200 (Recovery: neu versandt)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [3080, 480] },
-    { "parameters": { "respondWith": "json", "responseCode": 502, "responseBody": "={ \"ok\": false, \"error\": \"mail_failed\" }" }, "id": "wf1-resp-502-resend", "name": "Respond 502 (Recovery: Versand fehlgeschlagen)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [3080, 700] }
+    { "parameters": { "respondWith": "json", "options": { "responseCode": 200 }, "responseBody": "={ \"ok\": true }" }, "id": "wf1-resp-200-resend", "name": "Respond 200 (Recovery: neu versandt)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [3080, 480] },
+    { "parameters": { "respondWith": "json", "options": { "responseCode": 502 }, "responseBody": "={ \"ok\": false, \"error\": \"mail_failed\" }" }, "id": "wf1-resp-502-resend", "name": "Respond 502 (Recovery: Versand fehlgeschlagen)", "type": "n8n-nodes-base.respondToWebhook", "typeVersion": 1, "position": [3080, 700] }
   ],
   "connections": {
     "Webhook Anmeldung": { "main": [[{ "node": "IF Secret ok (X-Manibase-Secret)", "type": "main", "index": 0 }]] },
