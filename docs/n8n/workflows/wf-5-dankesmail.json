@@ -42,7 +42,7 @@
     },
     {
       "parameters": { "method": "POST", "url": "https://graph.microsoft.com/v1.0/users/{{CONFIG:SENDER}}/sendMail", "authentication": "genericCredentialType", "genericAuthType": "oAuth2Api", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"message\": { \"subject\": \"Danke – hier die Aufzeichnung\", \"body\": { \"contentType\": \"HTML\", \"content\": \"<p>Aufzeichnung: <a href='{{CONFIG:RECORDING_URL}}'>ansehen</a></p>\" }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{ $('Loop je Teilnehmer').item.json.email_norm }}\" } }] } }",
+        "jsonBody": "={ \"message\": { \"subject\": \"Danke – hier die Aufzeichnung\", \"body\": { \"contentType\": \"HTML\", \"content\": \"<p>Aufzeichnung: <a href='{{CONFIG:RECORDING_URL}}'>ansehen</a></p>\" }, \"toRecipients\": [{ \"emailAddress\": { \"address\": {{ JSON.stringify($('Loop je Teilnehmer').item.json.email_norm) }} } }] } }",
         "options": {} },
       "id": "wf5-graph", "name": "Graph sendMail Danke + Aufzeichnung", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1360, 420], "onError": "continueErrorOutput"
     },

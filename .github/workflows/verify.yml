@@ -32,6 +32,13 @@ jobs:
       - name: jsonBody-Payloads sind gueltiges JSON
         run: python3 scripts/check-n8n-jsonbody.py "docs/n8n/workflows/wf-*.json"
 
+      # Der statische Checker oben ersetzt jeden Ausdruck durch "X" und sieht deshalb nicht,
+      # ob eine echte Nutzereingabe den Body zerlegt. Dieser Test fuehrt die Code-Nodes aus.
+      - name: Graph-Payloads und ICS gegen boesartige Eingaben
+        run: |
+          npm i --no-save luxon
+          node scripts/test-n8n-payloads.mjs
+
       - name: PHP-Syntax der Proxys
         run: |
           for f in site/api/*.php; do php -l "$f"; done
