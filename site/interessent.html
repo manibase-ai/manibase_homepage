@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interessent · manibase</title>
+<meta name="description" content="Tragen Sie sich als Interessent bei manibase ein.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="assets/signet.png">
+<link rel="preload" href="fonts/Sora.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/HankenGrotesk.woff2" as="font" type="font/woff2" crossorigin>
+<script>document.documentElement.className+=' js';</script>
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="styles/site.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Zum Inhalt springen</a>
+
+<header class="site-header">
+  <div class="container nav">
+    <a class="brand" href="index.html" aria-label="manibase Startseite">
+      <img class="brand__signet" src="assets/signet.png" alt="" width="34" height="34">
+      <span class="wordmark" aria-hidden="true"><span class="mani">mani</span><span class="base">base</span><span class="dot"></span></span>
+    </a>
+  </div>
+</header>
+
+<main id="main">
+  <section class="booking eventpage" aria-labelledby="ip-h">
+    <div class="container">
+      <div class="booking__head">
+        <p class="eventpage__flag">Nur noch 3 Projektpartner</p>
+        <h1 class="h1" id="ip-h">Ich habe Interesse.</h1>
+        <p class="lead">Tragen Sie sich hier ein, dann kommen wir in den nächsten Tagen auf Sie zu. Wir nehmen aktuell nur noch <b>3 Projektpartner</b> auf, die Plätze vergeben wir nach Eingang und einer kurzen Eignung.</p>
+      </div>
+
+      <noscript><p class="eventform__err">Für die Eintragung bitte JavaScript aktivieren, oder schreiben Sie uns an <a href="mailto:kontakt@manibase.de">kontakt@manibase.de</a>.</p></noscript>
+      <form class="eventform" data-form="interessent" method="post" action="/api/event.php" novalidate>
+        <div class="eventform__body">
+          <div class="eventform__hp" aria-hidden="true"><label>Website (bitte frei lassen)<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+
+          <div class="field"><label for="ip-name">Name</label><input id="ip-name" name="name" type="text" autocomplete="name" maxlength="120" required></div>
+          <div class="field"><label for="ip-firma">Unternehmen</label><input id="ip-firma" name="unternehmen" type="text" autocomplete="organization" maxlength="120" required></div>
+          <div class="field"><label for="ip-mail">E-Mail</label><input id="ip-mail" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" required></div>
+          <div class="field"><label for="ip-info">Zusätzliche Info für uns: <span class="field__opt">(optional)</span></label><textarea id="ip-info" name="info" rows="3" maxlength="2000"></textarea></div>
+
+          <label class="consent"><input type="checkbox" name="kenntnisnahme" required><span>Ich nehme zur Kenntnis, dass manibase meine Angaben verwendet, um mit mir Kontakt zur möglichen Zusammenarbeit aufzunehmen. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</span></label>
+
+          <div class="eventform__actions">
+            <button type="submit" class="btn btn--accent">Als Interessent eintragen</button>
+          </div>
+          <p class="eventform__err" role="alert" hidden></p>
+        </div>
+        <div class="eventform__ok" role="status" tabindex="-1" hidden>
+          <h2 class="h2">Danke!</h2>
+          <p class="lead">Wir melden uns in den nächsten Tagen bei Ihnen.</p>
+        </div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer__top">
+      <div>
+        <span class="wordmark on-ink"><span class="mani">mani</span><span class="base">base</span><span class="dot" aria-hidden="true"></span></span>
+        <p class="footer__claim">KI-Helfer für die Büroarbeit, die niemand machen will. Gebaut für inhabergeführte Betriebe.</p>
+      </div>
+      <nav class="footer__col" aria-label="Rechtliches">
+        <p class="footer__h">Rechtliches</p>
+        <a href="impressum.html">Impressum</a>
+        <a href="datenschutz.html">Datenschutz</a>
+      </nav>
+    </div>
+    <div class="footer__bottom">
+      <span>© 2026 manibase UG (haftungsbeschränkt) i. G.</span>
+      <span class="num">Server in Deutschland · DSGVO-konform</span>
+    </div>
+  </div>
+</footer>
+
+<script src="scripts/site.js" defer></script>
+</body>
+</html>

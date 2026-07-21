@@ -10,7 +10,10 @@
  * Liste die Bestätigungsmail und verschiebt Klicker in die Liste
  * "Confirmed contacts". Nur diese Liste gilt als einwilligend, Newsletter-
  * Versand darf ausschließlich an sie gehen. "Newsletter" ist die Warteschlange
- * mit unbestätigten Adressen. Am Proxy ist dafür keine Änderung nötig.
+ * mit unbestätigten Adressen.
+ *
+ * Den Versand der Bestätigungsmail stößt dieser Proxy unten selbst an, damit
+ * sie in Sekunden statt über die Cron-Kette ankommt (siehe Kommentar dort).
  *
  * Zugangsdaten liegen AUSSERHALB des Webroots und NICHT im Repo:
  *   /etc/manibase/odoo.php   (aus site/api/odoo.config.example.php erzeugen,
@@ -43,16 +46,17 @@ foreach ([
     'username' => 'MANIBASE_ODOO_USERNAME',
     'api_key'  => 'MANIBASE_ODOO_API_KEY',
     'list_id'  => 'MANIBASE_ODOO_LIST_ID',
+    'campaign_id' => 'MANIBASE_ODOO_CAMPAIGN_ID', // optional: DOI-Kampagne (id), für Sofortversand
 ] as $k => $envName) {
     $v = getenv($envName);
     if ($v !== false && $v !== '') { $cfg[$k] = $v; }
 }
-if (count($cfg) < 5) {
-    $configPath = getenv('MANIBASE_ODOO_CONFIG') ?: '/etc/manibase/odoo.php';
-    if (is_file($configPath)) {
-        $fileCfg = require $configPath;
-        if (is_array($fileCfg)) { $cfg += $fileCfg; } // vorhandene (Env-)Keys bleiben
-    }
+// Datei immer laden (Env hat Vorrang via +=), sonst ginge z.B. campaign_id aus
+// der Datei verloren, wenn die 5 Pflicht-Keys bereits aus der Env kommen.
+$configPath = getenv('MANIBASE_ODOO_CONFIG') ?: '/etc/manibase/odoo.php';
+if (is_file($configPath)) {
+    $fileCfg = require $configPath;
+    if (is_array($fileCfg)) { $cfg += $fileCfg; } // vorhandene (Env-)Keys bleiben
 }
 foreach (['url', 'db', 'username', 'api_key', 'list_id'] as $k) {
     if (empty($cfg[$k])) {
@@ -134,6 +138,27 @@ try {
     } else {
         $exec('mailing.contact', 'create',
             [['name' => $email, 'email' => $email, 'list_ids' => [[4, $listId]]]]);
+    }
+
+    // Bestätigungsmail sofort auslösen statt auf die Cronjobs zu warten.
+    // Odoo verschickt die DOI-Mail sonst über nacheinander laufende Cronjobs
+    // (Teilnehmer synchronisieren -> Aktivitäten ausführen), im Ergebnis bis zu
+    // einer halben Stunde Verzögerung. Hier stoßen wir GEZIELT NUR die
+    // konfigurierte DOI-Kampagne an (campaign_id) — NICHT alle laufenden
+    // Kampagnen, und NICHT die globale Mail-Warteschlange (das würde fachfremde
+    // Kampagnen und wartende Mails ungeplant auslösen).
+    //
+    // Ohne campaign_id passiert nichts Sofortiges; die Odoo-Cronjobs holen den
+    // Versand als Sicherheitsnetz nach. Bewusst eigenes try/catch: schlägt es
+    // fehl, ist die Adresse trotzdem eingetragen.
+    if (!empty($cfg['campaign_id'])) {
+        try {
+            $campId = (int) $cfg['campaign_id'];
+            $exec('marketing.campaign', 'sync_participants', [[$campId]]);
+            $exec('marketing.campaign', 'execute_activities', [[$campId]]);
+        } catch (Throwable $e) {
+            error_log('newsletter: sofortversand fehlgeschlagen (cron holt nach): ' . $e->getMessage());
+        }
     }
 } catch (Throwable $e) {
     error_log('newsletter: ' . $e->getMessage());
