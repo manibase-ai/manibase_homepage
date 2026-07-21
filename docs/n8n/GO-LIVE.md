@@ -16,7 +16,11 @@ Automation). Die Seiten sind live, aber **geschlossen** (Kill-Switch → HTTP 50
 ## Schritt 1 — Odoo (Studio): 3 Custom-Modelle
 Referenz: [`datenmodell-odoo.md`](datenmodell-odoo.md)
 
-In Odoo **Studio** drei Modelle **nur mit Feldern** anlegen (keine Constraints/Methoden möglich):
+Drei Modelle **nur mit Feldern** anlegen (keine Constraints/Methoden möglich). Auf dieser
+Instanz ging das **nicht über Studio**: `manibase-ug.odoo.com` läuft auf `saas~19.3` und
+`web_studio` ist gar nicht installiert. Angelegt wurde per RPC über `ir.model` /
+`ir.model.fields` (+ je eine `ir.model.access`-Regel für `base.group_user`, sonst ist das
+Modell auch für Admins nicht lesbar):
 
 - **`x_infotermin_reg`**: `email_norm` (Char), `name` (Char), `unternehmen` (Char),
   `termin` (Char), `status` (Selection `received`/`confirmed`), `token_digest` (Char).
@@ -25,9 +29,11 @@ In Odoo **Studio** drei Modelle **nur mit Feldern** anlegen (keine Constraints/M
   `state` (Selection `sending`/`sent`/`failed_unknown`), `ts` (Datetime).
 - **`x_infotermin_audit`**: `ts` (Datetime), `deleted` (Integer).
 
-> **⚠️ Wichtigster manueller Punkt:** Studio vergibt technische Feldnamen (oft `x_studio_...`).
-> Notiere für **jedes** Feld den tatsächlichen technischen Namen (Studio → Feld → „Technischer
-> Name"). Die brauchst du in Schritt 4.
+> **✅ Erledigt am 21.07.2026.** Der Weg über RPC hat den Vorteil, dass die technischen
+> Feldnamen frei wählbar sind: sie heißen `x_email_norm`, `x_name`, `x_unternehmen`,
+> `x_termin`, `x_status`, `x_token_digest`, `x_mail_key`, `x_reg_id`, `x_state`, `x_ts`,
+> `x_deleted` statt `x_studio_...`. Über Studio hätte man jeden Namen einzeln ablesen und in
+> die Workflows übertragen müssen. Das `x_`-Präfix ist bei Odoo für Custom-Felder Pflicht.
 
 ## Schritt 2 — Microsoft Graph (RBAC) für den Mailversand
 Referenz: [`entra-graph-rbac.md`](entra-graph-rbac.md)
@@ -40,23 +46,51 @@ Referenz: [`entra-graph-rbac.md`](entra-graph-rbac.md)
    anlegen — das Secret liegt nur hier.
 
 ## Schritt 3 — Zwei Zoom-Meetings
-Je Termin ein Meeting anlegen (Mi 29.07. 19:30 / Fr 31.07. 19:30), **Join-Links** notieren.
+Je Termin ein Meeting anlegen (Mi 29.07. 19:30 / Fr 31.07. 19:30). Notieren:
+
+- **Join-Link inklusive `?pwd=`** → `MEETING_LINK_T1/T2`. Mit dem eingebetteten Kenncode
+  genügt ein Klick; ohne ihn muss jeder Teilnehmer den Code tippen.
+- **Meeting-ID und Kenncode im Klartext** → `MEETING_INFO_T1/T2`, Form:
+  `Meeting-ID 823 0682 0597, Kenncode 3KfGpd`. Das steht in Einladung, Erinnerung und in der
+  Beschreibung des Kalendereintrags, für alle, die in der App beitreten statt über den Link.
 
 ## Schritt 4 — n8n: 6 Workflows importieren & verdrahten
 Referenzen: [`README.md`](README.md), [`config-schema.md`](config-schema.md)
 
 1. `workflows/wf-1 … wf-6.json` über „Import from File" importieren.
-2. **Feldnamen angleichen:** In jedem JSON die logischen Namen (`email_norm`, `termin`,
-   `token_digest`, `mail_key`, `state`, `ts`, `status`, `name`, `unternehmen`) per Suchen-und-
-   Ersetzen auf die technischen Studio-Namen aus Schritt 1 setzen (sonst „Invalid field").
-3. Alle `{{CONFIG:*}}`-Platzhalter durch echte Werte ersetzen (siehe `config-schema.md`):
-   `ODOO_URL/DB/UID/APIKEY`, `SENDER=kontakt@manibase.de`, `BASE_URL=https://manibase.de`,
-   `MEETING_LINK_T1/T2` (Schritt 3), `TERMIN_T1=2026-07-29T19:30:00+02:00`,
-   `TERMIN_T2=2026-07-31T19:30:00+02:00`, `RECORDING_URL` (später), `TEAM_NOTIFY_TO` (interne
-   Adresse), `SHARED_SECRET` (langer Zufallswert — gleich wie in Schritt 5).
+2. **Feldnamen:** bereits erledigt, die JSONs im Repo nutzen die technischen Namen aus
+   Schritt 1. Nur nötig, falls die Modelle neu mit anderen Namen angelegt werden. Achtung:
+   angeglichen werden muss **beides** — die Odoo-Anfragen *und* die Ausdrücke, die deren
+   Antworten lesen (`r.x_...` in den Code-Nodes). Gate 10d in `verify-n8n.sh` prüft das.
+3. Alle `{{CONFIG:*}}`-Platzhalter durch echte Werte ersetzen (Beschreibungen in
+   [`config-schema.md`](config-schema.md)). Jeder Name hier einzeln ausgeschrieben, damit die
+   Liste greppbar ist und `verify-n8n.sh` sie gegen die tatsächlich verwendeten Platzhalter
+   prüfen kann:
+
+   | Platzhalter | Wert |
+   |---|---|
+   | `CONFIG:ODOO_URL` | `https://manibase-ug.odoo.com` |
+   | `CONFIG:ODOO_DB` | `manibase-ug` |
+   | `CONFIG:ODOO_UID` | `2` |
+   | `CONFIG:ODOO_APIKEY` | aus `/etc/manibase/odoo.php` auf dem Produktivserver |
+   | `CONFIG:SENDER` | `kontakt@manibase.de` |
+   | `CONFIG:BASE_URL` | `https://manibase.de` |
+   | `CONFIG:MEETING_LINK_T1` / `CONFIG:MEETING_LINK_T2` | Join-Links aus Schritt 3 |
+   | `CONFIG:MEETING_INFO_T1` / `CONFIG:MEETING_INFO_T2` | Meeting-ID und Kenncode aus Schritt 3 |
+   | `CONFIG:TERMIN_T1` | `2026-07-29T19:30:00+02:00` |
+   | `CONFIG:TERMIN_T2` | `2026-07-31T19:30:00+02:00` |
+   | `CONFIG:RECORDING_URL` | erst nach der Veranstaltung, siehe Schritt 8 |
+   | `CONFIG:TEAM_NOTIFY_TO` | interne Adresse für Alarme und Interessenten-Meldungen |
+   | `CONFIG:SHARED_SECRET` | langer Zufallswert, identisch mit Schritt 5 |
 4. Den HTTP-Graph-Nodes das OAuth2-Credential aus Schritt 2 zuweisen.
-5. **Wichtig:** bei wf-1/2/3/5/6 im Workflow-Settings-UI **„Limit execution to 1" (Concurrency 1)**
-   setzen — das ist der Serialisierungs-Mechanismus des Best-Effort-Designs.
+5. **Concurrency 1.** Ein Limit **pro Workflow** gibt es in n8n 1.70 nicht (die Public API
+   weist jeden solchen `settings`-Key ab). Die Serialisierung, auf der das Best-Effort-Design
+   beruht, kommt aus der **instanzweiten** Umgebungsvariable `N8N_CONCURRENCY_PRODUCTION_LIMIT=1`.
+   Auf der Zielinstanz ist sie gesetzt, zusammen mit `NODE_FUNCTION_ALLOW_BUILTIN=crypto`
+   (ohne die hat der Code-Node **keinerlei** Krypto: weder `require('crypto')` noch
+   `globalThis.crypto`, und wf-1 kann keinen DOI-Token erzeugen). Beides gehört in die
+   Bundle-Quelle, nicht nur in die gerenderte Compose-Datei — sonst entfernt der nächste
+   Deploy es wieder.
 6. Webhook-URLs von wf-1 (Anmeldung), wf-4 (Interessent), wf-2 (Confirm) notieren.
 
 ## Schritt 5 — Server: Config + nginx
