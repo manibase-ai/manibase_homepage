@@ -1,0 +1,37 @@
+name: Verify
+
+# Statische Gates fuer die Infotermin-n8n-Vorlagen (scripts/verify-n8n.sh) plus
+# ein Syntax-Check der PHP-Proxys.
+#
+# Warum als CI und nicht "vor dem Commit dran denken": beim Go-live am 21.07.2026
+# sind fuenf Fehler erst in der laufenden n8n-Instanz aufgeschlagen, obwohl es fuer
+# vier davon anschliessend ein Gate gab. Ein Gate, das nur lokal auf Zuruf laeuft,
+# faengt genau den Fall nicht ab, der ihn braucht: eine spaetere, gutgemeinte
+# Aenderung an den Vorlagen.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: jq und PHP bereitstellen
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -yqq jq php-cli
+
+      - name: n8n-Vorlagen (statische Gates)
+        run: bash scripts/verify-n8n.sh
+
+      - name: jsonBody-Payloads sind gueltiges JSON
+        run: python3 scripts/check-n8n-jsonbody.py "docs/n8n/workflows/wf-*.json"
+
+      - name: PHP-Syntax der Proxys
+        run: |
+          for f in site/api/*.php; do php -l "$f"; done

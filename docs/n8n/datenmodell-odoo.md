@@ -3,8 +3,9 @@
 **Plattform-Realität:** Die Instanz ist **Odoo Online** (`manibase-ug.odoo.com`). Odoo Online
 erlaubt **keine** Custom-Python-Module — also **weder** eigene Model-Methoden **noch**
 `_sql_constraints`. Die früher geplante DB-Atomizität (Unique-Constraints, transaktionale
-Methode) ist hier **nicht installierbar**. Die Modelle werden daher per **Odoo Studio nur mit
-Feldern** angelegt (keine Constraints, keine Methoden).
+Methode) ist hier **nicht installierbar**. Die Modelle bestehen daher **nur aus Feldern**
+(keine Constraints, keine Methoden) — angelegt per RPC über `ir.model`/`ir.model.fields`
+(Studio wäre der UI-Weg zum selben Ergebnis, ist auf der Instanz aber nicht installiert).
 
 **Nebenläufigkeit (Best-Effort, proportional zur Veranstaltungsgröße):**
 - Jeder zustandsändernde Workflow läuft mit **n8n „Limit execution to 1"** (Concurrency 1, im
@@ -20,23 +21,26 @@ Feldern** angelegt (keine Constraints, keine Methoden).
   braucht: **Upgrade auf Odoo.sh / on-prem** ermöglicht ein Modul mit Unique-Constraints +
   transaktionaler `confirm`-Methode (Upgrade-Pfad, hier bewusst nicht umgesetzt).
 
-> **⚠️ Technische Feldnamen (Studio):** Odoo Studio vergibt für Custom-Felder eigene technische
-> Namen (oft `x_studio_<name>`). Die hier und in den Workflow-JSONs genutzten **logischen** Namen
-> (`email_norm`, `termin`, `token_digest`, `mail_key`, `state`, `ts`, `status`, `name`,
-> `unternehmen`) müssen beim Anlegen entweder exakt als technischer Name gesetzt oder **vor dem
-> Import** in den JSONs per Suchen-und-Ersetzen an die von Studio erzeugten Namen angeglichen
-> werden — sonst „Invalid field". Siehe [`README.md`](README.md#odoo-studio-feldnamen).
+> **✅ Technische Feldnamen (angelegt am 21.07.2026):** Die drei Modelle wurden **nicht** über
+> Studio, sondern per RPC über `ir.model` / `ir.model.fields` angelegt (Odoo `saas~19.3`,
+> `web_studio` ist gar nicht installiert). Dadurch sind die technischen Namen frei gewählt und
+> nicht `x_studio_...`, sondern durchgehend das `x_`-Präfix (in Odoo für Custom-Felder Pflicht)
+> plus logischer Name: `x_email_norm`, `x_name`, `x_unternehmen`, `x_termin`, `x_status`,
+> `x_token_digest`, `x_mail_key`, `x_reg_id`, `x_state`, `x_ts`, `x_deleted`.
+> Die Workflow-JSONs sind bereits auf diese Namen angeglichen (Go-live Schritt 4.2 erledigt);
+> `crm.lead`-Payloads bleiben bewusst auf den Standardfeldern (dort ist `name` echt).
+> Je Modell existiert eine ACL für `base.group_user` (rwcd).
 
 ## Modell `x_infotermin_reg` (Registrierung = Quelle der Wahrheit)
 
 | Feld | Typ | Zweck |
 |------|-----|-------|
-| `email_norm` | Char | normalisierte E-Mail (lowercase, trim) |
-| `name` | Char | Name (für crm.lead-Spiegel nach Bestätigung) |
-| `unternehmen` | Char | Firma (für crm.lead-Spiegel) |
-| `termin` | Char | offset-ISO, z. B. `2026-07-29T19:30:00+02:00` |
-| `status` | Selection | `received` → `confirmed` |
-| `token_digest` | Char | SHA-256-Hex des DOI-Tokens (nie Klartext) |
+| `x_email_norm` | Char | normalisierte E-Mail (lowercase, trim) |
+| `x_name` | Char | Name (für crm.lead-Spiegel nach Bestätigung) |
+| `x_unternehmen` | Char | Firma (für crm.lead-Spiegel) |
+| `x_termin` | Char | offset-ISO, z. B. `2026-07-29T19:30:00+02:00` |
+| `x_status` | Selection | `received` → `confirmed` |
+| `x_token_digest` | Char | SHA-256-Hex des DOI-Tokens (nie Klartext) |
 
 Cleanup-Frist über Odoos automatisches `create_date`. **Dedup:** WF-1 macht vor `create` ein
 `search_read` auf `email_norm`+`termin`; existiert die reg schon → Recovery-Zweig statt Doublette
@@ -46,10 +50,10 @@ Cleanup-Frist über Odoos automatisches `create_date`. **Dedup:** WF-1 macht vor
 
 | Feld | Typ | Zweck |
 |------|-----|-------|
-| `mail_key` | Char | `<typ>:<reg_id>`, z. B. `doi:42`, `invite:42`, `reminder1d:42`, `reminder1h:42`, `thanks:42` |
-| `reg_id` | Many2one → `x_infotermin_reg` | Zuordnung |
-| `state` | Selection | `sending` → `sent` \| `failed_unknown` |
-| `ts` | Datetime | Claim-/Sendezeit |
+| `x_mail_key` | Char | `<typ>:<reg_id>`, z. B. `doi:42`, `invite:42`, `reminder1d:42`, `reminder1h:42`, `thanks:42` |
+| `x_reg_id` | Many2one → `x_infotermin_reg` | Zuordnung |
+| `x_state` | Selection | `sending` → `sent` \| `failed_unknown` |
+| `x_ts` | Datetime | Claim-/Sendezeit |
 
 **Claim = search-before-create (unter Concurrency 1):** vor dem Versand `search_read` auf
 `mail_key`. Existiert eine Row mit `state=sent` → **nicht** erneut senden (409/skip). Existiert
@@ -84,8 +88,8 @@ Inline-Atomizität nur mit Odoo.sh-Modul (Upgrade-Pfad).
 
 | Feld | Typ | Zweck |
 |------|-----|-------|
-| `ts` | Datetime | Laufzeitpunkt |
-| `deleted` | Integer | Anzahl gelöschter/anonymisierter Registrierungen (aus den tatsächlichen unlink-Ergebnissen) |
+| `x_ts` | Datetime | Laufzeitpunkt |
+| `x_deleted` | Integer | Anzahl gelöschter/anonymisierter Registrierungen (aus den tatsächlichen unlink-Ergebnissen) |
 
 WF-6 schreibt je Lauf einen Datensatz (keine personenbezogenen Daten). Erfüllt die zugesagte,
 lead-unabhängige Löschdokumentation.

@@ -20,7 +20,7 @@
       "position": [380, 320]
     },
     {
-      "parameters": { "respondWith": "json", "responseCode": 401, "responseBody": "={ \"ok\": false }" },
+      "parameters": { "respondWith": "json", "options": { "responseCode": 401 }, "responseBody": "={ \"ok\": false }" },
       "id": "wf4-resp-401",
       "name": "Respond 401",
       "type": "n8n-nodes-base.respondToWebhook",
@@ -50,7 +50,7 @@
       "position": [740, 320]
     },
     {
-      "parameters": { "respondWith": "json", "responseCode": 502, "responseBody": "={ \"ok\": false, \"error\": \"upstream\" }" },
+      "parameters": { "respondWith": "json", "options": { "responseCode": 502 }, "responseBody": "={ \"ok\": false, \"error\": \"upstream\" }" },
       "id": "wf4-resp-502",
       "name": "Respond 502 (CRM-Write fehlgeschlagen)",
       "type": "n8n-nodes-base.respondToWebhook",
@@ -92,7 +92,7 @@
       "onError": "continueErrorOutput"
     },
     {
-      "parameters": { "respondWith": "json", "responseCode": 200, "responseBody": "={ \"ok\": true }" },
+      "parameters": { "respondWith": "json", "options": { "responseCode": 200 }, "responseBody": "={ \"ok\": true }" },
       "id": "wf4-resp-200",
       "name": "Respond 200",
       "type": "n8n-nodes-base.respondToWebhook",
@@ -108,5 +108,5 @@
     "Graph interne Benachrichtigung": { "main": [[{ "node": "Graph Bestätigung an Interessent", "type": "main", "index": 0 }], [{ "node": "Graph Bestätigung an Interessent", "type": "main", "index": 0 }]] },
     "Graph Bestätigung an Interessent": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }], [{ "node": "Respond 200", "type": "main", "index": 0 }]] }
   },
-  "settings": { "executionOrder": "v1" }
+  "settings": { "executionOrder": "v1", "timezone": "Europe/Berlin" }
 }

@@ -22,7 +22,11 @@ count=$(find "$WF" -maxdepth 1 -name '*.json' | wc -l | tr -d ' ')
 # helper
 has_type(){ jq -e --arg t "$2" 'any(.nodes[]; .type==$t)' "$WF/$1.json" >/dev/null 2>&1; }
 sval(){ jq -e --arg s "$2" '[.. | strings] | any(contains($s))' "$WF/$1.json" >/dev/null 2>&1; }
-resp_code(){ jq -e --arg c "$2" 'any(.nodes[]; (.type|test("respondToWebhook")) and ((.parameters.responseCode // empty|tostring)==$c))' "$WF/$1.json" >/dev/null 2>&1; }
+# Achtung: der Statuscode gehoert bei respondToWebhook in parameters.options.responseCode.
+# Auf oberster Ebene ignoriert n8n ihn stillschweigend und antwortet 200 (siehe Go-live 21.07.2026).
+# resp_code() beantwortet nur "existiert ein Zweig mit Code X" — ob JEDER Node richtig
+# konfiguriert ist, prueft Gate 6b (sonst deckt ein korrekter 502-Node einen kaputten zweiten).
+resp_code(){ jq -e --arg c "$2" 'any(.nodes[]; (.type|test("respondToWebhook")) and ((.parameters.options.responseCode // empty|tostring)==$c))' "$WF/$1.json" >/dev/null 2>&1; }
 
 # 1) Valides JSON + Grundstruktur + typeVersion an jedem Node (Version-Pin)
 for n in "${EXPECTED[@]}"; do
@@ -107,6 +111,16 @@ done
 # 6) Confirm-WF: echte respondToWebhook-Nodes mit 200/409/410
 for c in 200 409 410; do resp_code wf-2-anmeldung-confirm "$c" || err "wf-2: respondToWebhook $c fehlt"; done
 
+# 6b) JEDER respondToWebhook-Node einzeln: Statuscode NUR in options, nie auf oberster
+#     Ebene. Die Existenzpruefung oben genuegt nicht — bei mehreren Nodes mit demselben
+#     Code deckt ein korrekter den kaputten zu, und dessen Fehlerpfad antwortet wieder 200.
+for f in "$WF"/wf-*.json; do
+  bad=$(jq -r '[ .nodes[] | select(.type|test("respondToWebhook"))
+                 | select((.parameters.responseCode != null) or (.parameters.options.responseCode == null))
+                 | .name ] | .[]' "$f")
+  [ -z "$bad" ] || err "$(basename "$f"): respondToWebhook ohne options.responseCode bzw. mit Code auf oberster Ebene: $(printf '%s' "$bad" | tr '\n' ' ')"
+done
+
 # 7) Zeitzone + ICS
 sval wf-3-reminder 'Europe/Berlin'               || err "wf-3: Europe/Berlin fehlt"
 sval wf-6-cleanup  'Europe/Berlin'               || err "wf-6: Europe/Berlin fehlt"
@@ -159,6 +173,56 @@ json_ph=$(grep -rhoE '\{\{CONFIG:[A-Za-z0-9_]+\}\}' "$WF" | sed -E 's/.*CONFIG:(
 doc_ph=$(grep -oE 'CONFIG:[A-Za-z0-9_]+' "$SCHEMA" | sed 's/CONFIG://' | sort -u)
 for k in $json_ph; do grep -qx "$k" <<<"$doc_ph" || err "Platzhalter $k nicht in config-schema.md dokumentiert"; done
 for k in $doc_ph; do grep -qx "$k" <<<"$json_ph" || err "config-schema-Key $k in keinem Workflow verwendet"; done
+
+# 10c) Switch-Nodes: fallbackOutput gehoert bei v3 in .parameters.options. Auf oberster
+#      Ebene ignoriert n8n ihn still, der Extra-Ausgang entsteht nicht, und Items, die auf
+#      keine Regel passen, verschwinden ohne Antwort (Webhook haengt bis zum Timeout).
+#      Zusaetzlich: nie mehr Ausgaenge verdrahten, als der Node ueberhaupt hat.
+for f in "$WF"/wf-*.json; do
+  jq -e '[.nodes[] | select(.type|test("\\.switch$")) | select(.parameters.fallbackOutput != null)] | length == 0' \
+    "$f" >/dev/null 2>&1 || err "$(basename "$f"): switch mit fallbackOutput auf oberster Ebene (gehoert in options)"
+  bad=$(jq -r --arg dummy x '
+    . as $doc | [ $doc.nodes[] | select(.type|test("\\.switch$"))
+      | . as $n
+      | ((($n.parameters.rules.values // []) | length)
+         + (if $n.parameters.options.fallbackOutput == "extra" then 1 else 0 end)) as $outs
+      | (($doc.connections[$n.name].main // []) | length) as $wired
+      | select($wired > $outs) | "\($n.name): \($wired) verdrahtet, nur \($outs) Ausgaenge" ] | .[]' "$f")
+  [ -z "$bad" ] || err "$(basename "$f"): $bad"
+done
+
+# 10d) Odoo-Antworten werden mit x_-Praefix gelesen. Die Umbenennung auf technische
+#      Feldnamen hat am 21.07.2026 nur die ANFRAGEN erfasst; die Code-Nodes lasen die
+#      ANTWORTEN weiter als r.email_norm usw. Ergebnis: undefined statt Fehler - der
+#      Graph-Versand ging mit leerem Empfaenger raus und die TTL-Pruefung (Date.parse
+#      von undefined -> NaN, falsy) fiel stillschweigend aus.
+#      Bewusst als ALLOWLIST: jede gepflegte Feldliste veraltet mit dem naechsten neuen
+#      Feld. Konvention im Repo: eine Odoo-Zeile heisst in jsCode immer `r`; erlaubt sind
+#      nur die Odoo-Standardfelder und alles mit x_-Praefix.
+bad=$(grep -ohE '\br\.[A-Za-z_][A-Za-z0-9_]*' "$WF"/wf-*.json \
+      | grep -vE '^r\.(x_[A-Za-z0-9_]+|id|create_date|write_date|display_name)$' | sort -u || true)
+[ -z "$bad" ] || { printf '%s\n' "$bad"; err "Odoo-Zeile ohne x_-Praefix gelesen (erlaubt: x_*, id, create_date, write_date, display_name)"; }
+
+# 10a) $now-Lint. n8n wertet $now in der WORKFLOW-Zeitzone aus; Odoo speichert Datetime
+#      IMMER in UTC. Ohne explizites .toUTC() haengt der geschriebene Zeitstempel davon ab,
+#      ob settings.timezone gesetzt ist (sonst Instanz-Default, z. B. America/New_York).
+#      Am 21.07.2026 lag x_ts dadurch 4 Stunden daneben.
+if grep -o "\$now[^\"]*toFormat" "$WF"/wf-*.json | grep -v 'toUTC()' >/dev/null 2>&1; then
+  grep -o "\$now[^\"]*toFormat" "$WF"/wf-*.json | grep -v 'toUTC()'
+  err "\$now.toFormat ohne .toUTC() (Odoo-Datetime ist UTC)"
+fi
+# 10b) jede Workflow-Datei setzt ihre Zeitzone explizit (Schedules + $now).
+for f in "$WF"/wf-*.json; do
+  jq -e '.settings.timezone == "Europe/Berlin"' "$f" >/dev/null 2>&1 \
+    || err "$(basename "$f"): settings.timezone != Europe/Berlin"
+done
+
+# 10) jsonBody der HTTP-Nodes muss gueltiges JSON ergeben.
+#     Am 21.07.2026 waren 10 der 45 Payloads kaputt (eine Klammer zu viel schloss die
+#     execute_kw-args vor dem kwargs-Objekt). n8n meldet das erst zur Laufzeit als
+#     "JSON parameter needs to be valid JSON" — also erst, wenn ein Nutzer davorsteht.
+python3 "$(dirname "$0")/check-n8n-jsonbody.py" "$WF/wf-*.json" >/dev/null 2>&1 \
+  || { python3 "$(dirname "$0")/check-n8n-jsonbody.py" "$WF/wf-*.json"; err "ungueltige jsonBody-Payloads (s. o.)"; }
 
 if [ "$fail" -eq 0 ]; then
   note "verify-n8n: alle statischen Gates bestanden (n8n>=$N8N_MIN_VERSION)"; exit 0
