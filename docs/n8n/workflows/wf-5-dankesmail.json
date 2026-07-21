@@ -4,7 +4,7 @@
     { "parameters": {}, "id": "wf5-manual", "name": "Manuell auslösen (nach Upload der Aufzeichnung)", "type": "n8n-nodes-base.manualTrigger", "typeVersion": 1, "position": [160, 340] },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"search_read\",[[[\"status\",\"=\",\"confirmed\"]]],{\"fields\":[\"id\",\"email_norm\"]}]] } }",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"search_read\",[[[\"x_status\",\"=\",\"confirmed\"]]],{\"fields\":[\"id\",\"x_email_norm\"]}]] } }",
         "options": {} },
       "id": "wf5-find", "name": "Odoo search_read confirmed", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [360, 340]
     },
@@ -25,14 +25,14 @@
     { "parameters": { "options": {} }, "id": "wf5-batch", "name": "Loop je Teilnehmer", "type": "n8n-nodes-base.splitInBatches", "typeVersion": 3, "position": [760, 340] },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"search_read\",[[[\"mail_key\",\"=\",\"thanks:{{ $json.reg_id }}\"]]],{\"fields\":[\"id\"]}]] } }",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"search_read\",[[[\"x_mail_key\",\"=\",\"thanks:{{ $json.reg_id }}\"]]],{\"fields\":[\"id\"]}]] } }",
         "options": {} },
       "id": "wf5-search", "name": "search thanks-outbox (mail_key) [Dedup]", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [860, 340]
     },
     { "parameters": {}, "id": "wf5-done", "name": "Fertig (alle gesendet)", "type": "n8n-nodes-base.noOp", "typeVersion": 1, "position": [760, 160] },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"create\",[{\"mail_key\":\"thanks:{{ $('Loop je Teilnehmer').item.json.reg_id }}\",\"reg_id\":{{ $('Loop je Teilnehmer').item.json.reg_id }},\"state\":\"sending\",\"ts\":\"{{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}\"}]] } }",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"create\",[{\"x_mail_key\":\"thanks:{{ $('Loop je Teilnehmer').item.json.reg_id }}\",\"x_reg_id\":{{ $('Loop je Teilnehmer').item.json.reg_id }},\"x_state\":\"sending\",\"x_ts\":\"{{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}\"}]] } }",
         "options": {} },
       "id": "wf5-outbox", "name": "Claim outbox mail_key thanks (unique)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [960, 340]
     },
@@ -48,13 +48,13 @@
     },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"write\",[[{{ $('Claim outbox mail_key thanks (unique)').item.json.result }}],{\"state\":\"sent\"}]] } }",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"write\",[[{{ $('Claim outbox mail_key thanks (unique)').item.json.result }}],{\"x_state\":\"sent\"}]] } }",
         "options": {} },
       "id": "wf5-sent", "name": "Odoo write outbox state=sent", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1560, 340]
     },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"write\",[[{{ $('Claim outbox mail_key thanks (unique)').item.json.result }}],{\"state\":\"failed_unknown\"}]] } }",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"write\",[[{{ $('Claim outbox mail_key thanks (unique)').item.json.result }}],{\"x_state\":\"failed_unknown\"}]] } }",
         "options": {} },
       "id": "wf5-failed", "name": "Odoo write outbox state=failed_unknown", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1560, 500]
     }

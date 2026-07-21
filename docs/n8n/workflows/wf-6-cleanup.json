@@ -7,7 +7,7 @@
     },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"search\",[[\"|\",\"&\",[\"status\",\"=\",\"received\"],\"|\",[\"create_date\",\"<\",\"{{ $now.minus({days:14}).toFormat('yyyy-MM-dd HH:mm:ss') }}\"],[\"termin\",\"<\",\"{{ $now.toISO() }}\"],\"&\",[\"status\",\"=\",\"confirmed\"],[\"termin\",\"<\",\"{{ $now.minus({days:30}).toISO() }}\"]]]]] } }",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"search\",[[\"|\",\"&\",[\"x_status\",\"=\",\"received\"],\"|\",[\"create_date\",\"<\",\"{{ $now.minus({days:14}).toFormat('yyyy-MM-dd HH:mm:ss') }}\"],[\"x_termin\",\"<\",\"{{ $now.toISO() }}\"],\"&\",[\"x_status\",\"=\",\"confirmed\"],[\"x_termin\",\"<\",\"{{ $now.minus({days:30}).toISO() }}\"]]]]] } }",
         "options": {} },
       "id": "wf6-find", "name": "Odoo suchen (received create_date<now-14d OR termin<now; confirmed termin<now-30d)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [380, 300]
     },
@@ -18,7 +18,7 @@
     { "parameters": { "jsCode": "// IDs aus dem JSON-RPC-Result (nicht $json.ids).\nconst ids=($json.result)||[];\nreturn [{ json:{ ids, count:ids.length } }];" }, "id": "wf6-ids", "name": "IDs aus result", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [760, 380] },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"search\",[[[\"reg_id\",\"in\",{{ JSON.stringify($json.ids) }}]]]]] } }",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"search\",[[[\"x_reg_id\",\"in\",{{ JSON.stringify($json.ids) }}]]]]] } }",
         "options": {} },
       "id": "wf6-find-outbox", "name": "Zugehörige outbox-Rows suchen", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [820, 220]
     },
@@ -36,7 +36,7 @@
     },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_audit\",\"create\",[{\"ts\":\"{{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}\",\"deleted\":{{ ($json.result === true) ? $('IDs aus result').item.json.count : 0 }}}]] } }",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_audit\",\"create\",[{\"x_ts\":\"{{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}\",\"x_deleted\":{{ ($json.result === true) ? $('IDs aus result').item.json.count : 0 }}}]] } }",
         "options": {} },
       "id": "wf6-audit", "name": "Audit persistieren (x_infotermin_audit, PII-frei, aus unlink-Erfolg)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1480, 300]
     },
