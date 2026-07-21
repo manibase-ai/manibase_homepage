@@ -43,13 +43,16 @@
            unterbindet den nativen Submit via preventDefault. -->
       <form class="eventform" data-form="anmeldung" method="post" action="/api/event.php" novalidate>
         <div class="eventform__body">
-          <div class="eventform__hp" aria-hidden="true"><label>Website (bitte frei lassen)<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+          <!-- Bot-Falle: Bots fuellen jedes Feld aus, event.php verwirft solche Einsendungen still.
+           Die Inline-Styles sind bewusst doppelt zur Regel .eventform__hp in site.css: laedt das
+           Stylesheet nicht, stuende das Feld sonst sichtbar mitten im Formular. -->
+          <div class="eventform__hp" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"><label>Website (bitte frei lassen)<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
 
           <fieldset class="wstep is-active">
             <legend class="wstep__q">Welcher Termin passt Ihnen?</legend>
             <div class="qgrid">
-              <label class="qcard"><input type="radio" name="termin" value="2026-07-29T19:30:00+02:00"><span class="qcard__t">Mittwoch, 29.07.</span><span class="qcard__d">19:30 Uhr, online per Teams</span></label>
-              <label class="qcard"><input type="radio" name="termin" value="2026-07-31T19:30:00+02:00"><span class="qcard__t">Freitag, 31.07.</span><span class="qcard__d">19:30 Uhr, online per Teams</span></label>
+              <label class="qcard"><input type="radio" name="termin" value="2026-07-29T19:30:00+02:00"><span class="qcard__t">Mittwoch, 29.07.</span><span class="qcard__d">19:30 Uhr, online per Zoom</span></label>
+              <label class="qcard"><input type="radio" name="termin" value="2026-07-31T19:30:00+02:00"><span class="qcard__t">Freitag, 31.07.</span><span class="qcard__d">19:30 Uhr, online per Zoom</span></label>
             </div>
           </fieldset>
 

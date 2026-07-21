@@ -36,6 +36,13 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H 72.61.153.206 >> ~/.ssh/known_hosts 2>/dev/null
 
+      # CSS/JS liegen unter einer festen URL und werden mit `immutable` fuer eine Woche
+      # gecacht. Ohne Version in der URL sieht ein wiederkehrender Besucher neues HTML mit
+      # altem Stylesheet (am 21.07.2026 passiert: sichtbares Honeypot-Feld im Formular).
+      # Der Hash haengt am Dateiinhalt, unveraenderte Dateien bleiben also im Cache.
+      - name: Cache-Busting (Inhalts-Hash an CSS/JS-Verweise)
+        run: python3 scripts/cache-bust.py site
+
       - name: Deploy (rsync release + flip symlink)
         run: |
           set -euo pipefail

@@ -37,7 +37,10 @@
       <noscript><p class="eventform__err">Für die Eintragung bitte JavaScript aktivieren, oder schreiben Sie uns an <a href="mailto:kontakt@manibase.de">kontakt@manibase.de</a>.</p></noscript>
       <form class="eventform" data-form="interessent" method="post" action="/api/event.php" novalidate>
         <div class="eventform__body">
-          <div class="eventform__hp" aria-hidden="true"><label>Website (bitte frei lassen)<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+          <!-- Bot-Falle: Bots fuellen jedes Feld aus, event.php verwirft solche Einsendungen still.
+           Die Inline-Styles sind bewusst doppelt zur Regel .eventform__hp in site.css: laedt das
+           Stylesheet nicht, stuende das Feld sonst sichtbar mitten im Formular. -->
+          <div class="eventform__hp" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"><label>Website (bitte frei lassen)<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
 
           <div class="field"><label for="ip-name">Name</label><input id="ip-name" name="name" type="text" autocomplete="name" maxlength="120" required></div>
           <div class="field"><label for="ip-firma">Unternehmen</label><input id="ip-firma" name="unternehmen" type="text" autocomplete="organization" maxlength="120" required></div>
