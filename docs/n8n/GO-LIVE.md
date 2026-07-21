@@ -39,7 +39,7 @@ Referenz: [`entra-graph-rbac.md`](entra-graph-rbac.md)
 4. In n8n ein **OAuth2-Credential** (Client Credentials, Scope `https://graph.microsoft.com/.default`)
    anlegen — das Secret liegt nur hier.
 
-## Schritt 3 — Zwei MS-Teams-Meetings
+## Schritt 3 — Zwei Zoom-Meetings
 Je Termin ein Meeting anlegen (Mi 29.07. 19:30 / Fr 31.07. 19:30), **Join-Links** notieren.
 
 ## Schritt 4 — n8n: 6 Workflows importieren & verdrahten
@@ -51,7 +51,7 @@ Referenzen: [`README.md`](README.md), [`config-schema.md`](config-schema.md)
    Ersetzen auf die technischen Studio-Namen aus Schritt 1 setzen (sonst „Invalid field").
 3. Alle `{{CONFIG:*}}`-Platzhalter durch echte Werte ersetzen (siehe `config-schema.md`):
    `ODOO_URL/DB/UID/APIKEY`, `SENDER=kontakt@manibase.de`, `BASE_URL=https://manibase.de`,
-   `TEAMS_LINK_T1/T2` (Schritt 3), `TERMIN_T1=2026-07-29T19:30:00+02:00`,
+   `MEETING_LINK_T1/T2` (Schritt 3), `TERMIN_T1=2026-07-29T19:30:00+02:00`,
    `TERMIN_T2=2026-07-31T19:30:00+02:00`, `RECORDING_URL` (später), `TEAM_NOTIFY_TO` (interne
    Adresse), `SHARED_SECRET` (langer Zufallswert — gleich wie in Schritt 5).
 4. Den HTTP-Graph-Nodes das OAuth2-Credential aus Schritt 2 zuweisen.

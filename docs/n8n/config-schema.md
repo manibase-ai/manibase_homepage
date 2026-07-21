@@ -2,6 +2,10 @@
 
 Zwei Arten von Konfiguration:
 
+> **Namensgebung:** die Meeting-Platzhalter heissen bewusst `MEETING_*` und nicht nach dem
+> Anbieter. Das Konferenztool ist bei manibase schon zweimal gewechselt (Calendly zu Zeeg,
+> MS Teams zu Zoom); ein Name wie `TEAMS_LINK` waere nach jedem Wechsel gelogen.
+
 ## A) Platzhalter der Form `{{CONFIG:<NAME>}}` in den Workflow-JSONs
 
 Diese Tokens stehen wörtlich in den JSONs und müssen beim Import in der Zielinstanz
@@ -19,8 +23,10 @@ keine ungenutzten).
 | `CONFIG:ODOO_APIKEY` | Odoo-API-Key (nur als Platzhalter, echter Wert in n8n) | (secret) | wf-1…wf-6 |
 | `CONFIG:SENDER` | Absender-Mailbox (RBAC-scoped) | `kontakt@manibase.de` | wf-1, wf-2, wf-3, wf-4, wf-5, wf-6 |
 | `CONFIG:BASE_URL` | Öffentliche Basis-URL für den DOI-Link | `https://manibase.de` | wf-1 |
-| `CONFIG:TEAMS_LINK_T1` | MS-Teams-Join-Link Termin 1 | `https://teams.microsoft.com/l/...` | wf-2, wf-3 |
-| `CONFIG:TEAMS_LINK_T2` | MS-Teams-Join-Link Termin 2 | `https://teams.microsoft.com/l/...` | wf-2, wf-3 |
+| `CONFIG:MEETING_LINK_T1` | Join-Link Termin 1 (inkl. `pwd`, damit ein Klick reicht) | `https://us06web.zoom.us/j/...?pwd=...` | wf-2, wf-3 |
+| `CONFIG:MEETING_LINK_T2` | Join-Link Termin 2 | `https://us06web.zoom.us/j/...?pwd=...` | wf-2, wf-3 |
+| `CONFIG:MEETING_INFO_T1` | Meeting-ID und Kenncode Termin 1, im Klartext fuer alle, die in der App beitreten | `Meeting-ID 823 0682 0597, Kenncode 3KfGpd` | wf-2, wf-3 |
+| `CONFIG:MEETING_INFO_T2` | Meeting-ID und Kenncode Termin 2 | `Meeting-ID 848 4493 7835, Kenncode 8RRLw4` | wf-2, wf-3 |
 | `CONFIG:TERMIN_T1` | Termin 1 (offset-ISO, Europe/Berlin) | `2026-07-29T19:30:00+02:00` | wf-1, wf-3 |
 | `CONFIG:TERMIN_T2` | Termin 2 (offset-ISO, Europe/Berlin) | `2026-07-31T19:30:00+02:00` | wf-1, wf-3 |
 | `CONFIG:RECORDING_URL` | Link zur Aufzeichnung (Dankesmail) | `https://.../aufzeichnung` | wf-5 |

@@ -10,7 +10,7 @@ erwarteter Zustand / erwarteter HTTP-Code / erwartete Mailanzahl.
 - [ ] **`graph-rbac`** — Entra-App ohne Tenant-Consent; Exchange RBAC scope auf `kontakt@manibase.de`;
   `Test-ServicePrincipalAuthorization` positiv (eigene Mailbox) + negativ (Fremdpostfach); echter
   Negativversand scheitert.
-- [ ] **`teams-links`** — zwei Teams-Meetings angelegt, Join-Links als `TEAMS_LINK_T1/T2` in Config.
+- [ ] **`meeting-links`** — zwei Zoom-Meetings angelegt, Join-Links als `MEETING_LINK_T1/T2` in Config.
 - [ ] **`config-disabled`** — `/etc/manibase/n8n.php` gesetzt (Secret, Webhook-URLs), `enabled=false`.
 - [ ] **`nginx-503`** — nginx-Snippet (PR1) im vhost aktiv, `nginx -t` ok; echter
   `POST /api/event.php` (ohne scharfe Config) → **503** (nicht 404, nicht PHP-Quelltext).

@@ -17,7 +17,7 @@ dieser Ordner liefert die Bausteine + das Runbook.
    n8n-Concurrency 1 + search-before-create (s. Doku).
 2. **[`entra-graph-rbac.md`](entra-graph-rbac.md)** — Graph-App **ohne** Tenant-Consent,
    `Mail.Send` nur via Exchange RBAC auf `kontakt@manibase.de`; n8n-OAuth2-Credential anlegen.
-3. **[`config-schema.md`](config-schema.md)** — alle Werte bereitstellen (Teams-Links, Termine,
+3. **[`config-schema.md`](config-schema.md)** — alle Werte bereitstellen (Meeting-Links, Termine,
    Odoo, Absender, Base-URL, interne Empfänger).
 4. **Import** der 6 Workflows (`workflows/wf-1…wf-6.json`) in n8n via „Import from File".
    Danach je Workflow: Graph-Credential zuweisen, `{{CONFIG:*}}` durch echte Werte ersetzen

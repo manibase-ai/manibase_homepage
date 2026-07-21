@@ -14,8 +14,8 @@
       "id": "wf3-sched", "name": "Schedule (Europe/Berlin) 4 Feuerzeitpunkte", "type": "n8n-nodes-base.scheduleTrigger", "typeVersion": 1, "position": [160, 340]
     },
     {
-      "parameters": { "jsCode": "// Timezone-sicher über absolute Zeitstempel (Termin-ISO trägt +02:00-Offset).\nconst now=Date.now();\nconst cand=[['{{CONFIG:TERMIN_T1}}','{{CONFIG:TEAMS_LINK_T1}}'],['{{CONFIG:TERMIN_T2}}','{{CONFIG:TEAMS_LINK_T2}}']];\nfunction win(iso){ const h=(new Date(iso).getTime()-now)/3600000; if(h>12&&h<36) return 'reminder1d'; if(h>0&&h<=3) return 'reminder1h'; return null; }\nfor(const [iso,teams] of cand){ const k=win(iso); if(k) return [{ json:{ termin:iso, kind:k, teams } }]; }\nreturn [];" },
-      "id": "wf3-map", "name": "Termin + Reminder-Typ + Teams-Link", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [360, 340]
+      "parameters": { "jsCode": "// Timezone-sicher über absolute Zeitstempel (Termin-ISO trägt +02:00-Offset).\nconst now=Date.now();\nconst cand=[['{{CONFIG:TERMIN_T1}}','{{CONFIG:MEETING_LINK_T1}}','{{CONFIG:MEETING_INFO_T1}}'],['{{CONFIG:TERMIN_T2}}','{{CONFIG:MEETING_LINK_T2}}','{{CONFIG:MEETING_INFO_T2}}']];\nfunction win(iso){ const h=(new Date(iso).getTime()-now)/3600000; if(h>12&&h<36) return 'reminder1d'; if(h>0&&h<=3) return 'reminder1h'; return null; }\nfor(const [iso,meeting,meeting_info] of cand){ const k=win(iso); if(k) return [{ json:{ termin:iso, kind:k, meeting, meeting_info } }]; }\nreturn [];" },
+      "id": "wf3-map", "name": "Termin + Reminder-Typ + Meeting-Link", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [360, 340]
     },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
@@ -24,7 +24,7 @@
       "id": "wf3-find", "name": "Odoo search_read confirmed + Termin", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [560, 340]
     },
     {
-      "parameters": { "jsCode": "// Result-Array in Einzel-Items je Teilnehmer aufspalten, kind/teams mitführen.\nconst rows=($json.result)||[];\nconst m=$('Termin + Reminder-Typ + Teams-Link').item.json;\nreturn rows.map(r=>({ json:{ reg_id:r.id, email_norm:r.x_email_norm, kind:m.kind, teams:m.teams } }));" },
+      "parameters": { "jsCode": "// Result-Array in Einzel-Items je Teilnehmer aufspalten, kind/meeting mitführen.\nconst rows=($json.result)||[];\nconst m=$('Termin + Reminder-Typ + Meeting-Link').item.json;\nreturn rows.map(r=>({ json:{ reg_id:r.id, email_norm:r.x_email_norm, kind:m.kind, meeting:m.meeting, meeting_info:m.meeting_info } }));" },
       "id": "wf3-expand", "name": "Result -> Items je Teilnehmer", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [760, 340]
     },
     { "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } }, "id": "wf3-if-finderr", "name": "IF Teilnehmer-Search-Fehler?", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [660, 500] },
@@ -57,7 +57,7 @@
     },
     {
       "parameters": { "method": "POST", "url": "https://graph.microsoft.com/v1.0/users/{{CONFIG:SENDER}}/sendMail", "authentication": "genericCredentialType", "genericAuthType": "oAuth2Api", "sendBody": true, "specifyBody": "json",
-        "jsonBody": "={ \"message\": { \"subject\": \"Erinnerung: Ihr Infotermin\", \"body\": { \"contentType\": \"HTML\", \"content\": \"<p>Bis gleich. Einwahl: <a href='{{ $('Loop je Teilnehmer').item.json.teams }}'>Teams</a></p>\" }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{ $('Loop je Teilnehmer').item.json.email_norm }}\" } }] } }",
+        "jsonBody": "={ \"message\": { \"subject\": \"Erinnerung: Ihr Infotermin bei manibase\", \"body\": { \"contentType\": \"HTML\", \"content\": \"<p>Guten Tag,</p><p>kurze Erinnerung an Ihren Infotermin bei manibase. Hier ist Ihr Zugang:</p><p><a href='{{ $('Loop je Teilnehmer').item.json.meeting }}'>Am Termin teilnehmen</a></p><p>Falls sich der Link nicht &ouml;ffnen l&auml;sst, kopieren Sie bitte diese Adresse in Ihren Browser:<br>{{ $('Loop je Teilnehmer').item.json.meeting }}<br>{{ $('Loop je Teilnehmer').item.json.meeting_info }}</p><p>Freundliche Gr&uuml;&szlig;e<br>Matthias Geisler und Nikolaus Schauersberger</p><p style='color:#5b6472;font-size:13px;line-height:1.5'>manibase UG (haftungsbeschr&auml;nkt) i. G.<br>W&uuml;rzburger Str. 1, 97246 Eibelstadt<br>Telefon +49 15565 697065, <a href='mailto:kontakt@manibase.de'>kontakt@manibase.de</a><br>Gesch&auml;ftsf&uuml;hrer: Matthias Geisler, Nikolaus Schauersberger</p>\" }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{ $('Loop je Teilnehmer').item.json.email_norm }}\" } }] } }",
         "options": {} },
       "id": "wf3-graph", "name": "Graph sendMail Reminder", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1560, 420], "onError": "continueErrorOutput"
     },
@@ -75,8 +75,8 @@
     }
   ],
   "connections": {
-    "Schedule (Europe/Berlin) 4 Feuerzeitpunkte": { "main": [[{ "node": "Termin + Reminder-Typ + Teams-Link", "type": "main", "index": 0 }]] },
-    "Termin + Reminder-Typ + Teams-Link": { "main": [[{ "node": "Odoo search_read confirmed + Termin", "type": "main", "index": 0 }]] },
+    "Schedule (Europe/Berlin) 4 Feuerzeitpunkte": { "main": [[{ "node": "Termin + Reminder-Typ + Meeting-Link", "type": "main", "index": 0 }]] },
+    "Termin + Reminder-Typ + Meeting-Link": { "main": [[{ "node": "Odoo search_read confirmed + Termin", "type": "main", "index": 0 }]] },
     "Odoo search_read confirmed + Termin": { "main": [[{ "node": "IF Teilnehmer-Search-Fehler?", "type": "main", "index": 0 }]] },
     "IF Teilnehmer-Search-Fehler?": { "main": [[{ "node": "Stop and Error (Lauf sichtbar fehlschlagen)", "type": "main", "index": 0 }], [{ "node": "Result -> Items je Teilnehmer", "type": "main", "index": 0 }]] },
     "Result -> Items je Teilnehmer": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }]] },
