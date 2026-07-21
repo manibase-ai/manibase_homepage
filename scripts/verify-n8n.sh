@@ -24,6 +24,8 @@ has_type(){ jq -e --arg t "$2" 'any(.nodes[]; .type==$t)' "$WF/$1.json" >/dev/nu
 sval(){ jq -e --arg s "$2" '[.. | strings] | any(contains($s))' "$WF/$1.json" >/dev/null 2>&1; }
 # Achtung: der Statuscode gehoert bei respondToWebhook in parameters.options.responseCode.
 # Auf oberster Ebene ignoriert n8n ihn stillschweigend und antwortet 200 (siehe Go-live 21.07.2026).
+# resp_code() beantwortet nur "existiert ein Zweig mit Code X" — ob JEDER Node richtig
+# konfiguriert ist, prueft Gate 6b (sonst deckt ein korrekter 502-Node einen kaputten zweiten).
 resp_code(){ jq -e --arg c "$2" 'any(.nodes[]; (.type|test("respondToWebhook")) and ((.parameters.options.responseCode // empty|tostring)==$c))' "$WF/$1.json" >/dev/null 2>&1; }
 
 # 1) Valides JSON + Grundstruktur + typeVersion an jedem Node (Version-Pin)
@@ -109,6 +111,16 @@ done
 # 6) Confirm-WF: echte respondToWebhook-Nodes mit 200/409/410
 for c in 200 409 410; do resp_code wf-2-anmeldung-confirm "$c" || err "wf-2: respondToWebhook $c fehlt"; done
 
+# 6b) JEDER respondToWebhook-Node einzeln: Statuscode NUR in options, nie auf oberster
+#     Ebene. Die Existenzpruefung oben genuegt nicht — bei mehreren Nodes mit demselben
+#     Code deckt ein korrekter den kaputten zu, und dessen Fehlerpfad antwortet wieder 200.
+for f in "$WF"/wf-*.json; do
+  bad=$(jq -r '[ .nodes[] | select(.type|test("respondToWebhook"))
+                 | select((.parameters.responseCode != null) or (.parameters.options.responseCode == null))
+                 | .name ] | .[]' "$f")
+  [ -z "$bad" ] || err "$(basename "$f"): respondToWebhook ohne options.responseCode bzw. mit Code auf oberster Ebene: $(printf '%s' "$bad" | tr '\n' ' ')"
+done
+
 # 7) Zeitzone + ICS
 sval wf-3-reminder 'Europe/Berlin'               || err "wf-3: Europe/Berlin fehlt"
 sval wf-6-cleanup  'Europe/Berlin'               || err "wf-6: Europe/Berlin fehlt"
@@ -183,12 +195,13 @@ done
 #      Feldnamen hat am 21.07.2026 nur die ANFRAGEN erfasst; die Code-Nodes lasen die
 #      ANTWORTEN weiter als r.email_norm usw. Ergebnis: undefined statt Fehler - der
 #      Graph-Versand ging mit leerem Empfaenger raus und die TTL-Pruefung (Date.parse
-#      von undefined -> NaN, falsy) fiel stillschweigend aus. Konvention im Repo: eine
-#      Odoo-Zeile heisst in jsCode immer `r`.
-if grep -oE '\br\.(email_norm|unternehmen|token_digest|mail_key|termin|status|state|deleted)\b' "$WF"/wf-*.json >/dev/null 2>&1; then
-  grep -oE '\br\.(email_norm|unternehmen|token_digest|mail_key|termin|status|state|deleted)\b' "$WF"/wf-*.json
-  err "Odoo-Zeile ohne x_-Praefix gelesen (s. o.)"
-fi
+#      von undefined -> NaN, falsy) fiel stillschweigend aus.
+#      Bewusst als ALLOWLIST: jede gepflegte Feldliste veraltet mit dem naechsten neuen
+#      Feld. Konvention im Repo: eine Odoo-Zeile heisst in jsCode immer `r`; erlaubt sind
+#      nur die Odoo-Standardfelder und alles mit x_-Praefix.
+bad=$(grep -ohE '\br\.[A-Za-z_][A-Za-z0-9_]*' "$WF"/wf-*.json \
+      | grep -vE '^r\.(x_[A-Za-z0-9_]+|id|create_date|write_date|display_name)$' | sort -u || true)
+[ -z "$bad" ] || { printf '%s\n' "$bad"; err "Odoo-Zeile ohne x_-Praefix gelesen (erlaubt: x_*, id, create_date, write_date, display_name)"; }
 
 # 10a) $now-Lint. n8n wertet $now in der WORKFLOW-Zeitzone aus; Odoo speichert Datetime
 #      IMMER in UTC. Ohne explizites .toUTC() haengt der geschriebene Zeitstempel davon ab,
