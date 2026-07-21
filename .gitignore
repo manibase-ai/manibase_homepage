@@ -7,6 +7,10 @@
 Thumbs.db
 *.swp
 
+# --- Python-Bytecode (entsteht beim Ausfuehren von scripts/*.py) ---
+__pycache__/
+*.py[cod]
+
 # --- Local tooling / agent config ---
 .agents/
 .claude/
