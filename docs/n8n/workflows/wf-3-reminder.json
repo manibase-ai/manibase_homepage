@@ -29,7 +29,14 @@
     },
     { "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } }, "id": "wf3-if-finderr", "name": "IF Teilnehmer-Search-Fehler?", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [660, 500] },
     { "parameters": { "errorMessage": "Reminder-Lauf abgebrochen: Odoo search_read (Teilnehmer) lieferte einen Fehler." }, "id": "wf3-stop", "name": "Stop and Error (Lauf sichtbar fehlschlagen)", "type": "n8n-nodes-base.stopAndError", "typeVersion": 1, "position": [860, 640] },
-    { "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } }, "id": "wf3-if-claimerr", "name": "IF Claim-Fehler? -> skip (kein Versand)", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [1360, 200] },
+    { "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } }, "id": "wf3-if-claimerr", "name": "IF Claim-Fehler? -> Alarm (kein Versand)", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [1360, 200] },
+    { "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } }, "id": "wf3-if-searcherr", "name": "IF Dedup-Search-Fehler? -> Alarm", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [1260, 460] },
+    {
+      "parameters": { "method": "POST", "url": "https://graph.microsoft.com/v1.0/users/{{CONFIG:SENDER}}/sendMail", "authentication": "genericCredentialType", "genericAuthType": "oAuth2Api", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"message\": { \"subject\": \"Reminder: Odoo-Fehler (Teilnehmer übersprungen)\", \"body\": { \"contentType\": \"Text\", \"content\": {{ JSON.stringify('Odoo-Fehler bei Dedup/Claim für reg_id ' + $('Loop je Teilnehmer').item.json.reg_id + ' – Reminder für diesen Teilnehmer wurde NICHT versandt, bitte prüfen.') }} }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{CONFIG:TEAM_NOTIFY_TO}}\" } }] } }",
+        "options": {} },
+      "id": "wf3-alarm", "name": "Alarm: Odoo-Fehler (Teilnehmer übersprungen)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1560, 200], "onError": "continueErrorOutput"
+    },
     { "parameters": { "options": {} }, "id": "wf3-batch", "name": "Loop je Teilnehmer", "type": "n8n-nodes-base.splitInBatches", "typeVersion": 3, "position": [960, 340] },
     {
       "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
@@ -45,8 +52,8 @@
       "id": "wf3-outbox", "name": "Claim outbox mail_key reminder (unique)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1160, 340]
     },
     {
-      "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined || ($json.result || []).length > 0 }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } },
-      "id": "wf3-if-claim", "name": "IF Fehler ODER bereits vorhanden? -> skip (fail-closed)", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [1360, 340]
+      "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ ($json.result || []).length > 0 }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } },
+      "id": "wf3-if-claim", "name": "IF Reminder bereits vorhanden? -> skip", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [1460, 340]
     },
     {
       "parameters": { "method": "POST", "url": "https://graph.microsoft.com/v1.0/users/{{CONFIG:SENDER}}/sendMail", "authentication": "genericCredentialType", "genericAuthType": "oAuth2Api", "sendBody": true, "specifyBody": "json",
@@ -74,10 +81,12 @@
     "IF Teilnehmer-Search-Fehler?": { "main": [[{ "node": "Stop and Error (Lauf sichtbar fehlschlagen)", "type": "main", "index": 0 }], [{ "node": "Result -> Items je Teilnehmer", "type": "main", "index": 0 }]] },
     "Result -> Items je Teilnehmer": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }]] },
     "Loop je Teilnehmer": { "main": [[{ "node": "Fertig (alle gesendet)", "type": "main", "index": 0 }], [{ "node": "search reminder-outbox (mail_key) [Dedup]", "type": "main", "index": 0 }]] },
-    "search reminder-outbox (mail_key) [Dedup]": { "main": [[{ "node": "IF Fehler ODER bereits vorhanden? -> skip (fail-closed)", "type": "main", "index": 0 }]] },
-    "IF Fehler ODER bereits vorhanden? -> skip (fail-closed)": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }], [{ "node": "Claim outbox mail_key reminder (unique)", "type": "main", "index": 0 }]] },
-    "Claim outbox mail_key reminder (unique)": { "main": [[{ "node": "IF Claim-Fehler? -> skip (kein Versand)", "type": "main", "index": 0 }]] },
-    "IF Claim-Fehler? -> skip (kein Versand)": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }], [{ "node": "Graph sendMail Reminder", "type": "main", "index": 0 }]] },
+    "search reminder-outbox (mail_key) [Dedup]": { "main": [[{ "node": "IF Dedup-Search-Fehler? -> Alarm", "type": "main", "index": 0 }]] },
+    "IF Dedup-Search-Fehler? -> Alarm": { "main": [[{ "node": "Alarm: Odoo-Fehler (Teilnehmer übersprungen)", "type": "main", "index": 0 }], [{ "node": "IF Reminder bereits vorhanden? -> skip", "type": "main", "index": 0 }]] },
+    "IF Reminder bereits vorhanden? -> skip": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }], [{ "node": "Claim outbox mail_key reminder (unique)", "type": "main", "index": 0 }]] },
+    "Claim outbox mail_key reminder (unique)": { "main": [[{ "node": "IF Claim-Fehler? -> Alarm (kein Versand)", "type": "main", "index": 0 }]] },
+    "IF Claim-Fehler? -> Alarm (kein Versand)": { "main": [[{ "node": "Alarm: Odoo-Fehler (Teilnehmer übersprungen)", "type": "main", "index": 0 }], [{ "node": "Graph sendMail Reminder", "type": "main", "index": 0 }]] },
+    "Alarm: Odoo-Fehler (Teilnehmer übersprungen)": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }], [{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }]] },
     "Graph sendMail Reminder": { "main": [[{ "node": "Odoo write outbox state=sent", "type": "main", "index": 0 }], [{ "node": "Odoo write outbox state=failed_unknown", "type": "main", "index": 0 }]] },
     "Odoo write outbox state=sent": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }]] },
     "Odoo write outbox state=failed_unknown": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }]] }

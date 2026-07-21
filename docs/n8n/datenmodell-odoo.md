@@ -71,13 +71,14 @@ Outbox je Mail: (kein Row) ──create──▶ sending ──Graph ok──▶
 - Mail nachweislich zugestellt → auf `sent` setzen.
 - Mail nachweislich NICHT zugestellt → Row **löschen** (nicht nur `failed_unknown` setzen), damit
   ein späterer Confirm-/Anmelde-Retry den Claim (`invite:<id>`/`doi:<id>`) neu anlegen und senden
-  kann. Sonst blockiert der Unique-Constraint den Retry dauerhaft (Confirm-Verlierer bekommt sonst
-  immer 409, Anmelde-Recovery sendet nicht neu, weil eine Row existiert).
+  kann. Sonst findet der nächste **search-before-create** die vorhandene Row und überspringt den
+  Versand dauerhaft (Confirm-Verlierer bekommt 409, Anmelde-Recovery sendet nicht neu).
 
 **Kein Auto-Retry** (bei transaktionalen Event-Mails ist ein Zweifelsfall besser als Doppelmail).
-Der Confirm-Verlierer bei echtem Parallel-Confirm sendet **nie** (immer 409) — der Unique-Constraint
-lässt genau einen Gewinner senden; ein abgestürzter Gewinner wird über diese Reconciliation
-(Row löschen) wieder retry-fähig. Für harte Inline-Atomizität die Odoo-Custom-Method (unten).
+Der Confirm-Verlierer bei echtem Parallel-Confirm sendet **nie** (immer 409) — dank **Concurrency 1
++ search-before-create** findet der zweite (serialisierte) Lauf die vorhandene invite-Row; ein
+abgestürzter Gewinner wird über diese Reconciliation (Row löschen) wieder retry-fähig. Harte
+Inline-Atomizität nur mit Odoo.sh-Modul (Upgrade-Pfad).
 
 ## Modell `x_infotermin_audit` (Cleanup-Nachweis, PII-frei)
 

@@ -19,7 +19,7 @@ erwarteter Zustand / erwarteter HTTP-Code / erwartete Mailanzahl.
   n8n-UI gesetzt — das ist hier der **Serialisierungs-Mechanismus** (nicht nur Defense-in-Depth).
 - [ ] **`smoke`** — `scripts/smoke-event.sh` gegen die Zielumgebung grün (alle curl-Fälle).
 - [ ] **`dup-anmeldung`** — zweite Anmeldung mit gleicher E-Mail+Termin → genau **1** gültiger
-  DOI-Link, **keine** zweite DOI-Mail (reg-Constraint + doi-Outbox `sent`).
+  DOI-Link, **keine** zweite DOI-Mail (search-before-create auf reg + doi-Outbox `sent`).
 - [ ] **`parallel-confirm`** — denselben Bestätigungs-Token **parallel** doppelt abfeuern →
   genau **1×200**, der andere **409**; genau **1** Einladung. Mechanismus: **Concurrency 1**
   serialisiert die beiden Läufe, der zweite findet die invite-Outbox-Row → 409.
