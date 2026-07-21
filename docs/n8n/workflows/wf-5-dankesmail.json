@@ -1,0 +1,79 @@
+{
+  "name": "manibase Infotermin – 5 Dankesmail (Aufzeichnung)",
+  "nodes": [
+    { "parameters": {}, "id": "wf5-manual", "name": "Manuell auslösen (nach Upload der Aufzeichnung)", "type": "n8n-nodes-base.manualTrigger", "typeVersion": 1, "position": [160, 340] },
+    {
+      "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_reg\",\"search_read\",[[[\"status\",\"=\",\"confirmed\"]]],{\"fields\":[\"id\",\"email_norm\"]}]] } }",
+        "options": {} },
+      "id": "wf5-find", "name": "Odoo search_read confirmed", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [360, 340]
+    },
+    {
+      "parameters": { "jsCode": "const rows=($json.result)||[];\nreturn rows.map(r=>({ json:{ reg_id:r.id, email_norm:r.email_norm } }));" },
+      "id": "wf5-expand", "name": "Result -> Items je Teilnehmer", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [560, 340]
+    },
+    { "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } }, "id": "wf5-if-finderr", "name": "IF Teilnehmer-Search-Fehler?", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [460, 500] },
+    { "parameters": { "errorMessage": "Dankesmail-Lauf abgebrochen: Odoo search_read (Teilnehmer) lieferte einen Fehler." }, "id": "wf5-stop", "name": "Stop and Error (Lauf sichtbar fehlschlagen)", "type": "n8n-nodes-base.stopAndError", "typeVersion": 1, "position": [660, 640] },
+    { "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } }, "id": "wf5-if-claimerr", "name": "IF Claim-Fehler? -> Alarm (kein Versand)", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [1160, 200] },
+    { "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ $json.error !== undefined }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } }, "id": "wf5-if-searcherr", "name": "IF Dedup-Search-Fehler? -> Alarm", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [1060, 460] },
+    {
+      "parameters": { "method": "POST", "url": "https://graph.microsoft.com/v1.0/users/{{CONFIG:SENDER}}/sendMail", "authentication": "genericCredentialType", "genericAuthType": "oAuth2Api", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"message\": { \"subject\": \"Dankesmail: Odoo-Fehler (Teilnehmer übersprungen)\", \"body\": { \"contentType\": \"Text\", \"content\": {{ JSON.stringify('Odoo-Fehler bei Dedup/Claim für reg_id ' + $('Loop je Teilnehmer').item.json.reg_id + ' – Dankesmail für diesen Teilnehmer wurde NICHT versandt, bitte prüfen.') }} }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{CONFIG:TEAM_NOTIFY_TO}}\" } }] } }",
+        "options": {} },
+      "id": "wf5-alarm", "name": "Alarm: Odoo-Fehler (Teilnehmer übersprungen)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1360, 200], "onError": "continueErrorOutput"
+    },
+    { "parameters": { "options": {} }, "id": "wf5-batch", "name": "Loop je Teilnehmer", "type": "n8n-nodes-base.splitInBatches", "typeVersion": 3, "position": [760, 340] },
+    {
+      "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"search_read\",[[[\"mail_key\",\"=\",\"thanks:{{ $json.reg_id }}\"]]],{\"fields\":[\"id\"]}]] } }",
+        "options": {} },
+      "id": "wf5-search", "name": "search thanks-outbox (mail_key) [Dedup]", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [860, 340]
+    },
+    { "parameters": {}, "id": "wf5-done", "name": "Fertig (alle gesendet)", "type": "n8n-nodes-base.noOp", "typeVersion": 1, "position": [760, 160] },
+    {
+      "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"create\",[{\"mail_key\":\"thanks:{{ $('Loop je Teilnehmer').item.json.reg_id }}\",\"reg_id\":{{ $('Loop je Teilnehmer').item.json.reg_id }},\"state\":\"sending\",\"ts\":\"{{ $now.toFormat('yyyy-MM-dd HH:mm:ss') }}\"}]] } }",
+        "options": {} },
+      "id": "wf5-outbox", "name": "Claim outbox mail_key thanks (unique)", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [960, 340]
+    },
+    {
+      "parameters": { "conditions": { "options": {}, "combinator": "and", "conditions": [ { "leftValue": "={{ ($json.result || []).length > 0 }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true", "singleValue": true } } ] } },
+      "id": "wf5-if-claim", "name": "IF Danke bereits versandt? -> skip", "type": "n8n-nodes-base.if", "typeVersion": 2, "position": [1260, 340]
+    },
+    {
+      "parameters": { "method": "POST", "url": "https://graph.microsoft.com/v1.0/users/{{CONFIG:SENDER}}/sendMail", "authentication": "genericCredentialType", "genericAuthType": "oAuth2Api", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"message\": { \"subject\": \"Danke – hier die Aufzeichnung\", \"body\": { \"contentType\": \"HTML\", \"content\": \"<p>Aufzeichnung: <a href='{{CONFIG:RECORDING_URL}}'>ansehen</a></p>\" }, \"toRecipients\": [{ \"emailAddress\": { \"address\": \"{{ $('Loop je Teilnehmer').item.json.email_norm }}\" } }] } }",
+        "options": {} },
+      "id": "wf5-graph", "name": "Graph sendMail Danke + Aufzeichnung", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1360, 420], "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"write\",[[{{ $('Claim outbox mail_key thanks (unique)').item.json.result }}],{\"state\":\"sent\"}]] } }",
+        "options": {} },
+      "id": "wf5-sent", "name": "Odoo write outbox state=sent", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1560, 340]
+    },
+    {
+      "parameters": { "method": "POST", "url": "={{CONFIG:ODOO_URL}}/jsonrpc", "sendBody": true, "specifyBody": "json",
+        "jsonBody": "={ \"jsonrpc\":\"2.0\",\"method\":\"call\",\"params\":{\"service\":\"object\",\"method\":\"execute_kw\",\"args\":[\"{{CONFIG:ODOO_DB}}\",{{CONFIG:ODOO_UID}},\"{{CONFIG:ODOO_APIKEY}}\",\"x_infotermin_outbox\",\"write\",[[{{ $('Claim outbox mail_key thanks (unique)').item.json.result }}],{\"state\":\"failed_unknown\"}]] } }",
+        "options": {} },
+      "id": "wf5-failed", "name": "Odoo write outbox state=failed_unknown", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4, "position": [1560, 500]
+    }
+  ],
+  "connections": {
+    "Manuell auslösen (nach Upload der Aufzeichnung)": { "main": [[{ "node": "Odoo search_read confirmed", "type": "main", "index": 0 }]] },
+    "Odoo search_read confirmed": { "main": [[{ "node": "IF Teilnehmer-Search-Fehler?", "type": "main", "index": 0 }]] },
+    "IF Teilnehmer-Search-Fehler?": { "main": [[{ "node": "Stop and Error (Lauf sichtbar fehlschlagen)", "type": "main", "index": 0 }], [{ "node": "Result -> Items je Teilnehmer", "type": "main", "index": 0 }]] },
+    "Result -> Items je Teilnehmer": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }]] },
+    "Loop je Teilnehmer": { "main": [[{ "node": "Fertig (alle gesendet)", "type": "main", "index": 0 }], [{ "node": "search thanks-outbox (mail_key) [Dedup]", "type": "main", "index": 0 }]] },
+    "search thanks-outbox (mail_key) [Dedup]": { "main": [[{ "node": "IF Dedup-Search-Fehler? -> Alarm", "type": "main", "index": 0 }]] },
+    "IF Dedup-Search-Fehler? -> Alarm": { "main": [[{ "node": "Alarm: Odoo-Fehler (Teilnehmer übersprungen)", "type": "main", "index": 0 }], [{ "node": "IF Danke bereits versandt? -> skip", "type": "main", "index": 0 }]] },
+    "IF Danke bereits versandt? -> skip": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }], [{ "node": "Claim outbox mail_key thanks (unique)", "type": "main", "index": 0 }]] },
+    "Claim outbox mail_key thanks (unique)": { "main": [[{ "node": "IF Claim-Fehler? -> Alarm (kein Versand)", "type": "main", "index": 0 }]] },
+    "IF Claim-Fehler? -> Alarm (kein Versand)": { "main": [[{ "node": "Alarm: Odoo-Fehler (Teilnehmer übersprungen)", "type": "main", "index": 0 }], [{ "node": "Graph sendMail Danke + Aufzeichnung", "type": "main", "index": 0 }]] },
+    "Alarm: Odoo-Fehler (Teilnehmer übersprungen)": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }], [{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }]] },
+    "Graph sendMail Danke + Aufzeichnung": { "main": [[{ "node": "Odoo write outbox state=sent", "type": "main", "index": 0 }], [{ "node": "Odoo write outbox state=failed_unknown", "type": "main", "index": 0 }]] },
+    "Odoo write outbox state=sent": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }]] },
+    "Odoo write outbox state=failed_unknown": { "main": [[{ "node": "Loop je Teilnehmer", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}
