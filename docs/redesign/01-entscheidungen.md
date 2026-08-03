@@ -36,7 +36,51 @@ GaLaBau auf der anderen). Die Klammer ist das Bauprojekt, nicht das Gewerk.
 
 ---
 
-## E2 · Segmentierungsachse für Unterseiten
+## E2 · Geschäftsmodell: Produkt plus Einführung, nicht Beratung
+
+**Entscheidung:** manibase ist kein Beratungshaus. Die operative Gesellschaft wurde
+gegründet, um aus der Beratung heraus **direkt in die Umsetzung** zu gehen. Beratung ist
+Aufhänger, nicht Produkt.
+
+**Zwei Standbeine:**
+
+1. **Eigene Assets (Helfer).** Benannte Software-Bausteine, die manibase gehören:
+   - **Bodo, der Baudokumentationshelfer** — Spracheingabe auf der Baustelle,
+     Wiederauffinden über RAG. Entsteht im Pilotprojekt Architekturbüro.
+   - **Anton, der Angebotsassistent** — nimmt Vorarbeiten der Angebotserstellung ab,
+     Spracheingabe auch während der Autofahrt.
+   - **Stefan, der Standortanalysehelfer** — holt über offene Schnittstellen erste
+     Daten zu einer Adresse.
+2. **Einführung und Projektgeschäft.** Open-WebUI-Implementierung als Dienstleister,
+   saubere KI-Einführung mit konkreten Use Cases, Projektmanagement,
+   Software-Deployment. Perspektivisch eigene Automatisierungen,
+   Prozessverbesserungen und eigene Softwarelösungen.
+
+**Der KI-Klartag wird nachrangig.** Begründung des Kunden: Ein Kunde muss bereits
+Vertrauen mitbringen, um 2.000 bis 3.000 € für einen reinen Beratungstag auszugeben.
+Vertrieblich schwierig als Einstieg. Es gibt Betriebe, die darauf warten, aber es ist
+nicht das Geschäft, das manibase machen will.
+
+**Konsequenzen für die Seite:**
+- Die heutige Seite ist ein einziger Funnel auf den Klartag, inklusive eigener
+  Landingpage `ki-klartag.html`. Diese Architektur bildet das neue Modell **nicht** ab.
+- Es braucht einen Produktbereich (11/11 Wettbewerber haben einen).
+- Die Helfer wechseln die Rolle: von dekorativen Maskottchen zur **Produktlinie**.
+  Das entkräftet Teil der Warnung aus `00-recherche.md` Abschnitt 5, aber nicht die
+  Warnung vor Cartoon-Stil und vor Personifizierung, die Ersetzungsangst weckt.
+
+**Offene Punkte:**
+- Preisangabe: Die Seite nennt durchgängig **1.800 €** Festpreis, der Kunde spricht von
+  **2.000 bis 3.000 €**. Muss geklärt werden, bevor irgendwo eine Zahl steht.
+- Was wird aus **Emma** (E-Mail-Assistenz), **Doreen** (Dokumentationshilfe) und
+  **Wiktor** (Wissensmanager) der heutigen Seite? Bodo deckt Doreen und Wiktor
+  inhaltlich ab. Emma ist im neuen Modell nicht erwähnt.
+- Die Namensreihe Bodo, Anton, Stefan ist rein männlich, die heutige Reihe war
+  paritätisch (Anton, Emma, Doreen, Wiktor). Bewusst entscheiden, nicht nebenbei.
+
+---
+
+## E3 · Segmentierungsachse für Unterseiten
 
 **Status: offen.**
 
