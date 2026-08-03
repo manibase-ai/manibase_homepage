@@ -679,6 +679,102 @@ nächste offene Punkt.
 
 ---
 
+## E17 · Die Microsoft-Frage
+
+**Frage 11 (konkrete IT-Einwände) wird zurückgestellt**, bis mehr Datenpunkte
+vorliegen. Richtig so: Bruxafort ist eine **Folienfirma**, kein Bauunternehmen. Ob
+Architekturbüros und Bauunternehmen dieselben Einwände bringen, ist unbelegt. Die Seite
+auf drei erfundene Einwände zu bauen, wäre schlechter als eine ehrliche Lücke.
+Sammelvorlage dafür: `02-einwand-log.md`.
+
+### Was der Fall Bruxafort trotzdem zeigt
+
+Der Betrieb hatte eine **interne Taskforce**, hatte in **Microsoft Copilot** bereits
+erste Dinge gebaut und ein kleines **RAG-System** versucht. Das ist kein Einwand, das
+ist eine Ausgangslage, und sie dürfte für das Zielsegment typisch sein.
+
+**Damit gibt es eine zweite Erklärung für das Scheitern, und sie ist mindestens so
+plausibel wie die aus E16:** Nicht nur die Geschäftsführung fehlte, sondern im Raum saß
+die Gruppe, die das Projekt selbst angefangen hatte. Wer einer Taskforce erklärt, dass
+ihr Weg der falsche ist, verliert den Raum, egal wer daneben sitzt. Beide Erklärungen
+können gleichzeitig zutreffen.
+
+**E16 bleibt gültig**, weil es sich auf das Muster aller Gespräche stützt, nicht nur auf
+Bruxafort. Aber das Bruxafort-Gewicht darin wird kleiner, und ein neuer Punkt kommt
+dazu: **Wie redet man mit einem Betrieb, der schon selbst angefangen hat, ohne ihn
+vorzuführen?** Diese Betriebe sind nicht die schlechteren Kunden, sondern die reiferen.
+Sie haben bewiesen, dass sie das Thema ernst nehmen, und sie kennen die Grenzen ihres
+Bastelstands aus eigener Erfahrung. Das ist ein besserer Gesprächseinstieg als ein
+unberührter Betrieb.
+
+### Die eigentliche Frage: konkurrieren oder koexistieren?
+
+Der Kunde stellt sie selbst und nennt drei mögliche Gründe für eine Konfrontation:
+Kostenersparnis, hauseigene Architektur, komplexere Workflows (Power Automate und
+Copilot-Agenten seien funktional deutlich schwächer).
+
+**Analyse, mit den Gegenargumenten zuerst:**
+
+1. **Frontal gegen Microsoft zu positionieren ist unglaubwürdig**, weil manibase
+   modellagnostisch **auf Azure** läuft (E3). Wer Azure nutzt und Microsoft angreift,
+   widerspricht sich im eigenen Architekturbild.
+2. **Es greift eine Entscheidung an, die der Leser schon getroffen hat.** M365 ist im
+   Haus, jemand hat das verantwortet. Das Gespräch beginnt mit einem Vorwurf.
+3. **Es macht den IT-Leiter zum Gegner.** Er verteidigt dann seine Welt und nicht mehr
+   die Sache. Genau das Veto aus E16.
+4. **Die Aussage „Power Automate und Copilot Studio können das nicht" ist ein
+   bewegliches Ziel.** Sie kann in sechs Monaten falsch sein und steht dann auf der
+   Website. Wer sie trotzdem verwenden will, muss sie vorher prüfen und als
+   Momentaufnahme kennzeichnen.
+
+**Empfehlung: Koexistenz statt Konfrontation.**
+
+> Copilot bleibt, wo es stark ist: im Word-Dokument, in der Mail, in der Teams-Sitzung.
+> Daneben entsteht eine eigene Ebene für das, was Copilot nicht macht: Bauprojekte
+> dokumentieren, DIN-Normen durchsuchbar halten, Angebote aus dem Bestand aufbauen,
+> Systeme miteinander verbinden.
+
+Was das leistet:
+
+- Es entwaffnet die IT vollständig. Keine Migration, kein Rauswurf, kein Angriff.
+- Es macht die Entscheidung der Geschäftsführung **klein statt groß**. Für ein junges
+  Unternehmen ohne Referenzen (E9) ist das der entscheidende Vorteil: Ein Zusatz ist
+  leichter zu genehmigen als ein Systemwechsel.
+- Es ist inhaltlich einfach wahr. manibase baut keine Office-Suite.
+
+### Der Einwand gegen die eigene Empfehlung
+
+**Koexistenz schwächt das Kostenargument** (E14 Nummer 3). Wer Copilot behält, spart
+zunächst nichts.
+
+**Auflösung, und sie ist präziser als die ursprüngliche Fassung:** Das Kostenargument
+richtet sich nicht gegen Copilot, sondern gegen den **flächendeckenden Rollout**. In
+einem Betrieb mit 150 Mitarbeitenden brauchen vielleicht 20 Leute Copilot dort, wo sie
+den ganzen Tag in Office arbeiten. Die übrigen 130 bekommen ihren Zugang über
+tokenbasierte Inferenz, zu einem Bruchteil. Das ist eine rechenbare, verteidigbare
+Aussage. „Copilot ist zu teuer, werft es raus" ist es nicht.
+
+### Was daraus für den Architektur-Vergleich (E15) folgt
+
+Die Achse der Gegenüberstellung ändert sich. Nicht **manibase gegen Microsoft**,
+sondern:
+
+| | |
+|---|---|
+| **links** | gewachsen: Copilot-Lizenzen hier, ein selbstgebautes RAG dort, private Konten dazwischen, kein Betriebskonzept |
+| **rechts** | gebaut: eine Ebene, ein Zugang über Entra ID, klare Datenwege, dokumentierter Betrieb |
+
+Das ist derselbe Vergleich, aber er beschreibt einen **Zustand statt eines Herstellers**.
+Er trifft den Bruxafort-Fall genau, ohne die Taskforce vorzuführen, und er kommt ohne
+eine einzige Behauptung über ein fremdes Produkt aus. Er ist damit auch der Vergleich,
+der in E15 als „fair" gefordert wurde.
+
+Er trägt zusätzlich den Rahmen aus E14 (Kosten des Wartens): Die linke Seite ist genau
+das, woran sich die Belegschaft gewöhnt und was in ein bis zwei Jahren wieder
+eingesammelt werden muss.
+
+---
+
 ## Unberührt
 
 `impressum.html`, `datenschutz.html`, `site/api/*.php` und alles rund um Sicherheit
