@@ -409,6 +409,62 @@ werden kann.
 **Status: durch E12 weitgehend erledigt.** Die Achse ist Betriebsgröße und Reifegrad,
 und sie verläuft zwischen den beiden Marken statt innerhalb einer Seite.
 
+---
+
+## E14 · Werteangebot für manibase.de: fünf Argumente, zwei Lager
+
+Die Kaufgründe, die der Kunde nennt. Sortiert nach Funktion im Verkaufsgespräch.
+
+### Der Rahmen: Kosten des Wartens
+
+Kein eigenes Argument, sondern die Klammer, die alle anderen dringlich macht:
+
+> Alles, was jetzt unstrukturiert eingeführt wird und woran sich die Belegschaft
+> gewöhnt, führt in ein bis zwei Jahren zu einem schmerzhaften Transformationsprojekt,
+> wenn der Wildwuchs wieder eingesammelt und sauber neu aufgesetzt werden muss.
+> Jetzt ist das Fenster, es von Anfang an richtig zu bauen.
+
+Das ist die stärkste Erzählung im ganzen Material, weil sie „wir haben noch Zeit" in
+„Warten wird teurer" umdreht. Gehört in den Hero oder direkt darunter.
+
+### Lager A: Risiko vermeiden (verschafft das Gespräch)
+
+| # | Argument | Substanz |
+|---|---|---|
+| 1 | **Schatten-KI und Compliance** | Belegschaft nutzt irgendwelche Tools. Keine Einführung, keine Schulung, kein Onboarding, keine Richtlinien, keine TOMs. manibase liefert Compliance-Check mit AVV, TOMs und VVT, vom DSB abgesegnet |
+| 2 | **Datensouveränität** | Baubranche ist besonders empfindlich (Entwürfe, geistiges Eigentum). Kein US-Transfer. Eigener Server beim Kunden, den er selbst betreut, ein- und ausschaltet, sichert. Für hochsensible Daten komplett lokale Verarbeitung möglich (z. B. Mac Mini vor Ort) mit Open-Source-Modellen |
+
+### Lager B: Wert schaffen (rechtfertigt das Budget)
+
+| # | Argument | Substanz |
+|---|---|---|
+| 3 | **Kosteneffizienz** | Lizenzmodelle wie Copilot skalieren linear mit der Kopfzahl. Eine tokenbasierte Architektur ist deutlich günstiger: für die breite Masse der Verwaltung ein kleineres, spezialisiertes Modell per API-Inferenz statt überall Frontier-Modelle |
+| 4 | **Firmen-Assets statt Abhängigkeiten** | Was auf eigenen Servern läuft, ist ein Asset, keine Liability. Proprietäre Prozesse und Automatisierungen steigern Unternehmenswert und Bewertung, besonders relevant bei einer **Unternehmensübergabe** |
+| 5 | **Systemintegration** | Mit ChatGPT oder Claude sind tiefe Integrationen schwer. Die eigene Infrastruktur ist das Bindeglied, um bestehende Systeme und Datenbestände anzuzapfen und intern weiterzuverwerten |
+
+### Empfohlene Reihenfolge auf der Seite
+
+Defensive Argumente verschaffen Termine, offensive rechtfertigen Budgets.
+Also: **Rahmen (Kosten des Wartens) → 1 → 2 → 3 → 4**, Nummer 5 als technische Tiefe
+weiter unten oder auf einer Unterseite.
+
+Nummer 4 ist der ungewöhnlichste Gedanke im ganzen Material und im Wettbewerb
+unbesetzt. In inhabergeführten Bauunternehmen dieser Größe ist die Nachfolge ein
+Dauerthema.
+
+### Zwei Warnungen
+
+**Zu Nummer 4:** „steigert EBITDA und Bewertung erheblich" ist ohne Beleg eine
+Behauptung der Sorte, vor der `00-recherche.md` Abschnitt 4 ausdrücklich warnt.
+Die Logik (proprietäre Prozesse sind Vermögenswerte) trägt, die Bezifferung nicht.
+Formulieren als Eigentumsfrage, nicht als Renditeversprechen.
+
+**Zu Nummer 3:** Das ist das einzige Argument, zu dem eine **harte Zahl** möglich ist.
+manibase kann den eigenen Preis nicht zeigen (E8), aber die **Kostenrechnung des
+Kunden** sehr wohl: Lizenzkosten pro Kopf und Jahr gegen tokenbasierte Inferenz für
+dieselbe Belegschaft. Aktuelle Lizenzpreise vor Veröffentlichung verifizieren.
+Das wäre die einzige belastbare Zahl auf der ganzen Seite und entsprechend wertvoll.
+
 Die zwei vom Kunden beschriebenen Formate beschreiben nicht zwei Veranstaltungen,
 sondern **zwei verschiedene Kundentypen**:
 
