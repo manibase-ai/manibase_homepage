@@ -510,6 +510,89 @@ Drei Achsen stehen zur Wahl. Aus der Recherche (`00-recherche.md`, Abschnitt 2):
 
 ---
 
+## E15 · Was gezeigt wird: die Architektur, nicht die Gesichter
+
+**Entscheidung des Kunden:** Gesichter und Helfer-Figuren sind nicht das Beweismittel
+für manibase.de. Sie gehören zum kleinen Handwerksbetrieb, also zur anderen Marke
+(E12). Gezeigt wird stattdessen **die Architektur**.
+
+### Das Leitbild der Seite: der Architektur-Vergleich
+
+Zwei Schaubilder nebeneinander auf einer Seite:
+
+| | |
+|---|---|
+| **links** | die manibase-Grundarchitektur, grob als Referenzdiagramm. Bewusst **ohne** Produktnamen wie n8n oder Open WebUI im Bild, sonst verliert man sich im Werkzeugkasten |
+| **rechts** | die herkömmliche Variante: über Microsoft gelöst, im schlimmsten Fall direkt über ChatGPT |
+| **darunter** | Vor- und Nachteile beider Wege gegenübergestellt |
+
+**Bewertung: das ist der stärkste Inhalt der neuen Seite.** Er beweist Kompetenz, macht
+das Datensouveränitäts-Argument (E14 Nummer 2) sichtbar statt behauptet, trägt
+gleichzeitig das Kosten- (Nummer 3) und das Eigentumsargument (Nummer 4) und verrät
+kein einziges Kundengeheimnis. Ein Bild statt drei Absätzen Text.
+
+**Warnung, ernst gemeint:** Eine Gegenüberstellung, bei der links alles grün und rechts
+alles rot ist, liest sich als Werbung und verliert genau den Leser, den sie gewinnen
+soll. Eine IT-Leitung in einem Betrieb mit 150 Mitarbeitern kennt die Microsoft-Welt
+besser als wir. Der Vergleich ist nur glaubwürdig, wenn er die echten Vorteile der
+Gegenseite benennt: tiefe Integration in eine vorhandene Microsoft-Landschaft, kein
+eigener Betrieb, sofort verfügbar, ein Vertragspartner. Die manibase-Seite gewinnt
+trotzdem, weil sie bei Datenhoheit, Kosten pro Kopf und Eigentum vorne liegt. **Ein
+fairer Vergleich, den man verliert, überzeugt mehr als ein unfairer, den man gewinnt.**
+
+### Screenshots: was geht, was nicht
+
+| Motiv | Verfügbar | Entscheidung |
+|---|---|---|
+| Open WebUI / LibreChat | ja, sofort | zeigen, aber **ehrlich beschriften**: „So sieht der Zugang für Ihre Mitarbeitenden aus." Es ist Open-Source-Software, nicht manibase-Eigenentwicklung. Als eigenes Produkt ausgegeben wäre es genau die Sorte Behauptung, die ein technischer Leser in zehn Sekunden auffliegen lässt |
+| n8n-Workflow | ja, sofort | zeigen, als Beleg für „hier läuft echte Automatisierung", nicht als Produkt |
+| **Cockpit mit den Helfern** | technisch ja, **UX noch nicht vorzeigbar** | **vorerst nicht zeigen** |
+| Bodo im Einsatz (UGC-Video, Baustelle + Bildschirm) | machbar | gute Idee, **nicht Priorität 1**. Kommt, wenn Bodos Name final ist (E4) |
+| Fotos aus echten Projekten, Workshop-Situationen | nein | später |
+
+**Zum Cockpit:** Das ist der wunde Punkt. Es ist das Flaggschiff-Asset aus Layer 5, und
+es ist das Einzige, was manibase wirklich selbst gebaut hat. Nicht zeigen ist richtig,
+solange es nicht dem Branchenstandard entspricht. Aber: **das Designsystem, das wir
+gerade für die Website bauen, ist zugleich das Designsystem fürs Cockpit.** Dieselben
+Farben, dieselbe Typoskala, dieselben Karten und Abstände. Wer beides in einer
+Handschrift baut, spart sich die zweite Grundsatzentscheidung und bekommt einen
+Screenshot, der irgendwann von selbst passt. Das sollte beim Bau mitgedacht werden.
+
+### Korrektur zur Ausgangslage
+
+„Fotos von uns haben wir noch nicht" trifft nur auf Projekt- und Workshop-Fotos zu.
+**Zwei brauchbare Porträts liegen bereits im Repository** (`site/assets/matthias.jpg`,
+`site/assets/nikolaus.webp`) und sind auf der heutigen Seite im Einsatz. Sie bleiben
+verwendbar.
+
+### Was das an E5 und E6 ändert
+
+E6 hatte die Gründergesichter zum ersten Beweisanker erklärt und „above the fold"
+verortet. **Das wird korrigiert, aber nicht gestrichen.** Für eine Geschäftsführung
+mit 150 Mitarbeitern lautet die stille Frage nicht „sind das sympathische Leute",
+sondern „gibt es diesen kleinen Anbieter in zwei Jahren noch, und kann er das
+überhaupt". Auf die erste Hälfte antwortet der Werdegang (E5), auf die zweite
+antwortet die Architektur.
+
+**Neue Rangfolge der Beweismittel auf manibase.de:**
+
+1. **Architektur-Vergleich** — beweist Können
+2. **Screenshots** (Open WebUI, n8n) — beweist, dass es real läuft
+3. **Das laufende Projekt als Tatsache** (E6 Punkt 2) — beweist Praxis
+4. **Gründer mit Werdegang** (E5) — beweist Verlässlichkeit, aber weiter unten,
+   nicht im Hero
+5. **Platzhalter für das erste echte Kundenzitat** (E6) — bleibt leer
+
+### Produktionsaufwand, ehrlich benannt
+
+Von den fünf Beweismitteln existiert heute genau eines fertig (Gründerfotos). Der
+Architektur-Vergleich ist **noch zu erstellen**, und er ist kein Nebenprodukt: zwei
+saubere Diagramme plus eine faire Vor-/Nachteil-Tabelle. Das ist Arbeit, die vor dem
+Bau der Seite erledigt sein muss, nicht währenddessen. Screenshots sind eine Stunde,
+das Diagramm ist ein Termin.
+
+---
+
 ## Unberührt
 
 `impressum.html`, `datenschutz.html`, `site/api/*.php` und alles rund um Sicherheit
