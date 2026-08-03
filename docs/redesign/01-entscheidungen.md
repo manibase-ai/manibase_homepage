@@ -80,7 +80,102 @@ nicht das Geschäft, das manibase machen will.
 
 ---
 
-## E3 · Segmentierungsachse für Unterseiten
+## E3 · Leistungsspektrum: drei Bereiche, ein Flaggschiff
+
+**Flaggschiff ist die Dienstleistung**, nicht das Produkt: das **strukturierte
+KI-Einführungsprojekt**. Es läuft bereits gut und ist in den nächsten sechs Monaten
+reproduzierbar lieferbar, für Betriebe von 50 bis 150 Mitarbeitern.
+
+### Die drei Bereiche
+
+| # | Bereich | Inhalt | Haltung |
+|---|---|---|---|
+| 1 | **Diagnose und Strategie** | Workshop: Use Cases, Aufgaben und Prozesse definieren. KI-Vision. Roadmap mit wirtschaftlichem Nutzen je Use Case | Einstieg in die Leiter |
+| 2 | **Umsetzung auf bestehender Kundenarchitektur** | Kunde hat schon Copilot oder Langdock, manibase hilft beim Agentenbau | **wird ungern gemacht** („in einer bestehenden Architektur herumpfuschen") |
+| 3 | **Eigene Architektur (Premium)** | n8n, Open WebUI oder LibreChat auf privater Cloud des Kunden. Prozesse und Automatisierungen sauber aufgesetzt | Zielgeschäft |
+
+**Der KI-Klartag ist nicht verschwunden, er ist Bereich 1 geworden.** Aus einem
+alleinstehenden Produkt mit Preisschild wurde die erste Stufe einer Leiter. Das löst
+das Vertriebsproblem aus E2, ohne den Inhalt aufzugeben.
+
+### Das Einführungsprojekt im Detail
+
+- **Technische Bereitstellung:** private Cloud des Kunden, Basis Open WebUI,
+  modellagnostisch, in Deutschland auf Azure- oder Stackit-Modellen, alternativ
+  komplett lokal auf eigenen Servern. Zugang für alle Mitarbeitenden über die
+  hauseigene **Microsoft Entra ID**.
+- **Begleitung:** Workshops, Kick-offs, Projektmanagement, Change-Management.
+- **Erste Use Cases:** Wissensdatenbank für **DIN-Normen**, Text- und
+  Angebotsbausteine für den Betrieb.
+
+### Eigentum und Abrechnung
+
+- Der Code der Helfer (Bodo und folgende) **gehört manibase**, nicht dem Kunden.
+- Individualisierungen für den Kunden (Prompt-Vorlagen, Schnittstellen zur hauseigenen
+  Software) **gehören dem Kunden**.
+- Der Kunde **rechnet die Cloud selbst ab** und kann eigenständig weiterarbeiten,
+  auch wenn es manibase nicht mehr geben sollte.
+
+**Bewertung:** Der letzte Punkt ist das stärkste Vertrauensargument im gesamten
+Material. Er beantwortet gleichzeitig das 96-%-Hemmnis (Datensicherheit) und die
+unausgesprochene Lock-in-Angst. Gehört prominent auf die Seite, nicht ins Kleingedruckte.
+
+### Empfehlung zu Bereich 2
+
+Nicht mit gleichem Gewicht ausstellen. Was auf der Seite steht, bestimmt, welche
+Anfragen kommen. Wer Bereich 2 gleichrangig zeigt, bekommt Bereich-2-Anfragen.
+Entweder weglassen oder ausdrücklich als Brücke formulieren („Sie arbeiten schon mit
+Copilot? Wir helfen punktuell weiter, der saubere Weg ist aber eine eigene Architektur").
+
+---
+
+## E4 · Produktreife (Stand 3.8.2026)
+
+| Produkt | Funktion | Reifegrad | Konsequenz für die Seite |
+|---|---|---|---|
+| **Bodo** (Name nicht final) | Baudokumentation, Spracheingabe, Wiederauffinden | **Erste Versionen im Test.** Feedback von Architekturbüro und einem Spenglerbetrieb, der es ausprobiert hat | einziger zeigbarer Kandidat, aber ohne festen Namen |
+| **PIA** | Frühe Grundstücks- und Projektprüfung für Architektur- und Planungsbüros | **Entwurfsphase.** Infopaper vom 26.7.2026 geht an potenzielle Pilotpartner, Experteninterviews geplant | als Pilotpartner-Aufruf zeigbar, nicht als Produkt |
+| **Anton** | Angebotsvorarbeiten | **Existiert nicht, kein Konzept.** Angebotsprozess in den Betrieben muss erst verstanden werden | nicht zeigen |
+
+**Namenssystem:** Der Anfangsbuchstabe ist an die Funktion gekoppelt.
+**B**odo → **B**audokumentation · **P**IA → **P**lanung/Projektprüfung ·
+**A**nton → **A**ngebote. Das System trägt. „Stefan, der Standortanalysehelfer" ist
+durch PIA überholt und entfällt.
+
+Damit ist auch die Sorge aus E2 erledigt, die Reihe sei rein männlich: PIA ist weiblich.
+
+**Haltung des Kunden zu den Figuren:** „müssen nicht zwingend auf die Webseite, die
+vielleicht etwas kitschig aussehen". Eventuell später eigene Seite je Helfer mit Bild
+und Funktionsbeschreibung.
+
+**Empfehlung:** Helfer vorerst **nicht** auf die Startseite. Begründung: Bodos Name ist
+nicht final, Anton existiert nicht, PIA sucht noch Pilotpartner. Drei Produktkacheln,
+hinter denen nichts Kaufbares steht, treffen genau die 57-%-Skepsis gegenüber
+Praxisreife. Die Startseite verkauft das Einführungsprojekt. Produkte bekommen eigene
+Seiten, sobald sie liefern.
+
+---
+
+## E5 · Der unfaire Vorteil
+
+Zwei nachprüfbare Fakten, die im Wettbewerb unbesetzt sind:
+
+- **Nikolaus Schauersberger:** 15 Jahre als freiberuflicher Softwareentwickler vor der
+  Gründung.
+- **Matthias Geisler:** erfahrener IT-Projektmanager für die Einführung von
+  **Dokumentenmanagementsystemen**.
+
+Die DMS-Einführung ist strukturell dieselbe Disziplin wie eine KI-Einführung:
+Dokumentprozesse, Change-Management, Widerstand in der Belegschaft, Altbestand.
+Das ist keine Marketingbehauptung, sondern ein überprüfbarer Werdegang.
+
+Die Recherche (`00-recherche.md`, Abschnitt 4) zeigt: **Kein einziger der sechs
+untersuchten Wettbewerber zeigt Gründergesichter.** Das ist die offene Flanke, und
+manibase hat jetzt die Substanz, sie zu besetzen. Gehört above the fold.
+
+---
+
+## E6 · Segmentierungsachse für Unterseiten
 
 **Status: offen.**
 
