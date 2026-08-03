@@ -593,6 +593,92 @@ das Diagramm ist ein Termin.
 
 ---
 
+## E16 · Ein Leser, ein Vetogeber
+
+**Befund aus der Praxis:** In allen bisherigen Gesprächen war der Ansprechpartner die
+**Geschäftsführung**. Ein Gegenbeispiel gibt es, und es ist lehrreich.
+
+> **Der Fall Bruxafort.** Workshop zum Konzept der eigenen Architektur. Am Tisch saßen
+> der IT-Leiter, einige Mitarbeitende und die Assistenz der Geschäftsführung. Die beiden
+> Geschäftsführer **nicht**. Ergebnis: kein Projekt.
+
+**Interpretation, vorsichtig:** Ein einzelner gescheiterter Workshop beweist keine
+Regel, es können Budget, Zeitpunkt oder Passung dahinterstecken. Aber er passt zum
+Muster aller anderen Gespräche, und die Richtung ist eindeutig genug, um danach zu
+bauen.
+
+### Die Asymmetrie
+
+**Die IT kann dieses Projekt nicht kaufen, aber sie kann es verhindern.**
+
+Das ist kein klassisches Buying Center mit zwei Entscheidern, sondern ein Entscheider
+und ein Vetogeber. Daraus folgt für die Seite etwas anderes, als ich in Frage 10
+vermutet hatte:
+
+| | |
+|---|---|
+| **Die Startseite hat genau einen Leser:** die Geschäftsführung | Nutzen, Risiko, Kosten, Eigentum. Keine Halbtechnik, die niemanden erreicht |
+| **Die IT bekommt eine eigene Seite** | Aufgabe ist **nicht**, die IT zum Kauf zu überreden. Aufgabe ist, ihr das Nein zu nehmen |
+
+Eine Seite, die versucht, beide gleichzeitig zu bedienen, wird für die Geschäftsführung
+zu technisch und für die IT zu dünn. Getrennte Ebenen sind hier keine Bequemlichkeit,
+sondern Voraussetzung.
+
+### Die technische Unterseite (erste inhaltlich begründete Unterseite)
+
+Trocken, vollständig, ohne Verkaufston. Sie beantwortet die Fragen, die eine IT-Leitung
+stellt, bevor sie gefragt wird:
+
+- Wer **betreibt** das System, wer hat Root, wer patcht?
+- Was passiert bei **Ausfall**, wie sieht **Backup** und Wiederanlauf aus?
+- Wie hängt es an der vorhandenen **Entra ID**, wie an bestehenden Systemen?
+- **Wo liegen die Daten**, welcher Anbieter, welche Region, welcher Vertrag?
+- Was passiert, **wenn es manibase nicht mehr gibt** (Antwort steht in E3 und ist stark)?
+- Was muss die IT selbst leisten, und was ausdrücklich nicht?
+
+### Das Veto vorab entschärfen: die IT einladen, nicht umgehen
+
+Die zweite Frage des Kunden („wie decken wir das IT-Veto im Vorfeld ab") hat eine
+Antwort, die zugleich die Lehre aus Bruxafort umsetzt: **Die Einladung zum Erstgespräch
+sagt selbst, wer dabei sein soll.**
+
+> „Das Gespräch führen wir mit der Geschäftsführung, gern zusammen mit Ihrer IT."
+
+Das leistet drei Dinge auf einmal:
+
+1. Es macht die Anwesenheit der Geschäftsführung zur Bedingung, ohne unhöflich zu sein.
+   Der Bruxafort-Fall wäre so nicht zustande gekommen.
+2. Es holt die IT **früh** an den Tisch. Eine IT-Leitung, die erst erfährt, dass etwas
+   läuft, wenn entschieden ist, legt aus Prinzip das Veto ein. Eine, die von Anfang an
+   gefragt wurde, wird zum Fürsprecher.
+3. Es signalisiert Ebenbürtigkeit: Wer sagt, wer am Tisch sitzen soll, verkauft nicht,
+   sondern prüft mit.
+
+Die vorhandene **Qualifizierungs-Maske** auf der heutigen Seite fragt die Rolle bereits
+ab. Der Mechanismus ist gebaut, er muss nur diesem Zweck dienen.
+
+### Was der Geschäftsführer davon hat
+
+Die erste Frage des Kunden („welchen konkreten Nutzen hat der Geschäftsführer") ist mit
+E14 schon beantwortet, aber die Zuordnung wird hier scharf:
+
+| Leser | Argumente aus E14 |
+|---|---|
+| **Geschäftsführung** | Rahmen (Kosten des Wartens) · 1 Schatten-KI und Haftung · 2 Datensouveränität · 3 Kosten pro Kopf · 4 Firmen-Asset und Nachfolge |
+| **IT-Leitung** | 2 Datensouveränität technisch · 5 Systemintegration · plus die Betriebsfragen oben |
+
+Argument 5 (Systemintegration) war in E14 als „technische Tiefe weiter unten" markiert.
+**Es gehört jetzt konkret auf die IT-Seite** und hat dort einen Adressaten.
+
+### Konsequenz für den CTA
+
+Der seit E12 offene Punkt bekommt Kontur: Der CTA muss **selektieren**, nicht nur
+einladen. Ein Gespräch, das ohne Geschäftsführung stattfindet, ist verlorene Zeit für
+beide Seiten. Formulierungen, die das leisten, ohne abweisend zu wirken, sind der
+nächste offene Punkt.
+
+---
+
 ## Unberührt
 
 `impressum.html`, `datenschutz.html`, `site/api/*.php` und alles rund um Sicherheit
