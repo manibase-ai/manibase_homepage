@@ -175,7 +175,49 @@ manibase hat jetzt die Substanz, sie zu besetzen. Gehört above the fold.
 
 ---
 
-## E6 · Segmentierungsachse für Unterseiten
+## E6 · Beweisführung: Gründer statt Referenzen
+
+**Ausgangslage (Stand 3.8.2026):**
+
+| Kunde | Freigabe | Belastbarkeit |
+|---|---|---|
+| Architekturbüro (18 MA) | **vertraglich als Referenz vereinbart** | Pilotprojekt läuft noch, kein Ergebnis vorzeigbar |
+| Spenglerbetrieb | – | kein zitierbarer Satz |
+| Dachdecker | – | nichts Belastbares |
+| Garten- und Landschaftsbau | – | nichts Belastbares |
+
+**Entscheidung:** Kein Ergebnis-Testimonial. Stattdessen vier Anker:
+
+1. **Gründergesichter und Werdegang** (siehe E5). Im Wettbewerb unbesetzt, 0 von 6.
+2. **Das laufende Projekt als Tatsache**, nicht als Erfolgsmeldung:
+   „Wir führen derzeit bei einem Architekturbüro mit 18 Mitarbeitern ein KI-System ein."
+   Behauptet kein Ergebnis, belegt die Tätigkeit. Freigabe liegt vor.
+   Nebeneffekt: „18 Mitarbeiter" ist die wirksamste Antwort auf die 59-%-Barriere
+   („lohnt nur für größere Betriebe").
+3. **Der Prozess, minutiös beschrieben.** Überprüfbar statt behauptet.
+4. **Eigentum und Datenschutz konkret**: private Cloud, Kunde rechnet selbst ab,
+   kann ohne manibase weiterarbeiten.
+
+**Bauvorgabe:** Der Platz für ein echtes Kundenzitat wird eingeplant, aber leer
+gelassen. Nach Abschluss des Pilotprojekts wird eine Zeile getauscht, nicht die Seite
+umgebaut.
+
+**Verboten** (aus `00-recherche.md`, Abschnitt 4): erfundene Kundenzahlen, anonyme
+Zitate, die wie echte aussehen, gekaufte Siegel, Referenzbehauptungen aus dem Vorleben
+ohne Beleg.
+
+---
+
+## E7 · Kontaktadresse vereinheitlicht
+
+`kontakt@demiospace.ai` war eine Legacy-Adresse und stand noch an 5 Stellen
+(impressum.html, datenschutz.html 2×, index.html, scripts/site.js), während der Rest
+der Seite bereits `kontakt@manibase.de` nannte. Umgestellt am 3.8.2026, die Seite ist
+jetzt durchgängig. Inhaltlich sonst nichts an Impressum und Datenschutz geändert.
+
+---
+
+## E8 · Segmentierungsachse für Unterseiten
 
 **Status: offen.**
 
