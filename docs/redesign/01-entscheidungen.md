@@ -217,7 +217,64 @@ jetzt durchgängig. Inhaltlich sonst nichts an Impressum und Datenschutz geände
 
 ---
 
-## E8 · Segmentierungsachse für Unterseiten
+## E8 · Preis: keine Zahl auf der Seite, aber die Form
+
+**Entscheidung: kein Preis auf der Website.**
+
+**Interne Kalkulation (nicht öffentlich):** Retainer **2.000 bis 5.000 € im Monat**,
+Projektlaufzeit **3 bis 6 Monate**, bei größeren Organisationen standardmäßig eher 6.
+Zielgröße 5.000 €/Monat. Ein zweiter Kunde würde noch zu vergünstigten
+Pilotkonditionen aufgenommen.
+
+**Warum kein Preis:** Zu viele Faktoren, und es fehlen Ankerwerte aus abgeschlossenen
+Projekten. Der Preis hängt an Organisationsgröße, Schulungsbedarf, Umfang der
+Compliance-Arbeit (Nutzungsrichtlinien), Anzahl Schulungssitze, Teamgröße, Zeit für
+Use Cases, Onboarding und KI-Champion-Training.
+
+**Im Markt vertretbar:** capmo und hero nennen ebenfalls keinen Preis (2 von 6).
+Aber NN/g (Loranger 2013) gilt weiter: Wer den Preis verbirgt, wirkt ausweichend.
+
+**Deshalb wird statt der Zahl die Form gezeigt:**
+
+1. **Die Struktur:** „Projektlaufzeit drei bis sechs Monate, Abrechnung als monatlicher
+   Retainer." Keine Zahl, aber eine Größenordnung zum Einordnen.
+2. **Die Preistreiber offen auflisten:** Teamgröße, Schulungsbedarf, Compliance-Umfang,
+   Anzahl Use Cases, KI-Champion-Training. Wirkt souverän statt ausweichend.
+3. **Was der Kunde *nicht* an manibase zahlt:** laufende Modell- und Cloudkosten gehen
+   direkt an Azure oder Stackit. Entschärft die Abo-Fallen-Angst und stützt das
+   Eigentumsargument aus E3.
+
+**Konsequenz:** Die 16 Nennungen von „1.800 € Festpreis" auf der Seite gehören zum
+Klartag und passen nicht mehr zum Modell. Muss beim Umbau aufgelöst werden.
+
+---
+
+## E9 · Pilotkonditionen als Haltung, nicht als Schwäche
+
+Auf `infotermin.html` und `interessent.html` steht bereits:
+„Wir nehmen aktuell nur noch **3 Projektpartner** auf, die Plätze vergeben wir nach
+Eingang und einer kurzen Eignung."
+
+Das ist die richtige Formulierung und wird auf die neue Startseite gehoben. Ein junges
+Unternehmen ohne Referenzen wirkt schwach; ein Unternehmen, das bewusst nur drei
+Partner aufnimmt, wirkt selektiv. Dieselbe Tatsache, andere Haltung, und sie ist wahr.
+
+Gekoppelt an den Werdegang aus E5 ergibt das die Position: junges Unternehmen,
+erfahrene Leute, sucht gerade die richtigen ersten Partner.
+
+---
+
+## Gefundene Fehler auf der Live-Seite
+
+| Fund | Ort | Status |
+|---|---|---|
+| Kontaktadresse uneinheitlich | 5 Stellen | **behoben** (E7) |
+| Infotermin-Termine abgelaufen (29.07./31.07., heute 3.8.) | `infotermin.html` | offen, Entscheidung des Kunden |
+| „per Zoom" im Text, „per Teams" in der Auswahl | `infotermin.html` | offen |
+
+---
+
+## E10 · Segmentierungsachse für Unterseiten
 
 **Status: offen.**
 
