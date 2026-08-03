@@ -274,9 +274,103 @@ erfahrene Leute, sucht gerade die richtigen ersten Partner.
 
 ---
 
-## E10 · Segmentierungsachse für Unterseiten
+## E10 · Eingänge: aus vier Türen werden zwei
 
-**Status: offen.**
+**Ist-Zustand:** Die Seite hat vier konkurrierende Eingänge — 15-Minuten-Gespräch
+(Startseite), Infotermin (`infotermin.html`), „Ich habe Interesse"
+(`interessent.html`), KI-Klartag (`ki-klartag.html`).
+
+Die Recherche ist eindeutig: immer ein CTA-**Paar**, nie mehr. 11 von 11 Anbietern
+haben genau einen Button im Header. Der einzige Ausreißer (openhandwerk, vier
+Hero-CTAs) wird in der Auswertung als verwässert beschrieben.
+
+**Entscheidung:**
+
+```
+Primär    Erstgespräch buchen        für die, die reden wollen
+Sekundär  Nächste KI-Sprechstunde    für die, die erst zuhören wollen
+```
+
+Das entspricht dem Sales-led-Muster von capmo, sablono und moser.
+
+- `ki-klartag.html` entfällt als eigener Eingang (der Klartag ist Bereich 1 eines
+  Projekts, siehe E3).
+- `interessent.html` wird Auffangformular, keine eigene Tür mehr.
+
+---
+
+## E11 · Veranstaltungsformate
+
+### KI-Sprechstunde für Bau und Handwerk (das Zielformat)
+
+Kostenlos, online, rund eine Stunde. Inhalt: was heute machbar ist, wie man es selbst
+umsetzen könnte (Open WebUI installieren, eigenes Projekt anlegen, Workshops).
+Haltung ausdrücklich: „Das könnten die Betriebe vermutlich auch selbst, wir können es
+besser begleiten." Am Ende ein QR-Code, unverbindlich, ohne Druck. Vorbild Baulig.
+
+**Als wiederkehrender Rhythmus bauen, nicht als Einzeltermine.**
+„Jeden ersten Mittwoch, 19:30 Uhr" veraltet nie. Zwei feste Daten veralten am dritten
+Tag, genau das ist im Juli passiert.
+
+### Weitere Formate
+
+- **Infotermin kommende Woche:** eigenes Format für **SHK-Handwerksbetriebe**, um
+  Baudokumentation und Angebotserstellung in einem **Verbundprojekt mit fünf Betrieben**
+  zu starten. Einmalig, nicht das wiederkehrende Format.
+- **Vorträge bei Branchenverbänden** (Bauplaner- und Bau-Info-Veranstaltungen) als
+  fester Kanal. Termine auf der Website, direkte Anmeldung.
+
+### Einwilligungsstruktur
+
+Das Dilemma „Daten vorab sammeln oder nicht" ist ein Scheinwiderspruch: Für einen
+Online-Termin ist die E-Mail-Adresse zwingend, sonst kann der Einwahllink nicht
+zugestellt werden. Die eigentliche Frage ist die spätere Werbenutzung, und die braucht
+eine **getrennte** Einwilligung (Zweckbindung).
+
+| | |
+|---|---|
+| **Pflicht-Checkbox** | „Einladung, Einwahllink und Erinnerung." Zweckgebunden, kein Marketing |
+| **Optionale zweite Checkbox** | „Außerdem alle paar Wochen eine kurze Mail." Ungehakt voreingestellt |
+| **QR-Code am Ende der Veranstaltung** | Für alle, die danach mehr wollen |
+
+Die Pflicht-Variante ist auf `infotermin.html` bereits sauber gebaut. Es fehlt nur die
+zweite, optionale Box. Vom externen DSB (DSZ365) gegenprüfen lassen.
+
+---
+
+## E12 · Segmentierungsachse: nach Betriebsgröße, nicht nach Gewerk
+
+**Status: Vorschlag steht, Entscheidung offen (Frage 7).**
+
+Die zwei vom Kunden beschriebenen Formate beschreiben nicht zwei Veranstaltungen,
+sondern **zwei verschiedene Kundentypen**:
+
+| | KI-Sprechstunde | Strukturierte Einführung |
+|---|---|---|
+| Zielgruppe | Handwerksbetriebe, kleinere Planungsbüros | „größere Betriebe" |
+| Haltung | „Das könnt ihr auch selbst, wir begleiten besser" | „Um Systematik kommen Sie nicht herum" |
+| Ergebnis | Hilfe zur Selbsthilfe | Retainer 3–6 Monate, eigene Infrastruktur |
+
+Damit ist die Achse **Betriebsgröße und Reifegrad**, nicht Gewerk. Das entspricht
+capmo, nevaris und plancraft („Segmente" nach Betriebsgröße auf der Startseite) und
+umgeht das Substanzproblem der Gewerke-Seiten (nur 30–40 % echter Inhalt, siehe
+`00-recherche.md`).
+
+**Ungeklärter Widerspruch, blockiert die Tonalität der ganzen Seite:**
+
+| Quelle | Betriebsgröße |
+|---|---|
+| `PRODUCT.md`, heutige Seite | 10–20 Mitarbeiter |
+| Pilotkunde Architekturbüro | 18 |
+| Einführungsprojekt laut E3 | 50, 100 oder 150 |
+| Spengler, Dachdecker, GaLaBau | vermutlich unter 20 |
+
+**Empfehlung:** Startseite für 10–30 Mitarbeiter schreiben, mit einer sichtbaren Tür
+für Größere. Begründung: reale Kundenliste, das beste Argument („18 Mitarbeiter, und
+es funktioniert") und der Claim „Holen Sie sich Ihre Abende zurück" zeigen alle in
+dieselbe Richtung. Der Claim ist auf einen Inhaber gemünzt, nicht auf eine
+Geschäftsführung. Größere Betriebe kommen ohnehin über Verband und Vortrag, nicht über
+die Startseite.
 
 Drei Achsen stehen zur Wahl. Aus der Recherche (`00-recherche.md`, Abschnitt 2):
 
