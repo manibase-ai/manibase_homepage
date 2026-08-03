@@ -338,9 +338,76 @@ zweite, optionale Box. Vom externen DSB (DSZ365) gegenprüfen lassen.
 
 ---
 
-## E12 · Segmentierungsachse: nach Betriebsgröße, nicht nach Gewerk
+## E12 · Zwei Marken, ein Layer-Modell
 
-**Status: Vorschlag steht, Entscheidung offen (Frage 7).**
+**Das ist die zentrale Entscheidung des ganzen Konzepts.** Es gibt nicht eine Zielgruppe
+mit zwei Formaten, sondern **zwei Marken mit getrennten Märkten**.
+
+| Ebene | Inhalt | Marke |
+|---|---|---|
+| **Layer 0** · Reine Information | YouTube (Long- und Shortform), LinkedIn, Instagram. Kein Gegenwert verlangt, reiner Goodwill | matthias-geisler.com |
+| **Layer 1** · Erste Interaktion und Community | kostenlose Community · kostenlose KI-Sprechstunden · kostenfreie Workshops (verlost, bis 5 Teilnehmer, 4 Stunden hands-on, erste reale Ergebnisse) · E-Mail-Newsletter | matthias-geisler.com |
+| **Layer 2** · Schulung und Einführung | Schulungen, saubere KI-Einführung, **Compliance-Check mit AVV, TOMs und VVT**, vom DSB abgesegnet, einmalige Hilfe oder leichtes Coaching | matthias-geisler.com |
+| **Layer 3** · Diagnose und Strategie | Der **Klartag als strategisches Instrument**, im besten Fall integraler Teil eines großen Projekts. Kanal: kostenlose Infoveranstaltungen bei **Handwerksinnungen und Kreishandwerkerschaften**. Auftritt als strategischer Partner, nicht als Sprechstunde | **manibase.de** |
+| **Layer 4** · Prozessbegleitung | Hilfe auf der Kundenwelt: Microsoft Copilot, erste RAG-Systeme, NotebookLM. **Krücke, nicht nachhaltig.** Nur wenn der Kunde wirklich Hilfe braucht und gut bezahlt | **manibase.de** |
+| **Layer 5** · Infrastruktur und Assets | **Flaggschiff.** Assets, Agents und Workflows auf hauseigener Infrastruktur: n8n, Open WebUI, manibase-Worker, Cockpit mit Standardmodulen. Teurer, steigert aber den Firmenwert des Kunden. Langfristige Partnerschaft, monatliche Retainer für Wartung, Service, Weiterentwicklung. Perspektive: einzelne Module als SaaS | **manibase.de** |
+
+### Zielgruppen der beiden Marken
+
+- **matthias-geisler.com:** kleine Handwerksbetriebe, die Orientierung und Hilfe suchen.
+  Wenig Geld, viel Reichweite, Vertrauen aufbauen, Referenzen und Testimonials sammeln.
+- **manibase.de:** größere Handwerksbetriebe, Bauplaner, Bauingenieure und
+  baubranchenspezifische Unternehmen mit **dutzenden bis hunderten Mitarbeitern**,
+  Zielkorridor **100 bis 200**. Auftritt als strategischer Partner.
+  Geschäftsziel: 100 bis 200 solcher Kunden bedeuten volle Auslastung.
+
+### Damit ist Frage 7 beantwortet, gegen die Empfehlung
+
+Empfohlen war die Startseite für 10 bis 30 Mitarbeiter. **Entschieden ist das Gegenteil:
+manibase.de schreibt für die Großen.** Die Begründung trägt: Der kleine Markt ist nicht
+verloren, er wandert nur auf die persönliche Marke, wo er ohne Preisdruck bedient
+werden kann.
+
+### Konsequenzen, die daraus zwingend folgen
+
+1. **Der Claim „Holen Sie sich Ihre Abende zurück" gehört nicht mehr auf manibase.de.**
+   Er ist auf einen Inhaber gemünzt, der selbst abends Angebote schreibt. In einem
+   Betrieb mit 150 Mitarbeitern entscheidet eine Geschäftsführung oder IT-Leitung, und
+   deren Problem ist nicht der eigene Feierabend. Der Claim ist gut, aber er gehört
+   nach matthias-geisler.com.
+2. **Die gesamte heutige Startseite ist auf den falschen Kunden geschrieben**
+   (Pains, Helden, Wertband, Klartag-Funnel). Das ist kein Redesign mehr, das ist
+   ein Neubau der Texte.
+3. **Teile der Recherche müssen neu gewichtet werden.** Die Bitkom-Studie 2025 befragt
+   **Handwerksunternehmen**, überwiegend klein. Für Betriebe mit 100 bis 200
+   Mitarbeitern tragen Befunde wie „84 % kein Thema" oder „lohnt nur für größere
+   Betriebe" **nicht mehr**. Was bleibt: Datenschutz- und Sicherheitsbedenken,
+   Zweifel an Praxisreife, Angst vor Kontrollverlust.
+4. **Der relevante Wettbewerb verschiebt sich.** Nicht mehr plancraft, craftnote,
+   meisterwerk, hero (Werkzeuge für kleine Handwerksbetriebe), sondern **capmo,
+   nevaris, sablono, cosuno**. Und genau diese vier zeigen keine Preise, machen keine
+   Gewerke-Seiten und segmentieren nach Rolle und Unternehmenstyp. Die
+   Preisentscheidung aus E8 und die Absage an Gewerke-Seiten sind damit rückwirkend
+   besser begründet als vorher.
+
+### Offen
+
+- **Sekundärer CTA:** Die KI-Sprechstunde scheidet aus (gehört zu Layer 1 und damit
+  zur anderen Marke). Ersatz noch offen.
+- **„Erstgespräch buchen" gilt dem Kunden als ausgelutscht.** Bessere Formulierung
+  gesucht. Aus der Recherche: CTA wörtlich benennen, nicht „Jetzt durchstarten".
+  Kandidat mit Substanz, weil er den unfairen Vorteil aus E5 nutzt:
+  ein Gespräch **direkt mit den Gründern**, nicht mit einem Vertrieb.
+- **Übergabe zwischen den Marken:** Was passiert, wenn ein Zwölf-Mann-Betrieb auf
+  manibase.de landet? Verweis auf matthias-geisler.com oder stiller Verlust?
+- Schreibweise **manibase-Worker** bestätigen (im Diktat stand „Manybase").
+
+---
+
+## E13 · Segmentierungsachse: nach Betriebsgröße, nicht nach Gewerk
+
+**Status: durch E12 weitgehend erledigt.** Die Achse ist Betriebsgröße und Reifegrad,
+und sie verläuft zwischen den beiden Marken statt innerhalb einer Seite.
 
 Die zwei vom Kunden beschriebenen Formate beschreiben nicht zwei Veranstaltungen,
 sondern **zwei verschiedene Kundentypen**:
