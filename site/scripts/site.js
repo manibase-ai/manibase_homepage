@@ -80,7 +80,7 @@
         if (btn) { btn.disabled = false; }
         if (err) {
           err.hidden = false;
-          err.textContent = 'Das hat gerade nicht geklappt. Bitte versuchen Sie es später erneut oder schreiben Sie an kontakt@demiospace.ai.';
+          err.textContent = 'Das hat gerade nicht geklappt. Bitte versuchen Sie es später erneut oder schreiben Sie an kontakt@manibase.de.';
         }
       });
     });
