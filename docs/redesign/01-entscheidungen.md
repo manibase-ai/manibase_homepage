@@ -1450,6 +1450,73 @@ trotzdem gern mit Ihnen und planen dann einen zweiten Termin ein."
 
 ---
 
+## E26 · Hero und Erklärvideo
+
+**Kundenwunsch:** animiertes Erklärvideo im Hero, rund 90 Sekunden, mit KI erstellt,
+fiktive Figuren, damit keine Deepfake-Kennzeichnung nötig wird. Ziel: Der Kunde weiß
+auf einen Blick, was er bekommt.
+
+**Bewertung: gutes Mittel, falscher Platz, und kein Grund zu warten.**
+
+### Warum nicht im Hero
+
+1. **Bewegung ist das Gegenteil von Ruhe.** Die Vorgabe des Kunden lautete: cleaner,
+   aufgeräumter, ruhiger, Capmo-Richtung, keine großen Farbflächen. Ein automatisch
+   startendes Video ist das lauteste Element, das eine Seite haben kann. Capmo hat
+   keines.
+2. **Niemand sieht 90 Sekunden kalt.** Die Entscheidung weiterzulesen fällt in drei bis
+   fünf Sekunden und wird von der Überschrift getroffen. Ein Video erreicht die, die
+   schon interessiert sind. Es gehört also **hinter** die Überschrift, nicht an ihre
+   Stelle.
+3. **Datenschutz.** Eine Einbindung über YouTube oder Vimeo baut eine
+   Drittanbieter-Verbindung auf, bevor jemand eingewilligt hat. Die ganze Seite ist
+   darauf gebaut, das zu vermeiden (E11). **Video selbst hosten**, auf dem
+   Hostinger-Server, kein Fremdanbieter.
+4. **Das Risiko liegt in der Ausführung.** Ein mittelmäßiges Erklärvideo beschädigt
+   Glaubwürdigkeit stärker, als ein gutes sie aufbaut, gerade bei einem
+   Geschäftsführer, der so etwas schon oft gesehen hat. Es ist das Bauteil mit dem
+   höchsten Risiko auf der Seite.
+
+### Entscheidung
+
+| | |
+|---|---|
+| **Hero** | Überschrift, Unterzeile, CTA, statisches Bild. Kann sofort gebaut werden |
+| **Video** | eigener Abschnitt direkt unter dem Hero, **Klick zum Abspielen** mit Standbild, nicht automatisch. So macht es der Sales-led-Wettbewerb, und die Seite bleibt ruhig |
+| **Zeitplan** | Der Platz wird reserviert. Das Video kommt, wenn es fertig ist. **Es blockiert den Bau nicht** |
+
+### Zur Bildidee: keine Cartoon-Figuren
+
+Fiktive Figuren im Zeichentrickstil sind dasselbe Risiko, das den Helfer-Maskottchen die
+Startseite gekostet hat: Der Kunde selbst nannte sie „vielleicht etwas kitschig" (E4),
+und die Recherche hat auf sieben Wettbewerberseiten **null** Maskottchen gemessen.
+An der prominentesten Stelle der Seite wäre das die riskanteste Variante.
+
+**Besserer Vorschlag: das Architekturdiagramm animieren.** Linien, die sich zeichnen,
+Daten, die fließen, der Übergang von „gewachsen" zu „gebaut" (E17). Das ist
+branchenüblich, markenkonform, günstiger in der Produktion, und **ein Asset mit zwei
+Verwendungen**: Das erste Standbild ist zugleich das statische Hero-Bild. Menschen
+kommen als kurze reale Aufnahmen dazu, wenn es sie gibt, nicht als Zeichentrick.
+
+### Zur Deepfake-Frage
+
+Der Instinkt ist richtig: Wer keine realen Personen nachbildet, umgeht Persönlichkeits-
+rechte und die Kennzeichnungspflicht für täuschend echte Darstellungen. Eine erkennbar
+stilisierte Animation ist kein Deepfake. **Trotzdem vor Veröffentlichung vom DSB
+(DSZ365) bestätigen lassen**, weil die Transparenzpflichten für KI-erzeugte Inhalte
+gerade in Bewegung sind. Das ist eine Fünf-Minuten-Frage an eine Stelle, die ohnehin
+beauftragt ist.
+
+### Bildmaterial: Bestandsaufnahme
+
+Die Frage nach vorhandenem Material blieb offen. Bekannt ist aus E15: Porträts beider
+Gründer liegen vor, Screenshots von Open WebUI und n8n sind kurzfristig machbar, das
+Cockpit ist nicht vorzeigbar, Projekt- und Workshopfotos existieren nicht.
+**Damit ist das Diagramm nicht nur die beste, sondern faktisch die einzige Option für
+ein starkes Bild oben.**
+
+---
+
 ## Unberührt
 
 `impressum.html`, `datenschutz.html`, `site/api/*.php` und alles rund um Sicherheit
