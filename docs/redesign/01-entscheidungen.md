@@ -1347,6 +1347,84 @@ sie zu streichen.
 
 ---
 
+## E25 · CTA und die Warteschlangen-Idee
+
+### Klarstellung zu E24
+
+Die vier spontan genannten Argumente **ersetzen** die fünf aus E14 nicht. Sie waren
+das, was gerade präsent war. Alle bisherigen Argumente gelten weiter, die Aufbereitung
+für die Website erfolgt später. Diese Sammlung ist die **Single Source of Truth**, aus
+der die Texte entstehen, nicht die Texte selbst.
+
+### Der CTA
+
+**Primär: „Machbarkeit klären."** Verb plus Objekt, beschreibt ehrlich, was in Stufe 1
+passiert (E20), und denkt das mögliche Ergebnis „geht nicht" mit. Ein Anbieter, der das
+mitdenkt, wirkt glaubwürdiger als einer, der bucht.
+
+Darunter als Kleintext die Auswahlfunktion aus E16, die der Knopf selbst nicht leisten
+kann, ohne unfreundlich zu werden:
+
+> 30 Minuten, mit der Geschäftsführung, gern zusammen mit Ihrer IT.
+
+**Sekundär: „So läuft ein Klartag"** (E23).
+
+### Die Warteliste: richtige Wahrheit, falscher Mechanismus
+
+**Der Gedanke stimmt.** Zwei Personen, begrenzte Kapazität, das ändert sich vorerst
+nicht. E9 hat die Knappheit bereits als Haltung festgehalten („wir nehmen aktuell nur
+noch 3 Projektpartner auf"), und echte Knappheit ist die einzige Form, die man ohne
+Risiko zeigen kann.
+
+**Vier Einwände gegen die Warteliste als Haupteingang:**
+
+1. **Eine Warteliste ohne Warten ist eine Lüge.** Wer sich einträgt und zwanzig Minuten
+   später einen Anruf bekommt, erkennt den Trick. Bei einem Geschäftsführer eines
+   150-Mann-Betriebs, der solche Mechaniken kennt, kostet das genau die Währung, die
+   diese Seite als einzige hat: Glaubwürdigkeit. Der ausformulierte Satz
+   („witzigerweise sind Sie gerade ganz oben") liest sich als einstudiert.
+2. **Sie verzögert Umsatz.** Laut E8 wird noch ein zweiter Kunde zu Pilotkonditionen
+   gesucht. Einem kaufbereiten Interessenten „nicht jetzt" zu sagen, ist das Gegenteil
+   dessen, was ein junges Unternehmen braucht.
+3. **Sie ersetzt das Gespräch durch ein Formular.** E16 hat gezeigt, dass alles davon
+   abhängt, wer am Tisch sitzt. Eine Eintragung wählt nicht aus, ein Gespräch schon.
+4. Sie kostet die Gelegenheit, im Erstkontakt die Machbarkeit zu prüfen, also genau das,
+   was Stufe 1 leisten soll.
+
+**Auflösung: Knappheit zeigen, ohne den Eingang zu verschließen.**
+
+Die Warteliste wird kein Mechanismus, sondern ein **Zustand**. Neben dem CTA steht eine
+wahre Kapazitätsaussage:
+
+> Wir arbeiten zu zweit und nehmen bis Jahresende drei Projekte an.
+> Zwei Plätze sind vergeben.
+
+Das leistet dasselbe wie eine Warteliste (Druck raus, Selektion sichtbar, Knappheit
+belegt), ohne den kaufbereiten Kunden wegzuschicken. **Zahlen nur nennen, wenn sie
+stimmen, und pflegen.** Eine veraltete Kapazitätsangabe ist so schädlich wie ein
+abgelaufener Veranstaltungstermin (E23).
+
+**Wenn tatsächlich ausgebucht:** Dann wird der CTA selbst zur Warteliste, offen benannt
+(„Wir sind bis März ausgebucht. Auf die Liste setzen lassen."). Ehrlich, weil dann
+wirklich gewartet wird.
+
+### Wo die Warteliste jetzt schon passt
+
+**Bei PIA.** Laut E4 sucht PIA Pilotpartner, das Infopaper ging am 26.7. raus. Eine
+begrenzte Zahl von Pilotplätzen ist dort real und überprüfbar. Das ist der richtige Ort
+für die Mechanik, nicht der Haupteingang.
+
+### Die Maske vor dem Kalender
+
+Von fünf auf **drei Schritte** gekürzt: Mitarbeiterzahl (trennt nach E12 zwischen den
+Marken) · **Wer wäre dabei** (E16, fängt den Bruxafort-Fall ab) · Kontakt und
+Einwilligung. Kürzer heißt mehr Abschlüsse. Der bestehende Wizard-Mechanismus bleibt,
+nur die Fragen wechseln.
+
+**Offen:** ob „wo brennt's" und Dringlichkeit als vierter Schritt zurückkommen sollen.
+
+---
+
 ## Unberührt
 
 `impressum.html`, `datenschutz.html`, `site/api/*.php` und alles rund um Sicherheit
