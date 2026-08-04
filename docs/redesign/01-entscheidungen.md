@@ -838,6 +838,85 @@ realistischen Nutzungsannahme durchrechnen (siehe Warnung in E14).
 
 ---
 
+## E19 · Korrektur zu E18: Agentenbau überall, und zwei Leistungsbausteine
+
+### Korrektur 1: Agentenbau in der Microsoft-Welt gehört dazu
+
+E18 stand „kein Agentenbau in fremder Architektur". **Falsch.** manibase baut auch in
+der Microsoft-Welt: kleine RAG-Systeme, interne Wikis anbinden, SharePoint-Anbindungen,
+Inhalte in Teams durchsuchbar machen. Und umgekehrt entstehen agentische Systeme
+perspektivisch gemeinsam mit dem Kunden auf der eigenen Plattform.
+
+**Quintessenz des Kunden:** Für welche Organisation was besser passt, lässt sich vorab
+nicht entscheiden. Es hängt am Reifegrad. Also muss manibase beides können.
+
+**Das ist inhaltlich richtig und für eine Website ein Problem.** „Wir können beides"
+liest sich als „wir wissen es nicht", und alle elf untersuchten Wettbewerber führen ein
+klares Angebot. Die Auflösung liegt nicht darin, eine Technik zu streichen, sondern
+darin, das Konstante nach vorn zu stellen:
+
+> **Konstant ist die Einführung.** Use Cases finden, Reihenfolge festlegen, Menschen
+> schulen, Richtlinien schreiben, Betrieb sichern. Das ist dieselbe Arbeit, egal wo es
+> am Ende läuft.
+>
+> **Variabel ist die Plattform.** Ob in Ihrer Microsoft-Umgebung oder auf eigener
+> Infrastruktur, entscheiden wir, wenn wir Ihre Ausgangslage kennen.
+
+So wird aus Unentschiedenheit eine Haltung: **erst schauen, dann bauen.** Das passt
+exakt zu E16 („wer sagt, wer am Tisch sitzt, verkauft nicht, sondern prüft mit") und
+ist genau das, was ein Geschäftsführer von einem Partner erwartet und von einem
+Verkäufer nicht bekommt. Die Plattformfrage gehört damit **nicht** in den Hero, sondern
+auf die technische Unterseite und ins Erstgespräch.
+
+### Korrektur 2: „Zugang für alle" gilt nicht überall
+
+E18 hatte „Bei uns bekommt jeder einen Zugang" zum stärksten Satz erklärt und ihn
+ausgerechnet im Bauunternehmen am stärksten verortet. **Der Kunde widerspricht, und er
+hat recht.**
+
+| | **Planungs- und Bürobetrieb** | **Ausführender Betrieb** |
+|---|---|---|
+| Beispiel | Architekturbüro, 50 Mitarbeitende | Bauunternehmen, Spengler, Dachdecker |
+| Anteil mit Schreibtisch und Rechner | nahezu alle | ein Drittel bis ein Fünftel |
+| Was gebraucht wird | **Zugang für jeden**, ganzheitliche KI-Einführung | **eine Funktion**, einmal eingerichtet |
+| Skaliert mit | Kopfzahl | Funktionsumfang, **nicht** mit der Nutzerzahl |
+| Leistungsbaustein | strukturiertes Einführungsprojekt | Helfer (Bodo, PIA) |
+
+**Damit ist „jeder bekommt einen Zugang" der richtige Satz für das Architekturbüro und
+der falsche für das Bauunternehmen.** Im ausführenden Betrieb lautet das Versprechen
+anders: eine Funktion, die läuft, und es ist gleichgültig, ob zwei, fünf oder zwanzig
+Leute sie benutzen.
+
+Die Beobachtung aus E18 (die Baustellen-Belegschaft bekommt in keinem Lizenzmodell
+einen Platz) bleibt gültig. Nur die Schlussfolgerung war falsch: Es folgt daraus kein
+Zugang für alle, sondern ein **Helfer statt Lizenzplätze**.
+
+### Die Segmentierungsachse, die daraus folgt
+
+E13 hatte die Segmentierung zwischen die beiden Marken gelegt und damit innerhalb von
+manibase.de offengelassen. **Hier ist die erste inhaltlich begründete Achse innerhalb
+der Seite: die Schreibtischquote.**
+
+Sie ist tragfähig, wo Gewerke-Seiten es nicht sind. Die Recherche beziffert den
+ehrlichen Substanzanteil einer Gewerke-Seite auf 30 bis 40 Prozent. Hier unterscheiden
+sich **Leistung, Preislogik und Ergebnis** wirklich, nicht nur die Überschrift.
+
+**Einschränkung:** Die beiden Bausteine schließen sich nicht aus. Ein Bauunternehmen
+mit 150 Mitarbeitenden hat ein Büro *und* eine Baustelle und braucht am Ende beides,
+nur in anderer Gewichtung. Die Seite sollte sie deshalb als **zwei Bausteine eines
+Angebots** zeigen, nicht als zwei Produkte mit getrennten Türen. Sonst entstehen wieder
+konkurrierende Eingänge, die E10 gerade abgeschafft hat.
+
+### Folge für die Preisdarstellung (E8)
+
+E8 hatte entschieden, statt einer Zahl die **Form** zu zeigen. Diese Form ist jetzt
+konkreter: **zwei Preislogiken.** Das Einführungsprojekt skaliert mit der Kopfzahl, der
+Helfer nicht. Das lässt sich ohne eine einzige Zahl darstellen und beantwortet die
+stille Frage „wird das mit 150 Leuten unbezahlbar" für den ausführenden Betrieb
+mit einem klaren Nein.
+
+---
+
 ## Unberührt
 
 `impressum.html`, `datenschutz.html`, `site/api/*.php` und alles rund um Sicherheit
