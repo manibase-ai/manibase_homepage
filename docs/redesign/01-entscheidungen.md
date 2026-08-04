@@ -1066,6 +1066,117 @@ kann, ist immer kleiner als einer, den man sich ausmalt.**
 
 ---
 
+## E22 · Wo es hakt, und warum das auf die Seite gehört
+
+Fünf reale Reibungspunkte aus dem laufenden Projekt. Das ist der glaubwürdigste Inhalt
+im ganzen Material, weil ihn nur schreiben kann, wer es gemacht hat.
+
+### 1 · Die leeren ersten Wochen
+
+Die technische Einrichtung hängt an den IT-Dienstleistern des Kunden oder am
+Rechenzentrum. Verträge unterschreiben, installieren, freischalten: **zwei bis drei
+Wochen**, in denen für die Belegschaft nichts Sichtbares passiert. Im Architekturbüro
+war es genau so. Die Leute werden ungeduldig, weil sie bezahlt haben und etwas sehen
+wollen.
+
+**Auf der Seite:** vorher sagen. „Die ersten zwei bis drei Wochen passiert für Ihre
+Belegschaft nichts Sichtbares. Es werden Verträge geschlossen und Systeme eingerichtet.
+Wir sagen es vorher, damit niemand nervös wird." Ein Anbieter, der die unangenehme
+Phase von sich aus benennt, wird beim Rest geglaubt.
+
+**Produktseitig prüfen:** Ließe sich die Lücke schließen, indem die AI Champions
+vorübergehend auf einer manibase-Instanz starten, während beim Kunden noch installiert
+wird? Dann gäbe es ab Woche 1 etwas zu sehen. Kein Website-Thema, aber ein
+Projektthema.
+
+### 2 · Die älteren Hasen
+
+Erfahrene Mitarbeitende und Bedenkenträger machen weniger mit. Erwartbar, in jedem
+Veränderungsprojekt.
+
+**Auf der Seite:** nicht abwertend formulieren. Wer über die eigenen Leute spottet,
+gewinnt keinen Geschäftsführer, der genau diese Leute seit zwanzig Jahren beschäftigt.
+Die brauchbare Fassung ist die Antwort darauf: AI Champions, interne Kommunikation,
+Schulung mit Zertifikat. Also **Methode statt Klage**.
+
+### 3 · Use Cases, die pivotieren müssen
+
+Was im Workshop gut klang, ist in der Praxis nicht umsetzbar. Das kostet Vertrauen,
+wenn sich jemand darauf eingestellt hat.
+
+**Auf der Seite, und das ist der Trick:** vorher ansagen, dass es passiert. „Von fünf
+Anwendungsfällen wird erfahrungsgemäß einer bis zwei ausgetauscht, weil die Praxis
+etwas anderes zeigt als der Workshop." Wer das vorher sagt, für den ist der Pivot
+**Bestätigung des Plans statt Scheitern**. Wer es verschweigt, steht beim ersten Pivot
+als jemand da, der sich geirrt hat.
+
+### 4 · Legacy-Systeme ohne echte Schnittstellen
+
+Alte Systeme lassen sich nicht anbinden, **obwohl die Hersteller behaupten, es gäbe
+Schnittstellen**.
+
+**Das ist ein Kompetenzbeleg, kein Problem.** Daraus wird ein Versprechen, das kein
+Wettbewerber gibt:
+
+> Wir sagen Ihnen im Klartag, was sich anbinden lässt und was nicht. Auch dann, wenn
+> Ihr Softwarehersteller etwas anderes behauptet.
+
+Nach E16 ist das zugleich der beste Satz für die IT-Leitung. Sie kennt dieses Problem
+aus eigener Erfahrung und hat es vermutlich schon einmal verloren. Ein Anbieter, der es
+von sich aus anspricht, wird vom Vetogeber zum Verbündeten.
+
+Er stützt außerdem Stufe 1 aus E20, wo ausdrücklich auch das Ergebnis „gar nichts
+machen" vorgesehen ist.
+
+### 5 · Niemand weiß, wie der Betrieb wirklich arbeitet
+
+> „Viele Workflows im Betrieb sind nie bis zur Geschäftsleitung durchgedrungen. Es
+> passieren Arbeitsabläufe, von denen die Führungsebene gar nichts weiß."
+
+**Das ist die wertvollste Beobachtung der ganzen Antwort.** Sie begründet den Klartag
+besser als jedes Nutzenversprechen: Wer nicht weiß, wie im eigenen Haus gearbeitet
+wird, kann keine sinnvollen Anwendungsfälle bestellen.
+
+Formulierung muss vorsichtig sein, sie darf dem Geschäftsführer nicht Unwissenheit
+vorwerfen. Tragfähig ist die verallgemeinerte Fassung: „In jedem Betrieb, den wir
+gesehen haben, arbeiten die Leute anders, als es auf dem Papier steht. Das ist normal
+und der Grund, warum wir mit der Arbeitsebene sprechen und nicht nur mit der Leitung."
+
+### Ein Widerspruch, der wichtiger ist als die Website
+
+E20 besetzt den Klartag mit **Geschäftsleitung, Führungsteam und IT**. Punkt 5 sagt,
+dass genau diese Runde die realen Abläufe **nicht kennt**.
+
+**Damit fehlt im Klartag die Arbeitsebene.** Das ist kein Textproblem, sondern ein
+Produktproblem: Ein Workshop, der Anwendungsfälle festlegen soll, aber nur mit Leuten
+besetzt ist, die den Alltag nicht im Detail kennen, produziert genau die Use Cases, die
+später pivotiert werden müssen (Punkt 3). Die beiden Reibungspunkte hängen zusammen.
+
+**Empfehlung: Klartag-Besetzung überdenken.** Entweder die Arbeitsebene mit an den
+Tisch, oder ein kurzer vorgeschalteter Termin mit zwei bis drei Leuten aus der Praxis.
+Das würde Punkt 3 und Punkt 5 gleichzeitig entschärfen und wäre nebenbei ein
+Verkaufsargument: „Wir fragen die Leute, die die Arbeit machen."
+
+### 6 · Fehlende Mitwirkung
+
+Termine fallen aus, Zusagen verzögern sich. Gegenmittel des Kunden: genug „Hausaufgaben"
+verteilen und schnell genug Output liefern, damit die Leute bei der Stange bleiben.
+
+**Auf der Seite als Bedingung formulieren, nicht als Beschwerde:** „Das Projekt
+gelingt nur, wenn Ihre Leute mitarbeiten. Wie viel Zeit das kostet, sagen wir vorher"
+(Zahlen aus E21). Das filtert die falschen Kunden vor dem Erstgespräch heraus und passt
+zur selektiven Haltung aus E9 und E16.
+
+### Format auf der Seite
+
+Diese sechs Punkte gehören **nicht** in eine Mängelliste, sondern paarweise:
+**Reibung → wie wir damit umgehen.** Sechs Zeilen, zwei Spalten. Das ist zugleich der
+Abschnitt, der die Recherche-Anforderung „Upfront Disclosure" (NN/g, Harley 2016)
+erfüllt, und der einzige Inhalt der Seite, den ein Wettbewerber nicht abschreiben kann,
+ohne es selbst erlebt zu haben.
+
+---
+
 ## Unberührt
 
 `impressum.html`, `datenschutz.html`, `site/api/*.php` und alles rund um Sicherheit
