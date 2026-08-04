@@ -1022,6 +1022,50 @@ Zeitaufwand für den Kunden und die Stelle, an der es hakt. Siehe Frage 14.
 
 ---
 
+## E21 · Was das Projekt den Kunden an eigener Zeit kostet
+
+| Posten | Aufwand | Wer |
+|---|---|---|
+| **Klartag** | mindestens 1 Tag | Geschäftsleitung, Führungsteam, IT |
+| **Projektgruppe** | mindestens 1 Std./Woche pro Person, **5 bis 6 Personen** = 5 bis 6 Std./Woche | Projektteam |
+| **Live-Tests und Review** | nicht beziffert, aber verbindlich: jemand muss testen und Rückmeldung geben, damit Feedback-Schleifen entstehen | Fachanwender |
+| **Schulung** | einmalig, Dauer noch offen | alle künftigen Nutzer |
+
+Der Umfang schwankt mit dem Bedarf.
+
+### Die Zahl, die auf die Seite gehört
+
+Sechs Stunden pro Woche über ein halbes Jahr klingt nach viel. **Pro Kopf gerechnet
+klingt dieselbe Zahl völlig anders:**
+
+> Rund eine Stunde pro Woche für fünf bis sechs Leute. Über sechs Monate sind das
+> **etwa drei Arbeitstage pro Person**. Dazu der Klartag und die Schulung.
+
+Das ist dieselbe Wahrheit, nur aus der Perspektive dessen, der sie freigeben muss. Für
+eine Geschäftsführung, die „sechs Monate Projekt" hört und insgeheim mit einem
+Vollzeit-Äquivalent rechnet, ist das eine Entwarnung. **Ein Aufwand, den man beziffern
+kann, ist immer kleiner als einer, den man sich ausmalt.**
+
+**Zwei Ehrlichkeitsauflagen:**
+
+1. Der Kunde sagt „mindestens". Auf der Seite muss das **mitgesagt** werden, sonst wird
+   aus einer Untergrenze ein Versprechen. Formulierung: „mindestens", oder eine Spanne.
+2. Die Rechnung enthält Schulung und Test-Reviews **nicht**. Solange die
+   Schulungsdauer pro Kopf nicht feststeht, darf die Zahl nicht als Gesamtaufwand
+   ausgegeben werden.
+
+### Noch offen
+
+- **Schulungsdauer pro Person** (halber Tag? zwei Stunden?). Wird gebraucht, sobald der
+  Gesamtaufwand genannt werden soll.
+- **Zeitanteil der Geschäftsführung selbst.** E16 hat gezeigt, dass ohne sie nichts
+  läuft. Ein Geschäftsführer, der freigibt, will wissen, was **er** leisten muss, nicht
+  nur sein Team.
+- **Die Stelle, an der es hakt.** Dreimal gefragt, dreimal nicht beantwortet. Siehe
+  Frage 15.
+
+---
+
 ## Unberührt
 
 `impressum.html`, `datenschutz.html`, `site/api/*.php` und alles rund um Sicherheit
