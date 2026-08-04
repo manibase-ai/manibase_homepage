@@ -1421,7 +1421,32 @@ Marken) · **Wer wäre dabei** (E16, fängt den Bruxafort-Fall ab) · Kontakt un
 Einwilligung. Kürzer heißt mehr Abschlüsse. Der bestehende Wizard-Mechanismus bleibt,
 nur die Fragen wechseln.
 
-**Offen:** ob „wo brennt's" und Dringlichkeit als vierter Schritt zurückkommen sollen.
+**Festgelegt (4.8.):** vier Schritte, so kurz wie möglich.
+
+| # | Schritt | Zweck |
+|---|---|---|
+| 1 | **Mitarbeiterzahl** | trennt nach E12 zwischen den beiden Marken |
+| 2 | **Art des Unternehmens** (Planungsbüro, Architekturbüro, TGA-Planung, ausführender Betrieb …) | siehe unten |
+| 3 | **Wer wäre dabei** | Geschäftsführung (verbindlich) · weitere strategische Führungskräfte · jemand aus der IT |
+| 4 | **Kontakt und Einwilligung** | so knapp wie möglich |
+
+„Wo brennt's" und Dringlichkeit entfallen. Sie gehören ins Gespräch, nicht ins Formular.
+
+**Schritt 2 ist mehr als eine Branchenabfrage.** Er ermittelt genau die Achse aus E19,
+die **Schreibtischquote**: Ein Planungs- oder Architekturbüro braucht das
+Einführungsprojekt mit Zugang für alle, ein ausführender Betrieb eher einen Helfer.
+Die Antwortoptionen müssen deshalb **beide Seiten** abdecken, nicht nur die
+Planungsseite — sonst spricht das Formular nur die Hälfte des Zielmarkts an.
+Also ergänzen: Bauunternehmen, Dachdecker, Spengler, Garten- und Landschaftsbau, SHK.
+
+Das widerspricht nicht E13 (keine Gewerke-Seiten). Die Abfrage steuert intern, sie ist
+keine öffentliche Segmentierung.
+
+**Schritt 3 als Frage, nicht als Schranke.** Die Lehre aus E16 gilt, aber ein
+IT-Leiter, der im Vorfeld recherchiert, darf nicht ausgesperrt werden. Wenn die
+Geschäftsführung nicht angehakt ist, erscheint ein Hinweis statt einer Blockade:
+„Erfahrungsgemäß führt ein Gespräch ohne Geschäftsführung selten weiter. Wir sprechen
+trotzdem gern mit Ihnen und planen dann einen zweiten Termin ein."
 
 ---
 
