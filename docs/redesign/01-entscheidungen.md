@@ -1177,6 +1177,105 @@ ohne es selbst erlebt zu haben.
 
 ---
 
+## E23 · Seitenstruktur
+
+### Startseite (ein Leser: die Geschäftsführung)
+
+Hero mit dem Rahmen „Kosten des Wartens" (E14) · Architektur-Vergleich *gewachsen gegen
+gebaut* (E17) · die zwei Bausteine Einführung und Helfer (E19) · fünf Kaufargumente in
+der Reihenfolge aus E14 · drei Stufen Gespräch → Klartag → Projekt (E20) · Reibung und
+Umgang, zweispaltig (E22) · Gründer (E5) · Pilotkonditionen (E9) · Termin.
+
+### Unterseiten
+
+| Seite | Inhalt | Status |
+|---|---|---|
+| **Der Klartag** | Ablauf, Besetzung, Preis, Anrechnung, der „gehen Sie gern zur Konkurrenz"-Satz | ersetzt `ki-klartag.html` |
+| **Das Einführungsprojekt** | volle Sieben-Schritte-Roadmap, Zeitaufwand (E21), Abschlusskriterien | neu |
+| **Für Ihre IT** | Betrieb, Backup, Entra ID, Datenwege, Schnittstellen-Ehrlichkeit, Exit | neu (E16) |
+| **Über uns** | Gründer, Werdegang, Haltung | bestätigt |
+| **Veranstaltungen** | siehe unten | neu, später |
+| **Karriere** | – | **entfällt.** 11 von 11 Wettbewerbern haben eine, bei zwei Personen wäre sie gelogen |
+| **Produktseiten Bodo, PIA** | – | **entfallen vorerst.** Bestätigt E4: erst wenn spruchreif |
+
+### Veranstaltungen: ja, aber mit einer Bedingung
+
+Passt zu E12, wo Infoveranstaltungen bei Handwerksinnungen und Kreishandwerkerschaften
+sowie Verbandsvorträge ausdrücklich als **Kanal von manibase.de** benannt sind. Nicht zu
+verwechseln mit der KI-Sprechstunde, die zu matthias-geisler.com gehört.
+
+**Bedingung: Die Seite geht erst online, wenn ein Termin in der Zukunft liegt.** Eine
+Veranstaltungsseite mit abgelaufenen Daten ist schlechter als keine. Genau das ist im
+Juli passiert (`infotermin.html` mit Terminen vom 29. und 31.07.). Wo es geht, mit
+wiederkehrendem Rhythmus arbeiten statt mit Einzeldaten.
+
+**Platzierung:** Footer und „Über uns", nicht in die Hauptnavigation. Vier bis sechs
+Punkte oben, mehr nicht (Median der Recherche: 5 bis 6).
+
+**Nicht als sekundärer CTA im Hero**, solange kein verlässlicher Rhythmus existiert.
+Verbandsvorträge terminieren Dritte, die Lücken sind unvermeidlich. Der offene Punkt aus
+E12 wird deshalb anders gelöst: **sekundärer CTA = „So läuft ein Klartag"** (Lesen statt
+Reden). Immer verfügbar, nie leer, und er führt genau auf die Seite, die die
+Kaufentscheidung vorbereitet. Entspricht dem Muster der alten Seite, die im Hero auf den
+Ablauf verwies.
+
+### Legacy-Seiten: bleiben, ohne Schaden
+
+Geprüft am 4.8.2026:
+
+| Seite | robots | eingehende Links |
+|---|---|---|
+| `infotermin.html` | `noindex, follow` | keine |
+| `interessent.html` | `noindex, nofollow` | keine |
+| `ki-klartag.html` | `noindex, follow` | keine |
+
+Alle drei sind unverlinkt und aus dem Index genommen. Die abgelaufenen Juli-Termine
+schaden also weder Auffindbarkeit noch Vertrauen, weil sie praktisch niemand erreicht.
+**`infotermin.html` bleibt als Vorlage liegen**, sie wird zur Grundlage der künftigen
+Veranstaltungsseite (Anmeldung und Einwilligungsstruktur sind dort bereits sauber
+gebaut, siehe E11).
+
+Der Widerspruch „per Zoom" im Text gegen „per Teams" in der Auswahl bleibt offen und
+muss vor einer Wiederverwendung raus.
+
+### Blog: Bewertung und Gegenvorschlag
+
+**Der Befund:** 11 von 11 Wettbewerbern haben einen Blog. Trotzdem lautet die Empfehlung
+**nicht** „Blog bauen".
+
+*Gegen den Blog:*
+
+- Der Vertrieb läuft über Innungen, Verbände, Vorträge und persönliche Kontakte (E12).
+  Suchmaschinen sind nicht der Kanal. Bei einem Geschäftsziel von 100 bis 200 Kunden
+  **insgesamt** ist Reichweite nicht das Nadelöhr.
+- Für GEO (Zitiertwerden durch KI-Systeme) gilt dasselbe in klein: Die Suchanfragen in
+  diesem Feld sind wenige, und der Ertrag ist nicht seriös prognostizierbar. Wer einen
+  Blog **für GEO** baut, baut auf eine Vermutung.
+- **Der heutige Blog ist schlechter als keiner:** ein einziger Beitrag. Ein sichtbar
+  eingeschlafener Blog beschädigt Vertrauen (NN/g Harley 2016, Kriterium
+  Vollständigkeit und Aktualität). Reichweite ohne Pflege ist ein Minusgeschäft.
+
+*Für Inhalte spricht etwas anderes, und zwar stark:*
+
+Ein Geschäftsführer, der den Vortrag bei der Innung gehört hat, **googelt danach die
+Firma**. Was er findet, entscheidet über den Rückruf. Dafür braucht es keine Frequenz,
+sondern Substanz.
+
+**Gegenvorschlag: keine Blog, sondern drei bis fünf dauerhafte Texte ohne Datum.**
+
+| | |
+|---|---|
+| **Ohne Datum** | veraltet nie sichtbar, kein Pflegedruck, keine tote Frequenz |
+| **Themen, die ohnehin gebraucht werden** | Was eine KI-Einführung im Bauunternehmen kostet und wovon es abhängt (E8) · Copilot oder eigene Plattform, und wann was passt (E18) · Schatten-KI: was ein Betrieb rechtlich riskiert (E14) · Warum Schnittstellen versprochen und nicht geliefert werden (E22) |
+| **Doppelnutzen** | dasselbe Material dient im Verkaufsgespräch, als Nachfass-Mail und als Vortragsunterlage |
+| **GEO nebenbei** | Genau solche konkreten, bezifferten, zitierfähigen Texte werden von KI-Systemen ausgewertet. Als Nebeneffekt mitnehmen, nicht als Begründung |
+
+**Der bestehende Beitrag** („Papierkram am Chef") ist auf den alten Zielkunden getextet
+(Inhaber, Abende, kleiner Betrieb) und passt nach E12 nicht mehr zu manibase.de.
+Kandidat für den Umzug auf matthias-geisler.com.
+
+---
+
 ## Unberührt
 
 `impressum.html`, `datenschutz.html`, `site/api/*.php` und alles rund um Sicherheit
