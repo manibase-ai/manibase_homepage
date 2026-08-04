@@ -775,6 +775,69 @@ eingesammelt werden muss.
 
 ---
 
+## E18 · Koexistenz bestätigt, und der eigentliche Unterschied
+
+**Entscheidung: Koexistenz mit Microsoft.** Keine Konfrontation, kein Vergleich, der
+ein fremdes Produkt schlechtredet. Damit ist E17 bestätigt und der Architektur-Vergleich
+aus E15 liegt fest auf der Achse **gewachsen gegen gebaut**.
+
+### Zwei Angebote statt einem
+
+Der Kunde nennt hier zum ersten Mal beide Wege nebeneinander:
+
+| | Für wen | Was manibase liefert |
+|---|---|---|
+| **In der Microsoft-Welt** | Betriebe, die M365 und Copilot bereits haben | **strukturell und organisatorisch**: welche Use Cases, in welcher Reihenfolge, wie abgebildet. Kein Agentenbau in fremder Architektur |
+| **Eigene Ebene** | Betriebe ohne passende Lösung, oder für die Copilot-Lizenzen in dreistelliger Zahl zu teuer sind | die vollständige Architektur (E3, Bereich 3) |
+
+**Das korrigiert E3, Bereich 2.** Dort stand „wird ungern gemacht, in einer bestehenden
+Architektur herumpfuschen". Die Abneigung galt dem **Agentenbau in fremder Umgebung**,
+nicht der Einführungsarbeit darüber. Die organisatorische Schicht (Use Cases,
+Reihenfolge, Schulung, Richtlinien) ist markenunabhängig und bleibt vollwertiges
+Angebot. Bereich 2 darf damit auf die Seite, anders geschnitten als bisher gedacht.
+
+### Der Satz, um den es geht
+
+> **Bei uns bekommt jeder einen Zugang.**
+
+Das ist die schärfste Formulierung im gesamten bisherigen Material. Sie ist wahr,
+nachprüfbar, greift kein fremdes Produkt an und beantwortet das Kostenargument aus E14
+Nummer 3 in fünf Wörtern. Lizenzmodelle vergeben **Plätze**, eine eigene Ebene vergibt
+**Zugänge**.
+
+### Warum das im Bau stärker wirkt als anderswo
+
+In einem Bauunternehmen mit 150 Mitarbeitenden sitzen vielleicht 30 im Büro. Die
+übrigen sind auf der Baustelle, im Auto, im Lager. **Diese Gruppe bekommt in keinem
+Lizenzmodell der Welt einen Platz**, weil sie den ganzen Tag nicht in Word arbeitet.
+
+Genau für sie ist **Bodo** gebaut (E4): Spracheingabe auf der Baustelle,
+Wiederauffinden über RAG. Damit schließt sich der Kreis zwischen Produktlinie und
+Positionierung. Der Zugang für alle ist nicht nur billiger, er erreicht überhaupt erst
+die Leute, um die es im Bau geht.
+
+Nebenwirkung, die dem Zielkunden gefallen dürfte: Es verhindert eine
+**Zwei-Klassen-Belegschaft**, in der das Büro Werkzeuge hat und der Bau nicht.
+
+### Zwei Warnungen
+
+**1. „Jeder bekommt Zugang" erzeugt Pflichten.** Wer eine ganze Belegschaft anschließt,
+braucht Schulung, Nutzungsrichtlinien und eine Antwort auf Missbrauch. In einem Betrieb
+dieser Größe kommt die **Mitbestimmung** dazu: Ein System, das Leistung sichtbar machen
+könnte, ist betriebsratspflichtig. Das ist kein Hindernis, sondern Umsatz. manibase
+liefert Richtlinien, TOMs und Compliance-Check ohnehin (E14 Nummer 1) und kann die
+Betriebsvereinbarung gleich mitdenken. Auf der Seite gehört es als Kompetenz genannt,
+nicht als Risiko verschwiegen.
+
+**2. Die Kostenaussage braucht eine Rechnung, keine Behauptung.** Tokenbasierte Inferenz
+für 150 Menschen ist nicht kostenlos, und Vielnutzer können teurer werden als ein
+Lizenzplatz. Belastbar ist die Aussage in dieser Form: **Sie zahlen Nutzung statt
+Plätze.** Bei einer Belegschaft, in der die meisten das System gelegentlich verwenden,
+ist der Unterschied groß. Vor Veröffentlichung mit echten Lizenzpreisen und einer
+realistischen Nutzungsannahme durchrechnen (siehe Warnung in E14).
+
+---
+
 ## Unberührt
 
 `impressum.html`, `datenschutz.html`, `site/api/*.php` und alles rund um Sicherheit
