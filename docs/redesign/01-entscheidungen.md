@@ -1517,6 +1517,51 @@ ein starkes Bild oben.**
 
 ---
 
+## E27 · Weg B: bauen, live gehen, nachliefern
+
+**Entscheidung: Weg B.** Struktur und Texte werden gebaut und eingespielt, ohne auf
+Diagramm und Video zu warten. Fehlende Bausteine bekommen sichtbare Platzhalter mit
+einem Hinweis wie „Dieser Bereich wird gerade erweitert".
+
+**Bewertung:** Richtig, weil die heutige Seite auf den falschen Kunden getextet ist
+(E12). Jede Woche, die sie länger steht, ist ein Verlust. Eine ehrlich beschriftete
+Lücke ist besser als eine falsche Aussage.
+
+**Auflage: Platzhalter müssen wie Absicht aussehen, nicht wie Vergessen.**
+Ein grauer Kasten mit „Bild folgt" ist ein Baustellenschild. Ein sauber gesetzter
+Bereich mit einer Zeile Erklärung ist ein Hinweis. Höchstens **zwei** solcher Stellen
+auf der Startseite, sonst wirkt die ganze Seite unfertig.
+
+**Erlaubt:** Videoabschnitt, Architektur-Vergleich.
+**Nicht erlaubt:** Platzhalter bei Gründern, Leistungen, Ablauf, Preisen oder Kontakt.
+Diese Abschnitte sind vollständig oder gar nicht.
+
+### Zur Frage eines frischen Farbdesigns
+
+Der Kunde erwägt „ein komplett frisches Farbdesign, weil das bisherige eher für kleine
+Betriebe gedacht war". **Empfehlung: keine neue Palette, aber eine neue Leinwand.**
+
+Ein vollständiger Farbwechsel wäre ein Markenwechsel, nicht ein Redesign. Cobalt,
+Tiefblau und Gelb stecken in Wortmarke, Signet und allen Unterlagen. Sie zu tauschen,
+kostet die Wiedererkennung und war ausdrücklich nicht der Auftrag („Corporate Design
+grundsätzlich beibehalten").
+
+**Was tatsächlich „klein und gemütlich" signalisiert, ist nicht die Farbe, sondern die
+Wärme des Hintergrunds.** Das cremige `#F8F4EC` liest sich handwerklich und
+wohnzimmerhaft. Die gemessene Cosuno-Palette, deren Marken-Töne den manibase-Tönen fast
+entsprechen, arbeitet dagegen mit **kühlen** Off-Weiß-Stufen (`#f8fafc`, `#f1f5fa`,
+`#f4f6fb`).
+
+**Vorschlag, eine Zeile Wirkung:** Die warme Leinwand wird durch eine kühle
+Off-Weiß-Treppe ersetzt, Cobalt, Tiefblau und Gelb bleiben unverändert. Das ergibt
+genau den Sprung von „inhabergeführter Kleinbetrieb" zu „Partner für 150 Mitarbeitende",
+ohne die Marke anzufassen. Zusammen mit der Verteilung 88/6/5/1 aus `00-recherche.md`
+ist das der gesamte optische Kurswechsel.
+
+Zu entscheiden beim Bau, mit einem direkten Vergleich beider Varianten.
+
+---
+
 ## Unberührt
 
 `impressum.html`, `datenschutz.html`, `site/api/*.php` und alles rund um Sicherheit
