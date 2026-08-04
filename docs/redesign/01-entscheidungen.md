@@ -1276,6 +1276,77 @@ Kandidat für den Umzug auf matthias-geisler.com.
 
 ---
 
+## E24 · Tonalität und Einstieg
+
+**Kein Nickerlebnis vorhanden.** Zu wenige Gespräche bisher. Die Suche nach dem einen
+Satz aus der Praxis entfällt damit, ehrlich festgehalten statt ersetzt durch eine
+Erfindung.
+
+**Was der Kunde stattdessen nennt:** verstanden werden „strukturierte
+KI-Einführungsprojekte, individuell für den Betrieb zugeschnitten", getragen von vier
+Argumenten: kein teures Lizenzchaos · keine Schatten-KI · Anwendungsfälle mit messbarem
+wirtschaftlichem Nutzen · Befähigung der Mitarbeitenden.
+
+### Entscheidung: nüchterne Überschrift, scharfe Unterzeile
+
+Keine der drei vorgeschlagenen Richtungen (Warnung / Fenster / Zugang) wird gewählt.
+Stattdessen das Muster, das die Vorbilder aus der Recherche tatsächlich verwenden:
+**Die Überschrift sagt, was verkauft wird. Die Unterzeile sagt, warum es anders ist.**
+
+Für einen Geschäftsführer, der in drei Sekunden entscheidet, ob er weiterliest, ist eine
+klare Kategoriebezeichnung wertvoller als ein kluger Einfall. Bei einer
+Investitionsentscheidung dieser Größe gewinnt Verständlichkeit gegen Originalität.
+
+**Entwurf:**
+
+> **KI im Betrieb einführen. Strukturiert, und auf Ihre Abläufe zugeschnitten.**
+>
+> Ohne Lizenzchaos, ohne Schatten-KI. In sechs Monaten drei bis fünf Anwendungsfälle,
+> die sich rechnen, und Mitarbeitende, die damit arbeiten können.
+
+Der Rahmen „Kosten des Wartens" (E14) bleibt die stärkste Erzählung, rutscht aber
+**eine Sektion nach unten**. Als Eröffnung wäre er eine Drohung, direkt nach der
+Einordnung ist er ein Argument.
+
+### Zwei Formulierungsauflagen
+
+**„individuell zugeschnitten"** ist die häufigste Floskel im deutschen B2B und sagt
+nichts. Ersetzt durch **„auf Ihre Abläufe, nicht auf eine Branchenschablone"**. Deckt
+sich mit E22 Punkt 5: In jedem Betrieb wird anders gearbeitet, als auf dem Papier steht.
+
+**„messbar wirtschaftlicher Nutzen"** ist ein Versprechen, kein Adjektiv. Es hält nur,
+wenn im Klartag je Anwendungsfall eine Messgröße festgelegt wird. Wenn ja, ist es ein
+Alleinstellungsmerkmal und gehört so formuliert: **„Anwendungsfälle, deren Nutzen wir
+vorher beziffern."** Wenn nein, muss es weicher werden. **Zu klären.**
+
+### Die vier Argumente werden das Wertband
+
+Sie ersetzen das heutige `.valueband` unter dem Hero (bisher: 1.800 € · 1 Tag · voll
+anrechenbar · DSGVO). Das Bauteil bleibt, der Inhalt wechselt. Vier Felder:
+Lizenzchaos · Schatten-KI · bezifferter Nutzen · befähigte Mitarbeitende.
+
+### Beobachtung zur Argumentliste
+
+Die vier spontan genannten Argumente decken sich nur teilweise mit den fünf aus E14:
+
+| E14 | in der spontanen Liste |
+|---|---|
+| 1 Schatten-KI und Compliance | **ja** |
+| 2 Datensouveränität | **nein** |
+| 3 Kosteneffizienz | ja (Lizenzchaos) |
+| 4 Firmen-Assets und Nachfolge | **nein** |
+| 5 Systemintegration | nein (gehört nach E16 auf die IT-Seite) |
+| – | **neu: messbarer Nutzen** |
+| – | **neu: Befähigung der Mitarbeitenden** |
+
+Was jemand spontan nennt, ist ein Hinweis darauf, was im Gespräch funktioniert.
+**Auflösung: Die vier spontanen Argumente werden das Wertband, die fünf aus E14 bleiben
+die Textabschnitte darunter.** Datensouveränität verschwindet damit nicht, sie eröffnet
+nur nicht. Für die Baubranche (geistiges Eigentum, Entwürfe) bleibt sie zu wichtig, um
+sie zu streichen.
+
+---
+
 ## Unberührt
 
 `impressum.html`, `datenschutz.html`, `site/api/*.php` und alles rund um Sicherheit
