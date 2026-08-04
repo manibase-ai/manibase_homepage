@@ -917,6 +917,111 @@ mit einem klaren Nein.
 
 ---
 
+## E20 · Der Ablauf, und die Rückkehr des Klartags
+
+### Drei Stufen, sieben Schritte
+
+**Stufe 1 · Gespräch auf Augenhöhe.** Geklärt wird, ob überhaupt etwas geht:
+Weiterentwicklung in der Microsoft-Welt, eigene Einführung, oder **gar nichts**, weil
+Programme und Schnittstellen im Haus sind, die sich heute nicht anbinden lassen.
+Abgefragt werden Systemlandschaft, Mitarbeiter- und Arbeitsplatzzahl und das Aufkommen
+in den Prozessen (Baudokumentation, Angebotserstellung, Verwaltung).
+
+**Stufe 2 · Klartag.** Tagesworkshop, kostenpflichtig, wird bei einem Folgeprojekt
+angerechnet. Ergebnis: Roadmap und geklärte Infrastruktur.
+
+**Stufe 3 · Einführungsprojekt, sechs Monate.**
+
+| # | Schritt | Inhalt |
+|---|---|---|
+| 1 | Kick-off | Starttermin, idealerweise mit den Führungskräften |
+| 2 | Erste Projektwochen | E-Mail-Vorlagen für Geschäftsleitung und Führungskräfte, Bestellung der Projektgruppe |
+| 3 | Laufendes Projektmanagement | mindestens wöchentliche Termine, Kanban-Board, Stakeholder eingebunden |
+| 4 | AI Champions | Early Access auf die Plattform, prüfen sie, entwickeln Use Cases für die Kollegen mit |
+| 5 | Interne Kommunikation | damit das Thema nicht versandet |
+| 6 | Individualisierung und Rollout | Standardbereitstellung für die ganze Organisation statt Einzeleinrichtung |
+| 7 | Schulung und Zugänge | breitflächig, mit **Zertifikaten** |
+
+**Abschlusskriterien des Projekts** (klar formuliert, gehört so auf die Seite):
+drei bis fünf Anwendungsfälle vollständig umgesetzt · Compliance-Vorgaben berücksichtigt
+und implementiert · Mitarbeitende geschult und zertifiziert · onboardet · System läuft
+produktiv.
+
+**Bewertung:** Die Selbstbegrenzung auf **maximal drei bis fünf Use Cases** ist ein
+Qualitätssignal. Wer eine Obergrenze nennt, hat schon einmal ein Projekt geliefert.
+Die **Zertifikate** sind ein greifbares Ergebnis, das im Wettbewerb niemand nennt.
+
+### Der Klartag ist zurück, und er ist teurer
+
+| | E2 / E3 (3.8.) | E20 (4.8.) |
+|---|---|---|
+| Rolle | „nachrangig", schwer verkäuflich | **integraler Standardbestandteil** vor jedem Projekt |
+| Preis | 1.800 € auf der Seite, 2.000–3.000 € im Gespräch | **3.000 bis 5.000 €** je nach Größe |
+| Anrechnung | voll | voll |
+
+**Und der Retainer hat sich verdoppelt.** E8 nannte 2.000 bis 5.000 € im Monat, hier
+stehen **6.000 bis 10.000 €**. Kein Widerspruch, sondern die Folge von E12: E8 wurde
+formuliert, bevor der Zielkorridor auf 100 bis 200 Mitarbeitende festgelegt war. Aber
+die Zahlen in E8 sind damit **überholt** und dürfen nicht versehentlich weiterverwendet
+werden.
+
+**Warum die Rückkehr des Klartags richtig ist:** Er löst genau das Problem, an dem er in
+E2 gescheitert war. Als alleinstehendes Beratungsprodukt für 1.800 € brauchte er
+Vertrauen, das ein Erstkontakt nicht mitbringt. Als **Risikopuffer vor einem
+Sechs-Monats-Retainer** verkauft er sich von selbst: Der Kunde muss nicht 36.000 bis
+60.000 € entscheiden, sondern einen Tag. Derselbe Workshop, andere Funktion.
+
+### Der stärkste Satz des gesamten Konzepts
+
+> „Du kannst mit dieser Roadmap gerne zur Konkurrenz gehen, das ist völlig in Ordnung.
+> Oder wir machen daraus ein gemeinsames Projekt über sechs Monate."
+
+Das ist eine echte Risikoumkehr ohne Geld-zurück-Garantie, und die Recherche hält fest,
+dass **kein einziger** der sechs untersuchten Wettbewerber irgendeine Form von
+Risikoumkehr anbietet. Es beantwortet außerdem die Lock-in-Angst, es beweist Vertrauen
+in die eigene Arbeit, und es ist überprüfbar wahr.
+
+**Gehört wörtlich auf die Seite.** Nicht paraphrasiert, nicht geglättet. Das Du in der
+Originalfassung wird auf Sie umgestellt, sonst nichts.
+
+### Damit ist die Preisfrage aus E8 neu zu stellen
+
+E8 entschied: keine Zahl auf der Seite. Das galt dem **Retainer**, und das bleibt
+richtig. Der **Klartag** ist ein anderer Fall:
+
+- Es ist der tatsächliche Einstiegspreis, der Retainer ist es nicht.
+- Er ist anrechenbar, das Risiko für den Kunden ist also gering.
+- Eine Zahl an dieser Stelle nimmt der Seite den ausweichenden Eindruck, vor dem
+  NN/g (Loranger 2013) warnt, ohne den Retainer offenzulegen.
+- Die alte Seite hatte diese Mechanik bereits (1.800 €, voll anrechenbar). Sie
+  funktioniert, nur Zahl und Zielgruppe stimmten nicht mehr.
+
+**Empfehlung: den Klartag-Preis nennen**, als „ab 3.000 €" oder mit einer Spanne, und
+die Anrechnung direkt danebenstellen. **Offen, weil es eine Kundenentscheidung ist.**
+
+### Konsequenz für den Seitenaufbau
+
+Sieben Schritte sind zu viel für eine Startseite. **Drei Stufen auf die Startseite**
+(Gespräch → Klartag → Projekt), die vollständige Roadmap auf eine Unterseite. Das
+vorhandene Timeline-Bauteil der heutigen Seite trägt genau das, es muss nur neu
+befüllt werden: aus „So läuft ein KI-Klartag" wird „So läuft eine Einführung".
+
+### Zwei Unklarheiten aus dem Diktat
+
+- **„150 Lizenzen für Open Web UI"** — Open WebUI ist Open Source und kennt keine
+  Lizenz pro Arbeitsplatz. Gemeint ist vermutlich der Einrichtungs- und
+  Onboarding-Aufwand pro Nutzer, oder es geht um Copilot-Lizenzen. Vor der Verwendung
+  im Text klären, ein technischer Leser stolpert darüber.
+- **„Die Kunden sind erfolgreich geonboardet"** — gemeint sind vermutlich die
+  Mitarbeitenden des Kunden.
+
+### Was der Antwort noch fehlt
+
+Beschrieben ist der Ablauf **wie geplant**. Es fehlt der Ablauf **wie erlebt**:
+Zeitaufwand für den Kunden und die Stelle, an der es hakt. Siehe Frage 14.
+
+---
+
 ## Unberührt
 
 `impressum.html`, `datenschutz.html`, `site/api/*.php` und alles rund um Sicherheit
