@@ -663,7 +663,7 @@ body{line-height:1.75;}
 
 /* ---------- Kapazität ---------- */
 .capacity{display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px;
-  background:var(--color-surface);border:1px solid var(--color-border);border-left:3px solid var(--color-accent);
+  background:var(--color-surface);border:1px solid var(--color-border);border-left:3px solid var(--color-primary);
   border-radius:var(--radius-lg);padding:clamp(18px,2.4vw,24px) clamp(20px,2.6vw,28px);
   margin-top:clamp(26px,4vw,40px);}
 .capacity p{margin:0;color:var(--color-text-secondary);max-width:58ch;font-size:.98rem;}
@@ -680,3 +680,22 @@ body{line-height:1.75;}
 
 /* Kein Gelb als große Fläche mehr */
 .spotlight-cta{background:var(--color-surface);border:1px solid var(--color-border);border-top:3px solid var(--color-accent);}
+
+/* ---------- Buttons eckiger (Capmo-Richtung) ---------- */
+.btn{border-radius:4px;font-weight:500;}
+.field input,.newsletter__form input[type=email]{border-radius:6px;}
+.qcard{border-radius:8px;}
+.stage-price{border-radius:4px;}
+
+/* ---------- CTA-Anker in der Seitenmitte und im unteren Drittel ---------- */
+.ctamid{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
+  gap:18px clamp(24px,4vw,44px);
+  margin-top:clamp(30px,4vw,46px);
+  padding-top:clamp(26px,3.5vw,36px);
+  border-top:1px solid var(--color-border);
+}
+.ctamid p{margin:0;color:var(--color-text-secondary);max-width:52ch;font-size:1rem;}
+.ctamid b{color:var(--color-ink);font-weight:500;}
+.ctamid .btn{flex:none;}
+@media (max-width:560px){.ctamid .btn{width:100%;}}

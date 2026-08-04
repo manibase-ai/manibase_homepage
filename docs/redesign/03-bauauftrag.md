@@ -277,10 +277,32 @@ vor. Die Klassen bleiben im Stylesheet, weil andere Seiten sie nutzen.
 **Screenshots** liegen in diesem Ordner: `v2-kuehl-1..3.png` (kühl, 1440 px),
 `v2-warm-1..3.png` (warm, zum Vergleich), `v2-mobil-1..2.png` (390 px).
 
-### Offen, blockiert die Unterseiten
+### Entschieden am 4.8.2026
 
-- [ ] **Kühle oder warme Leinwand.** Umschalten kostet ein Attribut am `<html>`-Element.
-      Standard ist derzeit kühl.
+- **Kühle Leinwand.** Begründung des Kunden: nehmen, was der Wettbewerb macht und sich
+  bewährt hat. Deckt sich mit der Messung: Capmo `#f4f6f6`, Cosuno `#f1f5fa`,
+  Plancraft `#f8f8f8`. Die warme Variante bleibt über `data-canvas="warm"` erhalten,
+  wird aber nicht mehr gepflegt.
+- **Buttons eckig statt rund** (Capmo-Richtung): `border-radius:4px`. Eingabefelder 6px,
+  Auswahlkarten 8px, Inhaltskarten 12–16px. Die Abstufung ist Absicht: je kleiner das
+  Element, desto kantiger.
+
+### CTA-Rhythmus: vier Anker über die Seitenlänge
+
+| Position | Ort auf der Seite | Umsetzung |
+|---|---|---|
+| **~10 %** | Hero | „Machbarkeit klären" plus sekundär „So läuft ein Klartag" |
+| **~50 %** | nach dem Vergleich *gewachsen gegen gebaut* | `.ctamid`, nach Hook und Re-Hook |
+| **~75 %** | nach den drei Stufen, also nach der Angebots- und Preiserklärung | `.ctamid` |
+| **100 %** | dunkles Band plus Buchungsmaske | `.ctaband` und `#termin` |
+
+**Dazwischen bewusst keine Knöpfe.** Wertband, Video, Rahmen, Bausteine, Argumente,
+Reibung und Gründer bleiben frei, damit der Leser die Argumentation am Stück lesen kann.
+
+**Bekannte Spannung:** Der Knopf im Kopfbereich ist sticky und damit immer sichtbar,
+was der Idee einer Pause widerspricht. Er bleibt trotzdem, weil 11 von 11 untersuchten
+Wettbewerbern einen führen und er die Haupt-Conversion-Fläche für wiederkehrende
+Besucher ist.
 
 ### Noch nicht gebaut
 
