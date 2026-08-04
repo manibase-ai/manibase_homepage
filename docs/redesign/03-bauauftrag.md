@@ -254,6 +254,39 @@ Erlaubt an **genau zwei** Stellen: Videoabschnitt und Architektur-Vergleich.
 - Vorschlag für das Video: **animiertes Architekturdiagramm**, nicht Zeichentrickfiguren.
   Erstes Standbild = statisches Hero-Bild. Ein Asset, zwei Verwendungen.
 
+## 12a · Stand der Umsetzung (4.8.2026)
+
+**Gebaut und committet** (`531b37b`):
+
+| Datei | Was daran neu ist |
+|---|---|
+| `site/index.html` | vollständig neu geschrieben. Alle Sektionen aus Abschnitt 8, beide Platzhalter, Maske auf vier Schritte |
+| `site/styles/tokens.css` | Redesign-Block am Ende: kühle Off-Weiß-Treppe als Standard, warme Variante über `<html data-canvas="warm">`, Schatten in Markenfarbe, ruhigere Radien, `--fw-heading:400` |
+| `site/styles/site.css` | Redesign-Schicht am Ende. Überschreibt bewusst zuletzt, damit Impressum, Datenschutz, Blog und Infotermin unverändert funktionieren |
+
+**Unangetastet:** `impressum.html`, `datenschutz.html`, `api/`, `scripts/site.js`,
+`blog/`, `infotermin.html`, `interessent.html`, `ki-klartag.html`.
+
+**Neue CSS-Klassen:** `.hero--calm` · `.ph` (Platzhalter) · `.frame` · `.mods`/`.mod` ·
+`.args`/`.arg` · `.stages`/`.stage-price` · `.frict` · `.capacity`.
+
+**Aus fünf Farbbändern ist eines geworden:** nur noch `.ctaband` vor dem Footer.
+`.folge`, `.newsletter` und das Cobalt-Gründerband kommen auf der Startseite nicht mehr
+vor. Die Klassen bleiben im Stylesheet, weil andere Seiten sie nutzen.
+
+**Screenshots** liegen in diesem Ordner: `v2-kuehl-1..3.png` (kühl, 1440 px),
+`v2-warm-1..3.png` (warm, zum Vergleich), `v2-mobil-1..2.png` (390 px).
+
+### Offen, blockiert die Unterseiten
+
+- [ ] **Kühle oder warme Leinwand.** Umschalten kostet ein Attribut am `<html>`-Element.
+      Standard ist derzeit kühl.
+
+### Noch nicht gebaut
+
+Die vier Unterseiten aus Abschnitt 8 (Klartag, Einführungsprojekt, Für Ihre IT,
+Über uns). Die Navigation zeigt deshalb ausschließlich auf Abschnitte der Startseite.
+
 ## 13 · Was zu tun bleibt, nach dem Bau
 
 - Architektur-Vergleich zeichnen (**fair**: echte Vorteile der Microsoft-Seite nennen,
