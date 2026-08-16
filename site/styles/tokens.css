@@ -131,6 +131,29 @@
   /* Ruhe-Hebel 1: Überschriften nicht mehr bold. Stärkster Einzelhebel. */
   --fw-heading:400;
   --fw-heading-strong:500;
+
+  /* Body auf 16px wie beim Vorbild (Capmo 1rem/1.75em). Zusammen mit der
+     größeren H1 ergibt das den gemessenen Sprung von 4,25× statt 3,3×.
+     Weniger Textfläche bei gleicher Aussage. */
+  --t-body:1rem;
+  --t-lead:clamp(1.05rem, 0.98rem + 0.35vw, 1.2rem);
+
+  /* Kleine Überschriften (Eyebrow, Kicker, Blattkopf, Footer-Spalten).
+     EINE Stufe für die ganze Seite, Vorgabe der Geschäftsführung 15.08.2026.
+     Vorbild war das .eyebrow auf ueber-uns („Laufende Projektarbeit"),
+     eine Größenstufe größer: 0.78rem → 0.875rem. Schrift ist Hanken
+     Grotesk, nicht mehr teils JetBrains Mono. Wer eine dieser kleinen
+     Überschriften baut, nimmt diese beiden Werte und nichts anderes. */
+  --t-eyebrow:0.875rem;
+  --ls-eyebrow:0.14em;
+
+  /* Maße an Capmo angeglichen (aus deren Stylesheet gemessen):
+     .container max-width:80rem + padding 1.5rem  ·  .section padding:4rem 0
+     .navbar-2 height:92px  ·  .home-hero-new padding-top:13rem */
+  --container:80rem;              /* 1280px, Inhalt 1232px */
+  --container-pad:1.5rem;         /* 24px, flach statt mitwachsend */
+  --section-y:clamp(2.75rem, 2rem + 2.2vw, 4rem);
+  --header-h:92px;
 }
 
 /* Warme Variante (Bestand) — zum Vergleich, nicht gelöscht */

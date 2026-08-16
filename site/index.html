@@ -3,365 +3,594 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>manibase · KI im Betrieb einführen, strukturiert und auf Ihre Abläufe zugeschnitten</title>
-<meta name="description" content="manibase führt KI in Bau- und Planungsunternehmen ein: ohne Lizenzchaos, ohne Schatten-KI, mit Anwendungsfällen, deren Nutzen vorher beziffert wird. Server in Deutschland, DSGVO-konform.">
+<title>KI-Arbeitsplätze, Automatisierungen und Helfer für Bau, Handwerk und Planung · manibase</title>
+<meta name="description" content="manibase führt eine passende KI-Arbeitsumgebung in Bauunternehmen, ausführenden Gewerken und Planungsbüros ein und ergänzt sie um Automatisierungen und vorbereitete Helfer für Baudokumentation, Angebote und Wissen. Regeln, Schulung und Übergabe gehören dazu.">
+<link rel="canonical" href="https://manibase.de/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="manibase">
+<meta property="og:locale" content="de_DE">
+<meta property="og:url" content="https://manibase.de/">
+<meta property="og:title" content="KI-Arbeitsplätze, Automatisierungen und Helfer für Bau, Handwerk und Planung">
+<meta property="og:description" content="manibase führt die passende KI-Arbeitsumgebung ein und ergänzt sie um vorbereitete Helfer für Baudokumentation, Angebote und Wissen. Mit klaren Datenwegen, fachlicher Freigabe, Schulung und Übergabe.">
+<meta property="og:image" content="https://manibase.de/assets/og-manibase.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" href="assets/signet.png">
+<link rel="apple-touch-icon" href="assets/signet-180.png">
 <link rel="preload" href="fonts/Sora.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/HankenGrotesk.woff2" as="font" type="font/woff2" crossorigin>
 <script>document.documentElement.className+=' js';</script>
 <link rel="stylesheet" href="styles/tokens.css">
-<link rel="stylesheet" href="styles/site.css">
+<link rel="stylesheet" href="styles/site.css?v=20260814-nav4">
+<link rel="stylesheet" href="styles/home.css?v=20260814-nav4">
+<script src="scripts/site.js?v=20260814-nav4" defer></script>
+<script src="scripts/kinetic-grid.js?v=20260815-kg1" defer></script>
 </head>
-<body>
+<body class="hp-home">
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
 
-<header class="site-header">
+<header class="site-header hp-header">
   <div class="container nav">
-    <a class="brand" href="/" aria-label="manibase Startseite">
-      <img class="brand__signet" src="assets/signet.png" alt="" width="34" height="34">
+    <a class="brand" href="index.html" aria-label="manibase Startseite">
+      <img class="brand__signet" src="assets/signet.png" alt="" width="36" height="36">
       <span class="wordmark" aria-hidden="true"><span class="mani">mani</span><span class="base">base</span><span class="dot"></span></span>
     </a>
+
     <nav class="nav__links" aria-label="Hauptnavigation">
-      <a href="#leistungen">Was wir machen</a>
-      <a href="#vergleich">Der Unterschied</a>
-      <a href="#ablauf">Ablauf</a>
-      <a href="#team">Über uns</a>
-    </nav>
-    <div class="nav__cta">
-      <a class="btn" href="#termin"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span class="btn-label-long">Machbarkeit&nbsp;klären</span></a>
-    </div>
-    <details class="menu-mobile">
-      <summary aria-label="Menü öffnen"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></summary>
-      <div class="menu-mobile__panel">
-        <a href="#leistungen">Was wir machen</a>
-        <a href="#vergleich">Der Unterschied</a>
-        <a href="#ablauf">Ablauf</a>
-        <a href="#team">Über uns</a>
-        <a href="#termin">Machbarkeit klären</a>
+      <a href="index.html" aria-current="page">Startseite</a>
+
+      <div class="nav__item">
+        <button class="nav__trigger" type="button" aria-expanded="false" aria-controls="nav-zielgruppen">Zielgruppen<svg viewBox="0 0 16 10" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m2 2 6 6 6-6"/></svg></button>
+        <div class="nav__dropdown nav__dropdown--small" id="nav-zielgruppen" hidden>
+          <p class="nav__dropdown-label">Für wen wir arbeiten</p>
+          <div class="nav__dropdown-grid"><a href="baugewerbe.html"><strong>Baugewerbe</strong><span>KI für Bauunternehmen, Hoch- und Tiefbau</span></a><a href="gebaeudetechnik-ausbau.html"><strong>Gebäudetechnik &amp; Ausbau</strong><span>KI für SHK, Elektro, Lüftung, Dach und Ausbau</span></a><a href="planungsbueros.html"><strong>Planungsbüros</strong><span>KI für Architektur, Ingenieurwesen und TGA</span></a></div>
+        </div>
       </div>
-    </details>
+
+      <div class="nav__item">
+        <button class="nav__trigger" type="button" aria-expanded="false" aria-controls="nav-einfuehrung">KI-Einführung<svg viewBox="0 0 16 10" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m2 2 6 6 6-6"/></svg></button>
+        <div class="nav__dropdown" id="nav-einfuehrung" hidden>
+          <p class="nav__dropdown-label">Der Weg ins Thema</p>
+          <div class="nav__dropdown-grid"><a href="klartag.html"><strong>Der Einstieg: Unser <span class="mark">Klartag</span></strong><span>Strategie, Machbarkeit und Roadmap an einem Tag</span></a><a href="firmen-ki.html"><strong>Firmen-KI</strong><span>Die eigene KI-Umgebung im Unternehmen einführen</span></a><a href="prozessautomatisierung.html"><strong>Prozessautomation</strong><span>Abläufe prüfen und kontrolliert automatisieren</span></a><a href="ki-helfer.html"><strong>Individuelle KI-Helfer</strong><span>Werkzeuge für konkrete Arbeitsabläufe</span></a></div>
+        </div>
+      </div>
+
+      <a href="ueber-uns.html">Über uns</a>
+      <a href="fuer-ihre-it.html">Für Ihre IT</a>
+    </nav>
+
+    <div class="nav__cta"><a class="btn" href="index.html#termin">Kontakt aufnehmen</a></div>
+
+    <button class="nav__toggle" type="button" aria-label="Menü öffnen" aria-expanded="false" aria-controls="nav-mobile">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
   </div>
+
+  <nav class="nav__mobile" id="nav-mobile" aria-label="Navigation" hidden>
+    <a href="index.html" aria-current="page">Startseite</a>
+    <div class="nav__acc">
+      <button type="button" aria-expanded="false" aria-controls="nav-m-zielgruppen">Zielgruppen<svg viewBox="0 0 16 10" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m2 2 6 6 6-6"/></svg></button>
+      <div class="nav__subnav" id="nav-m-zielgruppen" hidden><a href="baugewerbe.html">Baugewerbe</a><a href="gebaeudetechnik-ausbau.html">Gebäudetechnik &amp; Ausbau</a><a href="planungsbueros.html">Planungsbüros</a></div>
+    </div>
+    <div class="nav__acc">
+      <button type="button" aria-expanded="false" aria-controls="nav-m-einfuehrung">KI-Einführung<svg viewBox="0 0 16 10" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m2 2 6 6 6-6"/></svg></button>
+      <div class="nav__subnav" id="nav-m-einfuehrung" hidden><a href="klartag.html">Der Einstieg: Unser <span class="mark">Klartag</span></a><a href="firmen-ki.html">Firmen-KI</a><a href="prozessautomatisierung.html">Prozessautomation</a><a href="ki-helfer.html">Individuelle KI-Helfer</a></div>
+    </div>
+    <a href="ueber-uns.html">Über uns</a>
+    <a href="fuer-ihre-it.html">Für Ihre IT</a>
+    <a class="btn" href="index.html#termin">Kontakt aufnehmen</a>
+  </nav>
 </header>
 
 <main id="main">
 
-  <!-- HERO -->
-  <section class="hero hero--calm">
-    <div class="container hero__inner">
-      <div class="hero__copy">
-        <h1 class="h-hero">KI im Betrieb einführen. Strukturiert, und auf Ihre Abläufe zugeschnitten.</h1>
-        <p class="lead">Ohne Lizenzchaos, ohne Schatten-KI. In sechs Monaten drei bis fünf Anwendungsfälle, die sich rechnen, und Mitarbeitende, die damit arbeiten können.</p>
-        <div class="btn-row">
-          <a class="btn" href="#termin"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Machbarkeit klären</a>
-          <a class="btn btn--secondary" href="#ablauf">So läuft ein Klartag</a>
+  <!-- Hero =============================================================== -->
+  <section class="hp-hero" aria-labelledby="hero-title"
+           data-kinetic="cobalt" data-kinetic-guard="#hero-title, .hp-hero__lead" data-kinetic-schutz="0.35">
+    <div class="container">
+      <div class="hp-hero__copy">
+        <p class="hp-kicker">Strukturierte KI-Einführung für Bauunternehmen, ausführende Gewerke und Planungsbüros</p>
+        <h1 id="hero-title">KI zwischen Plan, Baustelle und Büro effizient einsetzen.</h1>
+        <p class="hp-hero__lead">Erfahren Sie, wie Sie KI im Betrieb strukturiert und nachhaltig einführen, um Ihre internen Arbeitsprozesse messbar zu optimieren. Von der strategischen Planung bis zu Ihrem zugeschnittenen KI-Helfer im Alltag.</p>
+        <div class="btn-row hp-hero__actions">
+          <a class="btn" href="#termin">Kontakt aufnehmen</a>
+          <a class="btn btn--ghost-ink" href="#module">Module ansehen</a>
         </div>
-        <p class="hero__micro">30 Minuten, mit der Geschäftsführung, gern zusammen mit Ihrer IT.</p>
+        <p class="hp-hero__microcopy">Erhalten Sie eine Ersteinschätzung, welche Lösung für Sie in Frage kommt.</p>
       </div>
 
-      <!-- PLATZHALTER 1 von 2: Referenzarchitektur -->
-      <div class="ph ph--wide" role="img" aria-label="Platzhalter für das Schaubild der Referenzarchitektur">
-        <svg class="ph__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="8.5" y="14" width="7" height="7" rx="1.5"/><path d="M6.5 10v2.5h11V10M12 12.5V14"/></svg>
-        <span class="ph__t">Schaubild: so ist Ihre KI aufgebaut</span>
-        <p class="ph__d">Dieser Bereich wird gerade erweitert. Hier steht in Kürze die Referenzarchitektur: wo Ihre Daten liegen, wer Zugang hat und was Ihr Haus nie verlässt.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- WERTBAND -->
-  <section class="valueband" aria-label="Was eine Einführung mit manibase leistet">
-    <div class="container">
-      <div class="valueband__grid">
-        <div class="vstat"><b>Kein Lizenzchaos</b><span>Sie zahlen Nutzung statt Plätze. Nicht jeder Kopf braucht eine Lizenz.</span></div>
-        <div class="vstat"><b>Keine Schatten-KI</b><span>Richtlinien, TOMs und Verarbeitungsverzeichnis, vom Datenschutzbeauftragten geprüft.</span></div>
-        <div class="vstat"><b>Nutzen vorher beziffert</b><span>Jeder Anwendungsfall bekommt eine Messgröße, bevor gebaut wird.</span></div>
-        <div class="vstat"><b>Befähigte Mitarbeitende</b><span>Schulung mit Zertifikat, nicht nur ein Zugang und viel Glück.</span></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- PLATZHALTER 2 von 2: Erklärvideo -->
-  <section class="section" aria-labelledby="video-h">
-    <div class="container">
-      <div class="ph reveal">
-        <svg class="ph__ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="M10 9.5l5 2.5-5 2.5z"/></svg>
-        <span class="ph__t" id="video-h">In 90 Sekunden erklärt</span>
-        <p class="ph__d">Dieser Bereich wird gerade erweitert. Hier läuft in Kürze ein kurzes Video, das den Aufbau und den Ablauf einer Einführung zeigt.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- RAHMEN: Kosten des Wartens -->
-  <section class="section frame" aria-labelledby="frame-h">
-    <div class="container frame__inner">
-      <div>
-        <h2 class="h2" id="frame-h">Warten wird teurer.</h2>
-        <p class="frame__quote">Alles, was jetzt unstrukturiert entsteht und woran sich Ihre Leute gewöhnen, müssen Sie in ein bis zwei Jahren wieder einsammeln.</p>
-      </div>
-      <div class="frame__body">
-        <p>In den meisten Betrieben ist KI längst im Haus. Nur eben nicht eingeführt: private Konten, ein Werkzeug hier, ein Abo dort, Daten in Systemen, die niemand freigegeben hat.</p>
-        <p>Das läuft eine Weile gut. Teuer wird es, wenn der Wildwuchs wieder aufgeräumt und sauber neu aufgesetzt werden muss, während die Belegschaft sich bereits daran gewöhnt hat.</p>
-        <p>Jetzt ist das Fenster, es von Anfang an richtig zu bauen.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ZWEI BAUSTEINE -->
-  <section class="section" id="leistungen" aria-labelledby="mods-h">
-    <div class="container">
-      <h2 class="h2 reveal" id="mods-h">Zwei Bausteine, je nachdem, wie Ihr Betrieb arbeitet.</h2>
-      <p class="lead reveal" style="max-width:60ch;margin-top:12px">Ein Planungsbüro braucht etwas anderes als ein ausführender Betrieb. In den meisten Häusern greift beides ineinander, nur mit anderem Gewicht.</p>
-      <div class="mods">
-        <article class="mod reveal">
-          <p class="mod__tag">Wenn fast alle am Schreibtisch sitzen</p>
-          <h3 class="h3">Die strukturierte Einführung</h3>
-          <p>Für Architektur- und Planungsbüros, TGA-Planung, Bauingenieurwesen. Jeder Mitarbeitende bekommt einen Zugang, und Ihr Haus bekommt eine Ebene, die ihm gehört.</p>
-          <ul>
-            <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg><span>Eigene Plattform, Zugang über Ihre bestehende Microsoft-Anmeldung</span></li>
-            <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg><span>Wissensdatenbank für Normen, Text- und Angebotsbausteine</span></li>
-            <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg><span>Schulung, Richtlinien und Begleitung, bis es wirklich genutzt wird</span></li>
-          </ul>
-        </article>
-        <article class="mod reveal">
-          <p class="mod__tag">Wenn die meisten draußen arbeiten</p>
-          <h3 class="h3">Der Helfer für eine Aufgabe</h3>
-          <p>Für Bauunternehmen, Dachdecker, Spengler, Garten- und Landschaftsbau, SHK. Hier hat oft nur ein Drittel der Belegschaft einen Schreibtisch. Eine Funktion, einmal eingerichtet, und es ist gleich, ob zwei oder zwanzig sie nutzen.</p>
-          <ul>
-            <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg><span>Baudokumentation per Sprache, auf der Baustelle und im Auto</span></li>
-            <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg><span>Wiederfinden, was dokumentiert wurde, ohne Ordnerstruktur im Kopf</span></li>
-            <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg><span>Kosten hängen an der Funktion, nicht an der Zahl der Nutzer</span></li>
-          </ul>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <!-- VERGLEICH: gewachsen gegen gebaut -->
-  <section class="section frame" id="vergleich" aria-labelledby="cmp-h">
-    <div class="container">
-      <h2 class="h2 reveal" id="cmp-h">Gewachsen oder gebaut.</h2>
-      <p class="lead reveal" style="max-width:62ch;margin-top:12px">Beides funktioniert eine Weile. Der Unterschied zeigt sich, wenn es mehr als eine Handvoll Leute betrifft.</p>
-      <div class="mods">
-        <article class="mod reveal">
-          <p class="mod__tag">Gewachsen</p>
-          <h3 class="h3">Was heute in den meisten Häusern steht</h3>
-          <p>Einzelne Lizenzen für die, die am lautesten gefragt haben. Ein selbstgebautes Wissenssystem aus einem Projekt, das gut anfing. Private Konten für den Rest.</p>
-          <ul>
-            <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg><span>Schnell verfügbar, ein Vertragspartner, tief in der Office-Welt verankert</span></li>
-            <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg><span>Kosten steigen mit jedem Kopf, unabhängig davon, wie viel genutzt wird</span></li>
-            <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg><span>Niemand kann sagen, welche Daten wo liegen und wer sie eingegeben hat</span></li>
-          </ul>
-        </article>
-        <article class="mod reveal">
-          <p class="mod__tag">Gebaut</p>
-          <h3 class="h3">Was wir daraus machen</h3>
-          <p>Eine Ebene, ein Zugang, klare Datenwege. Ihre bestehenden Microsoft-Werkzeuge bleiben, wo sie stark sind. Wir bauen daneben das, was sie nicht können.</p>
-          <ul>
-            <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg><span>Ein Zugang über Ihre vorhandene Anmeldung, für alle im Betrieb</span></li>
-            <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg><span>Server in Deutschland, auf Wunsch vollständig im eigenen Haus</span></li>
-            <li><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg><span>Was wir bauen, gehört Ihnen und läuft weiter, auch ohne uns</span></li>
-          </ul>
-        </article>
-      </div>
-      <div class="capacity reveal">
-        <p><b>Wir treten nicht gegen Microsoft an.</b> Copilot bleibt, wo es stark ist: im Dokument, in der Mail, in der Sitzung. Von 150 Mitarbeitenden brauchen das vielleicht 20 wirklich. Die anderen 130 versorgen wir günstiger und erreichen dabei auch die, die den ganzen Tag nicht am Rechner sitzen.</p>
-      </div>
-
-      <!-- CTA 2 von 4 · Seitenmitte, nach der Methode -->
-      <div class="ctamid reveal">
-        <p><b>Sie wissen nicht, welche der beiden Spalten Ihr Haus beschreibt?</b> Genau das klären wir im ersten Gespräch, bevor irgendjemand etwas kauft.</p>
-        <a class="btn" href="#termin">Machbarkeit klären</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- FÜNF ARGUMENTE -->
-  <section class="section" aria-labelledby="args-h">
-    <div class="container">
-      <h2 class="h2 reveal" id="args-h">Warum Betriebe das mit uns angehen.</h2>
-      <ol class="args">
-        <li class="arg reveal">
-          <span class="arg__n">01</span>
-          <div>
-            <h3 class="h3">Schatten-KI und Haftung</h3>
-            <p>Ihre Leute nutzen längst KI. Ohne Einführung, ohne Schulung, ohne Richtlinie, ohne technische und organisatorische Maßnahmen. Wir liefern den Compliance-Check mit Auftragsverarbeitung, TOMs und Verarbeitungsverzeichnis, abgestimmt mit einem Datenschutzbeauftragten.</p>
-          </div>
-        </li>
-        <li class="arg reveal">
-          <span class="arg__n">02</span>
-          <div>
-            <h3 class="h3">Ihre Daten bleiben Ihre Daten</h3>
-            <p>Entwürfe, Kalkulationen, Verträge: In der Baubranche ist das geistiges Eigentum, das niemanden etwas angeht. Kein Transfer in die USA. Server in Deutschland, auf Wunsch ein eigener Rechner im Haus, den Sie selbst ein- und ausschalten. Für besonders sensible Unterlagen läuft die Verarbeitung vollständig bei Ihnen.</p>
-          </div>
-        </li>
-        <li class="arg reveal">
-          <span class="arg__n">03</span>
-          <div>
-            <h3 class="h3">Sie zahlen Nutzung statt Plätze</h3>
-            <p>Lizenzmodelle wachsen mit der Kopfzahl, unabhängig davon, wie viel jemand tatsächlich arbeitet. Eine eigene Ebene rechnet nach Nutzung ab. Für die breite Belegschaft genügt ein kleineres, spezialisiertes Modell, das einen Bruchteil kostet.</p>
-          </div>
-        </li>
-        <li class="arg reveal">
-          <span class="arg__n">04</span>
-          <div>
-            <h3 class="h3">Was wir bauen, gehört Ihnen</h3>
-            <p>Ihre Abläufe, Ihre Vorlagen, Ihre Schnittstellen bleiben in Ihrem Haus. Sie rechnen die Cloud selbst ab und können ohne uns weiterarbeiten, auch wenn es manibase eines Tages nicht mehr geben sollte. Für Betriebe, bei denen eine Übergabe ansteht, ist das kein Nebensatz.</p>
-          </div>
-        </li>
-      </ol>
-    </div>
-  </section>
-
-  <!-- DREI STUFEN -->
-  <section class="section stages" id="ablauf" aria-labelledby="stages-h">
-    <div class="container">
-      <div class="process__head">
-        <h2 class="h2 reveal" id="stages-h">Drei Stufen, und Sie können nach jeder aussteigen.</h2>
-        <p class="lead reveal">Kein Paket, das man ganz oder gar nicht kauft.</p>
-      </div>
-      <ol class="steps">
-        <li class="step reveal">
-          <span class="step__n stage__n">1</span>
-          <h3 class="h3">Das Gespräch</h3>
-          <p>30 Minuten. Wir schauen uns Ihre Systemlandschaft, Ihre Größe und Ihre Abläufe an und sagen Ihnen, ob sich etwas machen lässt. Manchmal lautet die Antwort nein, weil die Systeme in Ihrem Haus sich heute nicht anbinden lassen. Dann sagen wir das.</p>
-        </li>
-        <li class="step reveal">
-          <span class="step__n stage__n">2</span>
-          <h3 class="h3">Der Klartag</h3>
-          <span class="stage-price num">ab 3.000 €, voll anrechenbar</span>
-          <p>Ein Tag mit Ihrer Geschäftsführung, Ihren Führungskräften und Ihrer IT. Am Ende halten Sie eine Roadmap in der Hand: welche Anwendungsfälle sich lohnen, in welcher Reihenfolge, mit welcher Messgröße. Entscheiden Sie sich für ein Projekt, rechnen wir den Tag voll an.</p>
-        </li>
-        <li class="step reveal">
-          <span class="step__n stage__n">3</span>
-          <h3 class="h3">Das Projekt</h3>
-          <p>Sechs Monate, monatlich abgerechnet. Kick-off, Projektgruppe, KI-Verantwortliche im Team, Rollout und Schulung. Am Ende laufen drei bis fünf Anwendungsfälle im Betrieb, die Compliance steht, und Ihre Leute sind geschult und zertifiziert.</p>
-        </li>
-      </ol>
-
-      <div class="capacity reveal">
-        <p><b>Nach dem Klartag können Sie mit dieser Roadmap gerne zur Konkurrenz gehen.</b> Das ist völlig in Ordnung. Oder wir machen daraus ein gemeinsames Projekt.</p>
-      </div>
-
-      <!-- CTA 3 von 4 · unteres Drittel, nach der Angebotserklärung -->
-      <div class="ctamid reveal">
-        <p><b>Der erste Schritt kostet Sie nichts außer 30 Minuten.</b> Erst danach entscheiden Sie, ob ein Klartag Sinn ergibt.</p>
-        <a class="btn" href="#termin">Machbarkeit klären</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- REIBUNG UND UMGANG -->
-  <section class="section" aria-labelledby="frict-h">
-    <div class="container">
-      <h2 class="h2 reveal" id="frict-h">Was in so einem Projekt schiefgeht.</h2>
-      <p class="lead reveal" style="max-width:58ch;margin-top:12px">Wir führen gerade bei einem Architekturbüro mit 18 Mitarbeitenden ein KI-System ein. Das sind die Stellen, an denen es hakt, und wie wir damit umgehen.</p>
-
-      <div class="frict__head" aria-hidden="true"><span>Reibung</span><span>Wie wir damit umgehen</span></div>
-      <ul class="frict">
-        <li class="reveal"><b>Die ersten zwei bis drei Wochen passiert für Ihre Belegschaft nichts Sichtbares.</b><span>Verträge werden geschlossen, Systeme eingerichtet, oft bei Ihrem IT-Dienstleister. Wir sagen es vorher, damit niemand nervös wird.</span></li>
-        <li class="reveal"><b>Erfahrene Mitarbeitende ziehen nicht mit.</b><span>Dafür gibt es KI-Verantwortliche aus dem eigenen Team, begleitete interne Kommunikation und Schulungen, die mit einem Zertifikat enden.</span></li>
-        <li class="reveal"><b>Ein Anwendungsfall klingt im Workshop gut und trägt in der Praxis nicht.</b><span>Von fünf Fällen tauschen wir erfahrungsgemäß ein bis zwei aus. Das ist eingeplant, kein Rückschlag.</span></li>
-        <li class="reveal"><b>Alte Systeme lassen sich nicht anbinden, obwohl der Hersteller Schnittstellen verspricht.</b><span>Wir sagen Ihnen im Klartag, was sich anbinden lässt und was nicht. Auch dann, wenn Ihr Softwarehersteller etwas anderes behauptet.</span></li>
-        <li class="reveal"><b>Niemand kennt die Abläufe so, wie sie wirklich laufen.</b><span>In jedem Betrieb wird anders gearbeitet, als es auf dem Papier steht. Deshalb sprechen wir nicht nur mit der Leitung, sondern mit den Leuten, die die Arbeit machen.</span></li>
-        <li class="reveal"><b>Termine fallen aus, das Projekt zieht sich.</b><span>Wir sagen vorher, was es Sie kostet: mindestens eine Stunde pro Woche für fünf bis sechs Leute. Über sechs Monate sind das etwa drei Arbeitstage pro Person, dazu der Klartag und die Schulung.</span></li>
+      <ul class="hp-legende" aria-label="Die Module im Überblick">
+        <li class="hp-legende__title"><span>Legende</span><strong>Die Module im Überblick</strong></li>
+        <li><span>01</span><strong>Einführung KI-Arbeitsplatz</strong><small>eigene „Firmen-KI“ oder MS365 Copilot</small></li>
+        <li><span>02</span><strong>Prozess-Automatisierungen</strong><small>in der Firmen-KI oder als separates Modul</small></li>
+        <li><span>03</span><strong>Angepasste KI-Helfer</strong><small>Ihre persönlichen Vorarbeiter für tägliche Aufgaben</small></li>
       </ul>
     </div>
   </section>
 
-  <!-- GRÜNDER -->
-  <section class="section frame" id="team" aria-labelledby="team-h">
+  <!-- Blatt 01 · Arbeitssituationen ====================================== -->
+  <section class="hp-situations" id="arbeitssituationen" aria-labelledby="situations-title">
     <div class="container">
-      <h2 class="h2 reveal" id="team-h">Wer hinter <span class="wordmark wordmark--inline" aria-hidden="true"><span class="mani">mani</span><span class="base">base</span><span class="dot"></span></span><span class="sr-only">manibase</span> steht.</h2>
-      <p class="lead founders__intro reveal">Kein anonymer Anbieter. Sie sprechen mit den beiden, die es auch bauen.</p>
-      <div class="founders__grid">
-        <article class="founder reveal">
-          <img class="founder__photo" src="assets/matthias.jpg" alt="Matthias Geisler" width="96" height="96" loading="lazy">
-          <div class="founder__body">
-            <h3 class="h3 founder__name">Matthias Geisler</h3>
-            <p class="founder__role">Einführung und Projekte</p>
-            <p class="founder__bio">Hat jahrelang als IT-Projektmanager Dokumentenmanagementsysteme in Unternehmen eingeführt. Dieselbe Disziplin wie eine KI-Einführung: Dokumentprozesse, Altbestand, Change-Management und Widerstand in der Belegschaft.</p>
+      <div class="hp-sheet"><span class="hp-sheet__no">Blatt 01</span><span class="hp-sheet__name">Drei Arbeitssituationen</span><i aria-hidden="true"></i></div>
+      <header class="hp-head hp-head--split">
+        <h2 id="situations-title">Niemand hat Zeit. Und doch verschwenden Fachkräfte wertvolle Stunden für …</h2>
+        <p>… Aufgaben, die eine KI heute zuverlässig im Handumdrehen löst. Ohne dabei die Kontrolle über den Inhalt zu verlieren.</p>
+      </header>
+
+      <div class="hp-sit-list">
+        <article class="hp-sit">
+          <figure class="hp-shot hp-sit__media">
+            <img src="assets/sit-wissen-1200.webp"
+                 srcset="assets/sit-wissen-700.webp 700w, assets/sit-wissen-1200.webp 1200w"
+                 sizes="(max-width:940px) 92vw, 44vw"
+                 width="1200" height="800" loading="lazy" decoding="async"
+                 alt="Aufgeschlagener Ordner mit Registerreitern und daneben lose Blätter; auf einem Blatt markiert eine blaue Klammer eine einzelne Zeile. Alle Texte sind zu grauen Balken abstrahiert.">
+            <figcaption><b>KI-generierte Illustration</b> Die Antwort zeigt, woher sie stammt.</figcaption>
+          </figure>
+          <div class="hp-sit__body">
+            <div class="hp-sit__index" aria-hidden="true">01</div>
+            <div class="hp-sit__copy">
+              <p class="hp-label">Suche nach Projekt- und Unternehmenswissen</p>
+              <h3>Die Informationen sind zerstreut. In den Ablagesystemen. In den Köpfen.</h3>
+              <p>Umfangreiche Projektunterlagen, Protokolle und interne Dokumente müssen schnell auffindbar und leicht durchsuchbar sein. Quellenverweise und Richtigkeit sind Pflicht.</p>
+            </div>
+            <dl class="hp-chain">
+              <div><dt>Ausgangslage</dt><dd>Eine Information wird für Planung oder Projektleitung gebraucht und muss durchsucht werden.</dd></div>
+              <div><dt>KI setzt ein</dt><dd>Das Dokument wird gefunden, durchsucht und der passende Inhalt ausgegeben.</dd></div>
+              <div><dt>Ergebnis</dt><dd>Zeitersparnis. Informationen werden anhand der Quellen gegengeprüft.</dd></div>
+            </dl>
           </div>
         </article>
-        <article class="founder reveal">
-          <img class="founder__photo" src="assets/nikolaus.webp" alt="Nikolaus Schauersberger" width="96" height="96" loading="lazy">
-          <div class="founder__body">
-            <h3 class="h3 founder__name">Nikolaus Schauersberger</h3>
-            <p class="founder__role">Technik und Architektur</p>
-            <p class="founder__bio">Fünfzehn Jahre als freiberuflicher Softwareentwickler, bevor manibase entstand. Baut die Infrastruktur, die Schnittstellen und die Helfer, die daraus entstehen.</p>
+
+        <article class="hp-sit">
+          <figure class="hp-shot hp-sit__media">
+            <img src="assets/sit-doku-1200.webp"
+                 srcset="assets/sit-doku-700.webp 700w, assets/sit-doku-1200.webp 1200w"
+                 sizes="(max-width:940px) 92vw, 44vw"
+                 width="1200" height="800" loading="lazy" decoding="async"
+                 alt="Staubiger Grundrissplan mit Mobiltelefon, aufgeschlagenem Notizbuch und Bleistift, daneben ein sauber gesetztes Blatt mit blauem Haken am Fuß.">
+            <figcaption><b>KI-generierte Illustration</b> Von der Notiz zum prüfbaren Entwurf.</figcaption>
+          </figure>
+          <div class="hp-sit__body">
+            <div class="hp-sit__index" aria-hidden="true">02</div>
+            <div class="hp-sit__copy">
+              <p class="hp-label">Dokumentation und Nachweise</p>
+              <h3>Aus unstrukturierten Zetteln und Diktaten müssen strukturierte Daten entstehen.</h3>
+              <p>Notizen enthalten nur Bruchteile, Gedanken gehen verloren. Die Nacharbeit für die Strukturierung bindet Ressourcen einzelner Personen.</p>
+            </div>
+            <dl class="hp-chain">
+              <div><dt>Ausgangslage</dt><dd>Dokumentation über Stand, Fortschritt und nächste Schritte.</dd></div>
+              <div><dt>KI setzt ein</dt><dd>Strukturiert die Daten nach Ihren Regeln und bereitet sie auf.</dd></div>
+              <div><dt>Ergebnis</dt><dd>Fertige Protokolle und Checklisten für die Mitarbeiter.</dd></div>
+            </dl>
           </div>
         </article>
-      </div>
-      <div class="founders__together reveal">
-        <p class="founders__label">Wie wir arbeiten</p>
-        <p class="founders__claim">Wir arbeiten zu zweit. Das begrenzt, wie viele Projekte gleichzeitig laufen können, und es heißt, dass <b>Sie im Projekt mit denselben zwei Leuten sprechen</b>, die auch im ersten Gespräch am Tisch saßen.</p>
+
+        <article class="hp-sit">
+          <figure class="hp-shot hp-sit__media">
+            <img src="assets/sit-angebot-1200.webp"
+                 srcset="assets/sit-angebot-700.webp 700w, assets/sit-angebot-1200.webp 1200w"
+                 sizes="(max-width:940px) 92vw, 44vw"
+                 width="1200" height="800" loading="lazy" decoding="async"
+                 alt="Großer Grundrissplan auf einem Betontisch, darauf drei lose Blätter mit abstrahiertem Text und ein Bleistift, im Fenster ein Rohbau.">
+            <figcaption><b>KI-generierte Illustration</b> Viele Unterlagen, ein Arbeitsstand.</figcaption>
+          </figure>
+          <div class="hp-sit__body">
+            <div class="hp-sit__index" aria-hidden="true">03</div>
+            <div class="hp-sit__copy">
+              <p class="hp-label">Angebots- und Projektvorbereitung</p>
+              <h3>Jede neue Anfrage für ein Projekt ist eine Einzelfallprüfung.</h3>
+              <p>Tiefgehende Analysen und Prüfungen neuer Projekte kosten den Betrieb unbezahlte Mannstunden.</p>
+            </div>
+            <dl class="hp-chain">
+              <div><dt>Ausgangslage</dt><dd>Neue Projektanfrage oder Idee muss geprüft werden.</dd></div>
+              <div><dt>KI setzt ein</dt><dd>Nutzt verfügbare Daten und Schnittstellen und liefert eine Entscheidungshilfe für die Vorprüfung.</dd></div>
+              <div><dt>Ergebnis</dt><dd>Datengetriebene Entscheidungsgrundlage, in einem Bruchteil der Zeit.</dd></div>
+            </dl>
+          </div>
+        </article>
       </div>
     </div>
   </section>
 
-  <!-- DAS EINE DUNKLE BAND -->
-  <section class="section" aria-labelledby="cta-h">
+  <!-- Blatt 02 · System (dunkles Band) =================================== -->
+  <section class="hp-system" aria-labelledby="system-title">
     <div class="container">
-      <div class="ctaband reveal">
-        <div>
-          <h2 class="h2" id="cta-h">Klären wir, ob sich das bei Ihnen lohnt.</h2>
-          <p>30 Minuten, mit der Geschäftsführung, gern zusammen mit Ihrer IT. Wenn wir zu dem Schluss kommen, dass es bei Ihnen heute nicht sinnvoll ist, sagen wir das im Gespräch.</p>
+      <div class="hp-sheet hp-sheet--dark"><span class="hp-sheet__no">Blatt 02</span><span class="hp-sheet__name">Das manibase-System</span><i aria-hidden="true"></i></div>
+      <header class="hp-head">
+        <h2 id="system-title">Der Einstieg, der Klarheit verschafft, welches Modul im Betrieb gebraucht wird.</h2>
+        <p>Der Klartag verschafft in erster Linie Klarheit für Sie: Welche Software ist im Einsatz, welche Prozesse binden Zeit, wo kann KI sinnvoll anpacken.</p>
+      </header>
+
+      <div class="hp-sysd" role="img" aria-label="Schnittzeichnung: Der Klartag ist der Eingang. Dahinter liegen drei kombinierbare Module, nämlich die Firmen-KI für alle Mitarbeiter, Automatisierungen und KI-Helfer. Alle stehen auf einem gemeinsamen Fundament aus Rollen und Datenwegen, Unterlagen für den Datenschutzbeauftragten, Richtlinie, Schulung und dokumentierter Übergabe.">
+        <div class="hp-sysd__entry">
+          <span>Einstieg</span>
+          <strong>Klartag</strong>
+          <small>Prüfung · Prioritäten · Strategie</small>
+          <i class="hp-sysd__arrow" aria-hidden="true"></i>
         </div>
-        <a class="btn btn--accent" href="#termin">Machbarkeit klären</a>
+        <div class="hp-sysd__mods">
+          <div><span>KI-Fundament für die Firma</span><strong>Firmen-KI für alle Mitarbeiter</strong><small>eigenes KI-Tool oder MS365 Copilot</small></div>
+          <div><span>Zeitersparnis durch</span><strong>Automatisierungen</strong><small>im Plattformweg oder standalone mit n8n</small></div>
+          <div><span>Individuelle Softwarelösung</span><strong>KI-Helfer</strong><small>auf Sie zugeschnitten</small></div>
+        </div>
+        <div class="hp-sysd__base">
+          <span>Übergreifend enthalten</span>
+          <strong>Rollen &amp; Datenwege · DSB-Unterlagen · Richtlinie · Schulung · dokumentierte Übergabe</strong>
+        </div>
+      </div>
+      <p class="hp-sysd__note">Nicht jedes Modul wird verkauft: Der Klartag kann auch zu einer Standardempfehlung, einer einzelnen Automation, einem einzelnen Helfer oder zu keiner Umsetzung führen.</p>
+    </div>
+  </section>
+
+  <!-- Module ============================================================ -->
+  <section class="hp-modules" id="module" aria-labelledby="modules-title">
+    <div class="container">
+      <header class="hp-head hp-head--split">
+        <h2 id="modules-title">Ihre KI-Strategie für die Zukunft.</h2>
+        <p>Technische Basis und Kernworkflows werden wiederverwendet. Daten, Rechte, Fachregeln, Ausgabeformate und Freigaben werden im Onboarding an den Kunden angepasst.</p>
+      </header>
+
+      <div class="hp-bento">
+        <article class="hp-mod hp-mod--klartag">
+          <p class="hp-mod__tag">Modul 01 · Verpflichtender Einstieg</p>
+          <h3>Klartag</h3>
+          <p>Ein gemeinsamer Arbeitstag für Diagnose, Use-Case-Bewertung, Plattformentscheidung und eine verwendbare Roadmap.</p>
+          <ul>
+            <li>priorisierte Arbeitsabläufe und Voraussetzungen</li>
+            <li>begründeter Plattformweg</li>
+            <li>Mess-, Abnahme- und Entscheidungskriterien</li>
+          </ul>
+          <a href="#klartag">Klartag ansehen <span aria-hidden="true">→</span></a>
+        </article>
+
+        <article class="hp-mod hp-mod--workspace">
+          <p class="hp-mod__tag">Modul 02 · Gemeinsamer Zugang</p>
+          <h3>Kontrollierter KI-Arbeitsplatz</h3>
+          <p>Eine geregelte Arbeitsumgebung für ausgewählte Nutzer, Rollen, Modelle und Helfer.</p>
+          <div class="hp-mod__way">
+            <span>Weg A</span>
+            <strong>Eigene Firmen-KI</strong>
+            <em>von manibase konfigurierte Kundenumgebung; keine proprietäre manibase-Plattform</em>
+          </div>
+          <div class="hp-mod__way">
+            <span>Weg B</span>
+            <strong>Microsoft 365 Copilot</strong>
+            <em>wenn Tenant, Lizenzen, Rechte und Anwendungsfälle dafür passen</em>
+          </div>
+        </article>
+
+        <article class="hp-mod hp-mod--automation">
+          <p class="hp-mod__tag">Modul 03 · Wiederkehrende Übergaben</p>
+          <h3>Automatisierungen</h3>
+          <p>Informationsschritte verbinden, damit weniger manuell kopiert, sortiert und weitergegeben werden muss.</p>
+          <ul>
+            <li>im gewählten Arbeitsplatz- oder Plattformweg</li>
+            <li>oder standalone mit n8n in der privaten Cloud des Kunden</li>
+            <li>mit definiertem Eingang, Ergebnis, Prüfpunkt und Fehlerfall</li>
+          </ul>
+        </article>
+
+        <article class="hp-mod hp-mod--helpers">
+          <p class="hp-mod__tag">Modul 04 · Definierte Arbeitsbausteine</p>
+          <h3>Vorbereitete KI-Helfer</h3>
+          <p>Wiederverwendbare Kernworkflows für Baudokumentation, freigegebenes Unternehmenswissen und Angebotsassistenz.</p>
+          <ul>
+            <li>kein fertiges SaaS von der Stange</li>
+            <li>kundenspezifisches Onboarding erforderlich</li>
+            <li>fachliche Freigabe bleibt beim Menschen</li>
+          </ul>
+          <a href="#helfer">Helfer im Ablauf ansehen <span aria-hidden="true">→</span></a>
+        </article>
       </div>
     </div>
   </section>
 
-  <!-- TERMIN: Qualifizierungs-Maske + Kalender -->
-  <section class="booking" id="termin" aria-labelledby="booking-h">
+  <!-- KI-Helfer als Bauteil-Datenblätter ================================= -->
+  <section class="hp-helpers" id="helfer" aria-labelledby="helpers-title">
+    <div class="container">
+      <header class="hp-head hp-head--split">
+        <h2 id="helpers-title">KI-Helfer, die Vorarbeit leisten und dazulernen.</h2>
+        <p>Unsere KI-Helfer basieren auf einer eigenen Software. Sie erhalten das Fundament, gemeinsam individualisieren wir Ihren Helfer auf Ihre Betriebsabläufe.</p>
+      </header>
+
+      <div class="hp-sheet-grid">
+        <article class="hp-datenblatt">
+          <div class="hp-datenblatt__portrait">
+            <img class="hp-datenblatt__avatar" src="assets/helfer-bernd-320.webp"
+                 srcset="assets/helfer-bernd-320.webp 320w, assets/helfer-bernd-640.webp 640w"
+                 sizes="(max-width:940px) 190px, 210px"
+                 width="320" height="320" loading="lazy" decoding="async"
+                 alt="Illustrierter Biber mit gelbem Bauhelm, der ein Tablet in den Händen hält.">
+          </div>
+          <header>
+            <p class="hp-label">Der Baudokumentations-Helfer</p>
+            <div class="hp-datenblatt__title">
+              <h3>Bernd</h3>
+              <p class="hp-status hp-status--live"><i aria-hidden="true"></i>Im Einsatz</p>
+            </div>
+          </header>
+          <p class="hp-datenblatt__lead">Macht aus Notizen, Diktaten und Stichpunkten ein fertiges Protokoll in Ihrem Format.</p>
+          <footer><span>Freigabe</span> Die Fachperson prüft vor Ablage und Versand.</footer>
+        </article>
+
+        <article class="hp-datenblatt">
+          <div class="hp-datenblatt__portrait">
+            <img class="hp-datenblatt__avatar" src="assets/helfer-willy-320.webp"
+                 srcset="assets/helfer-willy-320.webp 320w, assets/helfer-willy-640.webp 640w"
+                 sizes="(max-width:940px) 190px, 210px"
+                 width="320" height="320" loading="lazy" decoding="async"
+                 alt="Illustrierte Eule mit Brille, die einen Stapel Aktenordner trägt.">
+          </div>
+          <header>
+            <p class="hp-label">Die interne Wissensbibliothek</p>
+            <div class="hp-datenblatt__title">
+              <h3>Willy</h3>
+              <p class="hp-status hp-status--pilot"><i aria-hidden="true"></i>In Pilotierung</p>
+            </div>
+          </header>
+          <p class="hp-datenblatt__lead">Findet die Antwort in Ihren Unterlagen und nennt dazu Quelle und Fundstelle.</p>
+          <footer><span>Freigabe</span> Fachkritische Informationen gibt Ihr Team frei.</footer>
+        </article>
+
+        <article class="hp-datenblatt hp-datenblatt--plan">
+          <div class="hp-datenblatt__portrait">
+            <img class="hp-datenblatt__avatar" src="assets/helfer-anton-320.webp"
+                 srcset="assets/helfer-anton-320.webp 320w, assets/helfer-anton-640.webp 640w"
+                 sizes="(max-width:940px) 190px, 210px"
+                 width="320" height="320" loading="lazy" decoding="async"
+                 alt="Illustrierter Dachs, der ein Klemmbrett mit der Überschrift Angebot hochhält.">
+          </div>
+          <header>
+            <p class="hp-label">Der Angebotsassistent</p>
+            <div class="hp-datenblatt__title">
+              <h3>Anton</h3>
+              <p class="hp-status hp-status--plan"><i aria-hidden="true"></i>Entwicklung steht an</p>
+            </div>
+          </header>
+          <p class="hp-datenblatt__lead">Soll eine neue Anfrage sichten, die Unterlagen zusammenführen und die Vorprüfung aufbereiten.</p>
+          <footer><span>Stand</span> In Entwicklung, derzeit nicht buchbar.</footer>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Time-to-Value als Maßkette ========================================= -->
+  <section class="hp-golive" aria-labelledby="golive-title">
+    <div class="container">
+      <header class="hp-head hp-head--split">
+        <h2 id="golive-title">KI kommt nicht ungeprüft ins Haus.</h2>
+        <p>Jeder Baustein durchläuft dieselben fünf Tore und geht live, sobald er sie besteht. Nicht nach Kalender, nicht erst am Ende eines starren Gesamtprojekts.</p>
+      </header>
+
+      <ol class="hp-gates">
+        <li><span aria-hidden="true">01</span><strong>Prüfen</strong><p>Use Case, Daten, Risiko und Nutzen bewerten.</p><small>Tor: weiter, anders lösen oder stoppen</small></li>
+        <li><span aria-hidden="true">02</span><strong>Konfigurieren</strong><p>Umgebung, Rollen, Regeln und Ausgabe aufsetzen.</p><small>Tor: technisch bereit</small></li>
+        <li><span aria-hidden="true">03</span><strong>Mit echten Fällen testen</strong><p>Fachseite prüft Ergebnis und Ausnahmefälle.</p><small>Tor: Abnahmekriterien erfüllt</small></li>
+        <li><span aria-hidden="true">04</span><strong>Freigeben</strong><p>Datenwege und Verantwortlichkeiten bestätigen.</p><small>Tor: produktiver Einsatz</small></li>
+        <li><span aria-hidden="true">05</span><strong>Schulen &amp; übergeben</strong><p>Nutzer befähigen und Aufgaben dokumentieren.</p><small>Ergebnis: interne Verantwortung</small></li>
+      </ol>
+      <p class="hp-vermerk"><span>Vermerk</span> Produktiv, sobald Daten, Technik, Fachtest und Verantwortlichkeiten es zulassen, nicht nach einer pauschalen Kalenderlogik.</p>
+    </div>
+  </section>
+
+  <!-- Governance (Cobalt-Band) =========================================== -->
+  <section class="hp-governance" aria-labelledby="governance-title"
+           data-kinetic="weiss" data-kinetic-axis="x"
+           data-kinetic-guard=".hp-gov-list li, .hp-gov-note" data-kinetic-schutz="0.42">
+    <div class="container">
+      <div class="hp-governance__grid">
+        <div>
+          <h2 id="governance-title">KI-Einführung im Betrieb ist weit mehr als Technik.</h2>
+          <p>Regeln, Befähigung und Übergabe gehören zum Scope. Sie werden nicht nachträglich angehängt.</p>
+          <p class="hp-gov-note">Keine Rechts- oder Compliance-Garantie: Die konkrete Ausgestaltung bestätigen der Kunde, sein Datenschutzbeauftragter und gegebenenfalls seine Rechtsberatung.</p>
+        </div>
+        <ul class="hp-gov-list">
+          <li><span aria-hidden="true">01</span><b>Einsatzzwecke und Datenwege</b><em>dokumentiert und freigegeben</em></li>
+          <li><span aria-hidden="true">02</span><b>Rollen und Rechte</b><em>wer darf was, mit welchen Daten</em></li>
+          <li><span aria-hidden="true">03</span><b>Unterlagen für den DSB</b><em>prüffertig aufbereitet</em></li>
+          <li><span aria-hidden="true">04</span><b>KI-Nutzungsrichtlinie</b><em>intern verbindlich</em></li>
+          <li><span aria-hidden="true">05</span><b>Schulung der Nutzer</b><em>der Menschen, die es täglich anwenden</em></li>
+          <li><span aria-hidden="true">06</span><b>Übergabe nach innen</b><em>Ihr Team führt es weiter</em></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Blatt 03 · Klartag ================================================= -->
+  <section class="hp-klartag" id="klartag" aria-labelledby="klartag-title">
+    <div class="container">
+      <div class="hp-sheet"><span class="hp-sheet__no">Blatt 03</span><span class="hp-sheet__name">Der erste bezahlte Schritt</span><i aria-hidden="true"></i></div>
+
+      <figure class="hp-shot hp-klartag__figure">
+        <img src="assets/klartag-raum-1200.webp"
+             srcset="assets/klartag-raum-700.webp 700w, assets/klartag-raum-1200.webp 1200w"
+             sizes="(max-width:940px) 92vw, 92vw"
+             width="1200" height="800" loading="lazy" decoding="async"
+             alt="Besprechungsraum mit langem Tisch und Stühlen; auf dem Tisch liegen eine Bewertungsmatrix und ein gelber Stift.">
+        <figcaption><b>KI-generierte Illustration</b> Ein Tag, an dem entschieden wird, was trägt.</figcaption>
+      </figure>
+
+      <div class="hp-klartag__grid">
+        <div class="hp-klartag__copy">
+          <h2 id="klartag-title">Erst entscheiden, was trägt. Dann gezielt einführen.</h2>
+          <p>Der Klartag schafft eine verwendbare Entscheidungsgrundlage für Geschäftsführung, Fachseite und IT. Das Ergebnis kann eine Microsoft-Lösung, eine einzelne Automation, ein einzelner Helfer, ein Standardwerkzeug oder vorerst keine Umsetzung sein.</p>
+          <p class="hp-klartag__risk"><strong>Die Roadmap bleibt nutzbar,</strong> auch wenn manibase die anschließende Umsetzung nicht übernimmt.</p>
+        </div>
+        <aside class="hp-ksheet" aria-label="Lieferumfang des Klartags">
+          <div class="hp-ksheet__meta"><span>1 gemeinsamer Arbeitstag</span><strong>3.900&nbsp;€ netto</strong></div>
+          <h3>Am Ende liegt vor:</h3>
+          <ul>
+            <li>bewertete und priorisierte Use Cases</li>
+            <li>Datenquellen, Schnittstellen, Risiken und Voraussetzungen</li>
+            <li>begründete Plattformentscheidung</li>
+            <li>Mess- und Abnahmekriterien</li>
+            <li>Umsetzungsplan mit nächsten Entscheidungstoren</li>
+            <li>kompaktes schriftliches Ergebnis</li>
+          </ul>
+          <p>Bei einem Folgeprojekt mit manibase vollständig anrechenbar.</p>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- Blatt 04 · Architektur ============================================= -->
+  <section class="hp-architecture" id="architektur" aria-labelledby="architecture-title">
+    <div class="container">
+      <div class="hp-sheet"><span class="hp-sheet__no">Blatt 04</span><span class="hp-sheet__name">Architektur für Ihre IT</span><i aria-hidden="true"></i></div>
+      <header class="hp-head hp-head--split">
+        <h2 id="architecture-title">Vier Bausteine. Ihre Cloud. Ihre Daten.</h2>
+        <p>Nutzerkreis, Daten, Lizenzen und Betriebsverantwortung bestimmen den Weg. Keine pauschale Plattformempfehlung.</p>
+      </header>
+
+      <div class="hp-variants">
+        <article>
+          <span class="hp-variants__letter" aria-hidden="true">A</span>
+          <p class="hp-label">Weg A · Arbeitsplatz</p>
+          <h3>Eigene Firmen-KI</h3>
+          <p>Von manibase in Ihrer Umgebung eingerichtet. Rollen, Rechte und Datenwege legen Sie fest.</p>
+          <small>Keine proprietäre manibase-Plattform.</small>
+        </article>
+        <article>
+          <span class="hp-variants__letter" aria-hidden="true">B</span>
+          <p class="hp-label">Weg B · Arbeitsplatz</p>
+          <h3>Microsoft 365 Copilot</h3>
+          <p>Wenn Tenant, Identitäten, Rechte und Lizenzen ohnehin bei Microsoft liegen.</p>
+          <small>Der einzige Weg außerhalb Ihrer Cloud.</small>
+        </article>
+        <article>
+          <span class="hp-variants__letter" aria-hidden="true">C</span>
+          <p class="hp-label">Automatisierung</p>
+          <h3>n8n als eigener Dienst</h3>
+          <p>Für einen klaren Ablauf, auch ohne vorherige Einführung eines KI-Arbeitsplatzes.</p>
+          <small>Betrieb und Prüfpunkt sind festgelegt.</small>
+        </article>
+        <article>
+          <span class="hp-variants__letter" aria-hidden="true">D</span>
+          <p class="hp-label">Software</p>
+          <h3>KI-Helfer-Software</h3>
+          <p>Unsere eigene Software als Fundament, auf Ihre Abläufe individualisiert.</p>
+          <small>Bernd, Willy und Anton laufen darauf.</small>
+        </article>
+      </div>
+
+      <div class="hp-souveraen">
+        <div>
+          <p class="hp-label">Datenhoheit</p>
+          <strong>Alles außer Microsoft 365 läuft in Ihrer privaten Cloud.</strong>
+        </div>
+        <div>
+          <p>Firmen-KI, Automatisierungen und KI-Helfer werden in Ihrer eigenen Umgebung bereitgestellt. Die Daten bleiben bei Ihnen, maximale Souveränität ist damit möglich.</p>
+          <a href="fuer-ihre-it.html">Technische Vertiefung für Ihre IT <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Team ============================================================== -->
+  <section class="hp-team" id="team" aria-labelledby="team-title">
+    <div class="container">
+      <div class="hp-sheet"><span class="hp-sheet__no">Blatt 05</span><span class="hp-sheet__name">Ihre Ansprechpartner</span><i aria-hidden="true"></i></div>
+      <div class="hp-team__grid">
+        <div>
+          <h2 id="team-title">Jahrzehntelange Erfahrung in IT-Software und Projektmanagement vereint.</h2>
+          <p>Geschäftsführung, Fachanwender, IT und Datenschutz werden passend zum Modul einbezogen. So werden technische Entscheidungen, Fachtest und Übergabe nicht voneinander getrennt.</p>
+        </div>
+        <div class="hp-founders">
+          <article>
+            <img src="assets/matthias.jpg" alt="Matthias Geisler" width="132" height="132" loading="lazy" decoding="async">
+            <div>
+              <h3>Matthias Geisler</h3>
+              <p class="hp-label">Einführung · Projektsteuerung</p>
+              <p>Einführung, Projektsteuerung, Change und Schulung.</p>
+            </div>
+          </article>
+          <article>
+            <img src="assets/nikolaus.webp" alt="Nikolaus Schauersberger" width="132" height="132" loading="lazy" decoding="async">
+            <div>
+              <h3>Nikolaus Schauersberger</h3>
+              <p class="hp-label">Entwicklung · Architektur</p>
+              <p>Softwareentwicklung, Architektur und Schnittstellen.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Übergang zum Erstgespräch (dunkles Band) =========================== -->
+  <section class="hp-final" id="kontakt" aria-labelledby="final-title"
+           data-kinetic="gelb" data-kinetic-axis="x"
+           data-kinetic-guard=".hp-final__action p, .hp-final__action small" data-kinetic-schutz="0.22">
+    <div class="container">
+      <div class="hp-final__grid">
+        <h2 id="final-title">Welche Bausteine passen zu Ihrem Betrieb?</h2>
+        <div class="hp-final__action">
+          <p>Im ersten Gespräch klären wir Ausgangslage, Nutzerkreis, Systeme und das dringendste Arbeitsfeld. Danach erhalten Sie eine ehrliche Einordnung, ob ein Klartag sinnvoll ist.</p>
+          <small>Erstgespräch und Klartag sind getrennte Schritte. Ihre IT oder Ihr IT-Dienstleister ist ausdrücklich willkommen.</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Buchungsstrecke =================================================== -->
+  <section class="booking booking--qualify" id="termin" aria-labelledby="booking-h">
     <div class="container">
       <div class="booking__head">
-        <h2 class="h1" id="booking-h">Machbarkeit klären.</h2>
-        <p class="lead">Kostenlos und unverbindlich. Drei kurze Angaben, dann wählen Sie direkt einen Termin. So sind wir im Gespräch sofort beim Thema.</p>
+        <h2 class="h1" id="booking-h">Kontakt aufnehmen.</h2>
+        <p class="lead">Beantworten Sie einige kurze Fragen. Danach wählen Sie einen Termin für das etwa 30-minütige Erstgespräch mit der Geschäftsführung.</p>
       </div>
-
       <form class="wizard" id="qualify" novalidate aria-describedby="wiz-progress">
-        <p class="wizard__progress" id="wiz-progress" aria-live="polite"><span class="wizard__bar"><span class="wizard__bar-fill"></span></span><span class="wizard__count">Schritt <b>1</b> von 4</span></p>
-
+        <p class="wizard__progress" id="wiz-progress" aria-live="polite"><span class="wizard__bar"><span class="wizard__bar-fill"></span></span><span class="wizard__count">Schritt <b>1</b> von 5</span></p>
         <fieldset class="wstep is-active" data-step="1" data-auto>
           <legend class="wstep__q">Wie viele Mitarbeitende hat Ihr Unternehmen?</legend>
           <div class="qgrid">
-            <label class="qcard"><input type="radio" name="groesse" value="bis-20"><span class="qcard__t">bis 20</span></label>
-            <label class="qcard"><input type="radio" name="groesse" value="21-50"><span class="qcard__t">21 bis 50</span></label>
-            <label class="qcard"><input type="radio" name="groesse" value="51-150"><span class="qcard__t">51 bis 150</span></label>
-            <label class="qcard"><input type="radio" name="groesse" value="150+"><span class="qcard__t">mehr als 150</span></label>
+            <label class="qcard"><input type="radio" name="groesse" value="unter-50"><span class="qcard__t">unter 50</span><span class="qcard__d">Bei Planungsbüros und spezialisierten Betrieben kann ein Projekt dennoch passen.</span></label>
+            <label class="qcard"><input type="radio" name="groesse" value="50-99"><span class="qcard__t">50 bis 99</span></label>
+            <label class="qcard"><input type="radio" name="groesse" value="100-249"><span class="qcard__t">100 bis 249</span></label>
+            <label class="qcard"><input type="radio" name="groesse" value="250-500"><span class="qcard__t">250 bis 500</span></label>
+            <label class="qcard"><input type="radio" name="groesse" value="ueber-500"><span class="qcard__t">mehr als 500</span></label>
           </div>
         </fieldset>
-
         <fieldset class="wstep" data-step="2" data-auto>
           <legend class="wstep__q">Was für ein Unternehmen ist das?</legend>
           <div class="qgrid">
-            <label class="qcard"><input type="radio" name="art" value="architektur"><span class="qcard__t">Architektur- oder Planungsbüro</span></label>
-            <label class="qcard"><input type="radio" name="art" value="tga"><span class="qcard__t">TGA-Planung oder Ingenieurbüro</span></label>
-            <label class="qcard"><input type="radio" name="art" value="bau"><span class="qcard__t">Bauunternehmen</span></label>
-            <label class="qcard"><input type="radio" name="art" value="handwerk"><span class="qcard__t">Handwerksbetrieb</span><span class="qcard__d">Dachdecker, Spengler, SHK, Garten- und Landschaftsbau</span></label>
+            <label class="qcard"><input type="radio" name="art" value="bau"><span class="qcard__t">Bauunternehmen</span><span class="qcard__d">Hoch- oder Tiefbau</span></label>
+            <label class="qcard"><input type="radio" name="art" value="gebaeudetechnik"><span class="qcard__t">Gebäudetechnik</span><span class="qcard__d">SHK, Elektro oder Lüftung</span></label>
+            <label class="qcard"><input type="radio" name="art" value="dach-ausbau"><span class="qcard__t">Dach- oder Ausbaugewerk</span></label>
+            <label class="qcard"><input type="radio" name="art" value="architektur-planung"><span class="qcard__t">Architektur- oder Planungsbüro</span></label>
+            <label class="qcard"><input type="radio" name="art" value="ingenieur-tga"><span class="qcard__t">Ingenieur- oder TGA-Büro</span></label>
             <label class="qcard"><input type="radio" name="art" value="andere"><span class="qcard__t">Etwas anderes</span></label>
           </div>
         </fieldset>
-
-        <fieldset class="wstep" data-step="3">
+        <fieldset class="wstep" data-step="3" data-auto>
+          <legend class="wstep__q">Wo steht Ihre KI-Nutzung heute?</legend>
+          <div class="qgrid">
+            <label class="qcard"><input type="radio" name="ki-stand" value="einzelne-versuche"><span class="qcard__t">Einzelne Versuche</span></label>
+            <label class="qcard"><input type="radio" name="ki-stand" value="lizenzen-ohne-rahmen"><span class="qcard__t">Lizenzen, aber kein gemeinsamer Rahmen</span></label>
+            <label class="qcard"><input type="radio" name="ki-stand" value="erste-anwendungen"><span class="qcard__t">Erste Anwendungen oder Piloten</span></label>
+            <label class="qcard"><input type="radio" name="ki-stand" value="noch-offen"><span class="qcard__t">Noch offen</span></label>
+          </div>
+        </fieldset>
+        <fieldset class="wstep" data-step="4">
           <legend class="wstep__q">Wer wäre beim Gespräch dabei? <span class="wstep__hint">Mehrfachauswahl möglich</span></legend>
           <div class="qgrid">
             <label class="qcard"><input type="checkbox" name="teilnehmer" value="gf"><span class="qcard__t">Geschäftsführung</span></label>
             <label class="qcard"><input type="checkbox" name="teilnehmer" value="fuehrung"><span class="qcard__t">Weitere Führungskräfte</span></label>
-            <label class="qcard"><input type="checkbox" name="teilnehmer" value="it"><span class="qcard__t">Jemand aus der IT</span></label>
-            <label class="qcard"><input type="checkbox" name="teilnehmer" value="ich"><span class="qcard__t">Zunächst nur ich</span></label>
+            <label class="qcard"><input type="checkbox" name="teilnehmer" value="it"><span class="qcard__t">Interne IT oder IT-Dienstleister</span></label>
+            <label class="qcard"><input type="checkbox" name="teilnehmer" value="fachbereich"><span class="qcard__t">Fachverantwortliche</span></label>
           </div>
-          <p class="wstep__hint" style="display:block;margin-top:14px">Erfahrungsgemäß führt ein Gespräch ohne die Geschäftsführung selten weiter. Wir sprechen trotzdem gern mit Ihnen und planen dann einen zweiten Termin ein.</p>
+          <p class="wstep__hint wstep__hint--block">Die Beteiligung der Geschäftsführung ist für das Erstgespräch erforderlich.</p>
         </fieldset>
-
-        <fieldset class="wstep wstep--contact" data-step="4">
+        <fieldset class="wstep wstep--contact" data-step="5">
           <legend class="wstep__q">Wohin dürfen wir die Bestätigung schicken?</legend>
           <div class="field"><label for="q-name">Name</label><input id="q-name" name="name" type="text" autocomplete="name" required></div>
           <div class="field"><label for="q-mail">E-Mail</label><input id="q-mail" name="email" type="email" inputmode="email" autocomplete="email" required></div>
-          <div class="field"><label for="q-firma">Unternehmen <span class="field__opt">(optional)</span></label><input id="q-firma" name="firma" type="text" autocomplete="organization"></div>
+          <div class="field"><label for="q-firma">Unternehmen</label><input id="q-firma" name="firma" type="text" autocomplete="organization" required></div>
           <div class="field"><label for="q-tel">Telefon <span class="field__opt">(optional)</span></label><input id="q-tel" name="telefon" type="tel" inputmode="tel" autocomplete="tel"></div>
           <label class="consent"><input type="checkbox" name="consent" required><span>Ich bin mit der Verarbeitung meiner Angaben zur Bearbeitung meiner Anfrage einverstanden. Hinweise in der <a href="datenschutz.html">Datenschutzerklärung</a>.</span></label>
         </fieldset>
-
         <div class="wizard__nav">
           <button type="button" class="btn btn--ghost-ink wizard__back" hidden>Zurück</button>
           <button type="button" class="btn wizard__next">Weiter</button>
@@ -369,53 +598,50 @@
         </div>
         <p class="wizard__err" role="alert" hidden></p>
       </form>
-
-      <!-- Kalender wird erst nach Abschluss der Maske + Einwilligung geladen (Zeeg).
-           Buchungstool-Konfiguration NUR hier + in loadBookingCalendar() in site.js. -->
-      <div class="cal" id="booking-calendar"
-           data-cal-url="https://zeeg.me/rechnung27/technische-beratung"
-           data-cal-script="https://assets.zeeg.me/embed.min.js"
-           data-cal-answer=""
-           hidden>
-        <p class="cal__intro"><b>Geschafft.</b> Wählen Sie jetzt einen Termin, der Ihnen passt.</p>
+      <div class="cal" id="booking-calendar" data-cal-url="https://zeeg.me/rechnung27/technische-beratung" data-cal-script="https://assets.zeeg.me/embed.min.js" data-cal-answer="311958" hidden>
+        <p class="cal__intro"><b>Danke.</b> Wählen Sie jetzt einen passenden Termin für Ihr Erstgespräch.</p>
         <div id="cal-target" class="cal__embed"></div>
         <p class="cal__note">Es öffnet sich der Kalender von <b>Zeeg</b>. Hinweise zur Datenverarbeitung in der <a href="datenschutz.html">Datenschutzerklärung</a>. <a class="cal__alt" href="https://zeeg.me/rechnung27/technische-beratung" target="_blank" rel="noopener">Direkt bei Zeeg öffnen</a></p>
       </div>
-      <noscript>
-        <p class="cal__note" style="margin-top:18px">Für die Online-Buchung bitte JavaScript aktivieren, oder schreiben Sie uns an <a href="mailto:kontakt@manibase.de">kontakt@manibase.de</a>. <a href="https://zeeg.me/rechnung27/technische-beratung" target="_blank" rel="noopener">Direkt bei Zeeg öffnen</a></p>
-      </noscript>
+      <noscript><p class="cal__note cal__note--nojs">Für die Online-Buchung bitte JavaScript aktivieren, oder schreiben Sie uns an <a href="mailto:kontakt@manibase.de">kontakt@manibase.de</a>.</p></noscript>
     </div>
   </section>
 </main>
 
-<footer class="site-footer">
-  <div class="container">
-    <div class="footer__top">
-      <div>
-        <span class="wordmark on-ink"><span class="mani">mani</span><span class="base">base</span><span class="dot" aria-hidden="true"></span></span>
-        <p class="footer__claim">KI-Einführung für Bau- und Planungsunternehmen. Server in Deutschland, Eigentum bleibt im Haus.</p>
-      </div>
-      <nav class="footer__col" aria-label="Seiteninhalte">
-        <p class="footer__h">Seite</p>
-        <a href="#leistungen">Was wir machen</a>
-        <a href="#vergleich">Der Unterschied</a>
-        <a href="#ablauf">Ablauf</a>
-        <a href="#team">Über uns</a>
-        <a href="#termin">Machbarkeit klären</a>
-      </nav>
-      <nav class="footer__col" aria-label="Rechtliches">
-        <p class="footer__h">Rechtliches</p>
-        <a href="impressum.html">Impressum</a>
-        <a href="datenschutz.html">Datenschutz</a>
-      </nav>
+<footer class="site-footer hp-footer">
+  <div class="container footer__top">
+    <div>
+      <a class="brand" href="index.html" aria-label="manibase Startseite">
+        <img class="brand__signet" src="assets/signet-negative.png" alt="" width="36" height="36">
+        <span class="wordmark on-ink" aria-hidden="true"><span class="mani">mani</span><span class="base">base</span><span class="dot"></span></span>
+      </a>
+      <p class="footer__claim">Strukturierte KI-Einführung für Bauunternehmen, ausführende Gewerke und Planungsbüros.</p>
     </div>
-    <div class="footer__bottom">
-      <span>© 2026 manibase UG (haftungsbeschränkt) i. G.</span>
-      <span class="num">Server in Deutschland · DSGVO-konform</span>
-    </div>
+    <div class="footer__col"><h2 class="footer__h">Zielgruppen</h2><a href="baugewerbe.html">Baugewerbe</a><a href="gebaeudetechnik-ausbau.html">Gebäudetechnik &amp; Ausbau</a><a href="planungsbueros.html">Planungsbüros</a></div>
+    <div class="footer__col"><h2 class="footer__h">KI-Einführung</h2><a href="klartag.html">Klartag</a><a href="firmen-ki.html">Firmen-KI</a><a href="prozessautomatisierung.html">Prozessautomation</a><a href="ki-helfer.html">Individuelle KI-Helfer</a></div>
+    <div class="footer__col"><h2 class="footer__h">Unternehmen</h2><a href="ueber-uns.html">Über uns</a><a href="fuer-ihre-it.html">Für Ihre IT</a><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></div>
   </div>
+  <div class="container footer__bottom"><span>© 2026 manibase UG (haftungsbeschränkt)</span><span>Würzburger Str. 1 · 97246 Eibelstadt</span></div>
 </footer>
 
-<script src="scripts/site.js" defer></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "manibase UG (haftungsbeschränkt)",
+  "url": "https://manibase.de/",
+  "logo": "https://manibase.de/assets/wortmarke.png",
+  "email": "kontakt@manibase.de",
+  "telephone": "+49 15565 697065",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Würzburger Str. 1",
+    "postalCode": "97246",
+    "addressLocality": "Eibelstadt",
+    "addressCountry": "DE"
+  },
+  "description": "manibase führt KI-Arbeitsplätze, Automatisierungen und vorbereitete KI-Helfer in Bauunternehmen, ausführenden Gewerken und Planungsbüros ein."
+}
+</script>
 </body>
 </html>
