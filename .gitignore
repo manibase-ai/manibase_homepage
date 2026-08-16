@@ -27,3 +27,19 @@ KI Klartag/
 
 # --- Large reference material ---
 *.pdf
+
+# --- Rohdateien der gelieferten KI-Bilder (aufbereitete Fassungen liegen in site/assets/) ---
+incoming/
+!incoming/README.md
+
+# --- Vom Kunden gelieferte Helfer-Portraets im Projektstamm (aufbereitet in site/assets/helfer-*.webp) ---
+/Anton_Angebotsassistenz*.png
+/Bernd_Baudokuhelfer*.png
+/Willy*.png
+
+# --- Lokale Zwischenstaende und Pakete (abgeleitet aus site/, nicht ausgeliefert) ---
+versions/
+exports/
+
+# --- Log der Headless-Browser-Screenshots ---
+debug.log
