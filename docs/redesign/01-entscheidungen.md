@@ -956,7 +956,7 @@ Die **Zertifikate** sind ein greifbares Ergebnis, das im Wettbewerb niemand nenn
 | | E2 / E3 (3.8.) | E20 (4.8.) |
 |---|---|---|
 | Rolle | „nachrangig", schwer verkäuflich | **integraler Standardbestandteil** vor jedem Projekt |
-| Preis | 1.800 € auf der Seite, 2.000–3.000 € im Gespräch | **3.000 bis 5.000 €** je nach Größe |
+| Preis | 1.800 € auf der Seite, 2.000–3.000 € im Gespräch | **3.900 € netto als Festpreis** |
 | Anrechnung | voll | voll |
 
 **Und der Retainer hat sich verdoppelt.** E8 nannte 2.000 bis 5.000 € im Monat, hier
@@ -996,8 +996,9 @@ richtig. Der **Klartag** ist ein anderer Fall:
 - Die alte Seite hatte diese Mechanik bereits (1.800 €, voll anrechenbar). Sie
   funktioniert, nur Zahl und Zielgruppe stimmten nicht mehr.
 
-**Empfehlung: den Klartag-Preis nennen**, als „ab 3.000 €" oder mit einer Spanne, und
-die Anrechnung direkt danebenstellen. **Offen, weil es eine Kundenentscheidung ist.**
+**Entscheidung vom 13. August 2026: den Klartag-Preis mit 3.900 € netto als Festpreis
+nennen** und die volle Anrechnung direkt danebenstellen. Enthalten sind Vorbereitung,
+der gemeinsame Tag im Unternehmen und eine schriftliche Roadmap im Anschluss.
 
 ### Konsequenz für den Seitenaufbau
 

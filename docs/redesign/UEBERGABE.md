@@ -42,12 +42,16 @@ Architektur-Schaubild), Rahmen „Kosten des Wartens", zwei Leistungsbausteine, 
 *gewachsen gegen gebaut*, vier Kaufargumente, drei Stufen mit Klartag-Preis, sechs
 Reibungspunkte, Gründer, dunkles CTA-Band, vierstufige Maske vor dem Kalender.
 
-Geändert wurden nur drei Dateien: `site/index.html`, `site/styles/tokens.css`,
-`site/styles/site.css`.
+Die **vier Unterseiten** stehen seit dem 4.8.2026: `site/klartag.html`,
+`site/einfuehrungsprojekt.html`, `site/fuer-ihre-it.html`, `site/ueber-uns.html`.
+Die Navigation führt jetzt fünf Punkte und zeigt nicht mehr nur auf Abschnitte der
+Startseite. Einzelheiten in `03-bauauftrag.md`, Abschnitt 12a.
+
+Geändert wurden: `site/index.html`, `site/styles/tokens.css`, `site/styles/site.css`
+und die vier neuen Dateien.
 
 ### Was noch fehlt
 
-- Die vier Unterseiten: Klartag · Einführungsprojekt · Für Ihre IT · Über uns
 - Architektur-Schaubild und Erklärvideo (beide als Platzhalter angelegt)
 - Feinschliff Mobilansicht, Lighthouse, Zeeg-Kalender im echten Browser testen
 - Die Restliste in `03-bauauftrag.md`, Abschnitt 13
@@ -90,10 +94,11 @@ den `current`-Symlink um. Es gibt keinen Zwischenschritt und keine manuelle Frei
 `main` ist derzeit **ungeschützt**. Eine Branch-Protection-Regel mit
 Pull-Request-Pflicht wäre an dieser Stelle sinnvoll.
 
-**Die Seite ist bewusst noch nicht fertig.** Zwei Bereiche tragen sichtbare Hinweise
-(„Dieser Bereich wird gerade erweitert"), und die Navigation zeigt nur auf Abschnitte
-der Startseite, weil die Unterseiten fehlen. Das ist so entschieden (Weg B: früh live
-gehen, nachliefern), sollte vor dem Merge aber bewusst bestätigt werden.
+**Die Seite ist bewusst noch nicht fertig.** Zwei Bereiche auf der Startseite tragen
+sichtbare Hinweise („Dieser Bereich wird gerade erweitert"), weil Schaubild und Video
+fehlen. Das ist so entschieden (Weg B: früh live gehen, nachliefern), sollte vor dem
+Merge aber bewusst bestätigt werden. Die vier Unterseiten sind vollständig und tragen
+keine Platzhalter.
 
 ### Was unangetastet blieb
 

@@ -709,7 +709,7 @@ git commit -m "feat(infotermin): initEventForm JSON-POST-Handler"
       </nav>
     </div>
     <div class="footer__bottom">
-      <span>© 2026 manibase UG (haftungsbeschränkt) i. G.</span>
+      <span>© 2026 manibase UG (haftungsbeschränkt)</span>
       <span class="num">Server in Deutschland · DSGVO-konform</span>
     </div>
   </div>
@@ -813,7 +813,7 @@ git commit -m "feat(infotermin): Anmeldeseite infotermin.html"
       </nav>
     </div>
     <div class="footer__bottom">
-      <span>© 2026 manibase UG (haftungsbeschränkt) i. G.</span>
+      <span>© 2026 manibase UG (haftungsbeschränkt)</span>
       <span class="num">Server in Deutschland · DSGVO-konform</span>
     </div>
   </div>
