@@ -607,15 +607,38 @@ Die erste Fassung führte „keine Zertifikate" als Lücke. **Das war falsch.** 
 
 Folge: Authority & Trust von 10 auf 11 von 20, E-E-A-T von 4,0 auf 4,5 von 10, Gesamtnote von 39,5 auf **40,0 von 90**. Am Befund selbst ändert das wenig, an der Aussage „es gibt keinerlei Qualifikationsnachweis" aber schon.
 
-### Achtung bei der nächsten Navigations-Generierung
+### Achtung bei der nächsten Navigations-Generierung, jetzt durch CI abgesichert
 
-`scratchpad/nav.py` erzeugt Header und Footer und ist nicht im Repo versioniert. **Die Signet-Umstellung aus S4 betrifft Zeilen innerhalb dieser generierten Blöcke.** Ein nächster Lauf des Generators setzt sie auf `signet.png` zurück, wenn die Vorlage nicht mitgezogen wird. Zu ändern sind dort drei Stellen:
+`scratchpad/nav.py` erzeugt Header und Footer. **Der Generator liegt weder im Repo noch auf dieser Maschine**, seine Vorlage lässt sich hier also nicht mitziehen. Ein Lauf mit alter Vorlage würde die Signet-Umstellung aus S4, das kleine Favicon und den LinkedIn-Link zurücknehmen, und im Diff sähe das aus wie ein normaler Generatorlauf.
 
-```
-assets/signet.png          → assets/signet-72.webp            (Header-Signet)
-assets/signet-negative.png → assets/signet-negative-72.webp   (Footer-Signet)
-rel="icon" … signet.png    → rel="icon" … favicon-32.png      (Favicon)
-```
+Weil sich die Ursache nicht beseitigen ließ, ist stattdessen die Wirkung abgefangen: **`scripts/test-frontend.mjs` prüft alle betroffenen Punkte über sämtliche Seiten**, und `verify.yml` führt die Datei bei jedem Pull Request aus. Ein Rückfall macht die CI rot, statt unbemerkt zu deployen. Die Testdatei begründet diese Bauart bereits für zwei ältere Fehler: „Ein Gate, das nur lokal auf Zuruf läuft, fängt genau den Fall nicht ab, der ihn braucht."
+
+Neu abgesichert sind:
+
+| Test | fängt ab |
+|---|---|
+| Signets als WebP | Rückfall auf die 192 KB PNG |
+| Favicon klein, 96px vorhanden | Rückfall auf `signet.png` als Favicon |
+| LinkedIn in der Spalte „Unternehmen" | Verlust des Entitätssignals |
+| genau ein Canonical je Seite | S6 |
+| Open Graph auf indexierbaren Seiten | S7 |
+| Sitemap deckt sich mit den indexierbaren Seiten | neue Seite ohne Sitemap-Eintrag |
+| robots.txt sperrt keinen KI-Crawler | ein kopierter Standardblock |
+| Organization-Schema mit `sameAs`, `founder`, `knowsAbout` … | S5 |
+| `rel="me"` nur für die Unternehmensseite | siehe Korrektur unten |
+
+Für die Vorlage selbst stehen die vier Zeilen in `CLAUDE.md` im Abschnitt „Navigation".
+
+### Nachbesserungen aus dem Review
+
+| Punkt | Änderung |
+|---|---|
+| `rel="me"` bei den Gründerlinks | **entfernt.** Die Relation bezeichnet laut IANA eine Ressource über den Autor des Link-Kontexts. `ueber-uns.html` ist nicht von einer einzelnen Person verfasst, zwei `rel="me"` auf zwei verschiedene Personen hätten Identitätsdienste in die Irre geführt. Die Zuordnung leistet `Person.sameAs` im JSON-LD. Am Footer-Link auf die **Unternehmens**seite bleibt `rel="me"`, dort ist es korrekt: die eigene Domain verweist auf das eigene Profil. |
+| Favicon zu klein | `favicon-96.png` ergänzt, beide Größen mit `sizes` deklariert. Google akzeptiert ab 8×8, empfiehlt aber ein Vielfaches von 48 für die verschiedenen Suchoberflächen. 32px bleibt für den Browser-Tab. Zusammen rund 9 KB gegenüber 132 KB vorher. |
+
+Zwei Fehlannahmen in meinen eigenen neuen Tests sind dabei aufgefallen und korrigiert worden: Die Weiterleitungs-Stubs (`einfuehrungsprojekt.html`, `ki-klartag.html`) tragen bewusst keinen Favicon-Link, und die Lead-Seiten (`infotermin.html`, `interessent.html`) haben eine einzelne Footer-Spalte „Rechtliches", in die ein LinkedIn-Verweis semantisch nicht gehört. Beide Ausnahmen stehen jetzt mit Begründung im Test.
+
+Am Rande aufgefallen: `infotermin.html` und `interessent.html` setzen die Footer-Spaltenköpfe bereits als `<p class="footer__h">`, während der volle Footer `<h2>` verwendet. Der oben unter 3.1 beschriebene Gliederungsfehler ist dort also schon richtig gelöst; die Vorlage könnte sich das abschauen.
 
 ### Geprüft nach der Umsetzung
 
