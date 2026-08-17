@@ -5,7 +5,7 @@
 **Geprüfte Domain:** https://manibase.de/
 **Umfang:** 15 Live-Seiten, robots.txt, Header, Schema, KI-Bot-Zugriff, 4 Marken- und Longtail-Suchen, 3 Wettbewerber
 
-> **Umsetzungsstand, nachgetragen am 17.08.2026.** Die Sofortmaßnahmen **S1 bis S7 sind umgesetzt** (S3 dokumentiert, Serverarbeit steht aus). Die Scores in diesem Bericht beschreiben den **Zustand vor der Umsetzung**; sie werden bewusst nicht überschrieben, damit der Nachaudit-Vergleich eine Basislinie hat. Details am Ende in Abschnitt 10.
+> **Umsetzungsstand, nachgetragen am 17.08.2026.** Die Sofortmaßnahmen **S1 bis S7 sind vollständig umgesetzt und live**, einschließlich der nginx-Kompression auf dem Produktivserver. Die Scores in diesem Bericht beschreiben den **Zustand vor der Umsetzung**; sie werden bewusst nicht überschrieben, damit der Nachaudit-Vergleich eine Basislinie hat. Details am Ende in Abschnitt 10.
 >
 > **Verhältnis zum bestehenden Audit.** `FULL-AUDIT-REPORT.md` vom selben Tag deckt Technik, On-Page, Content und Core Web Vitals ab. Dieses Audit übernimmt dessen Messwerte, wo sie heute noch gelten (nachgeprüft: CSS weiterhin unkomprimiert, `signet.png` weiterhin 132 KB), und ergänzt die vier Dimensionen, die dort nicht vorkommen: **E-E-A-T, Entity SEO, GEO (Sichtbarkeit in KI-Systemen) und Wettbewerbsvergleich**. Die Gesamtnote nach diesem Raster ist strenger, weil Autorität und Entität mitgewogen werden.
 
@@ -568,7 +568,7 @@ Der direkteste Wettbewerber kozoa.de liegt bei etwa 38 von 90 und wird gefunden,
 |---|---|---|
 | S1 | `site/robots.txt` angelegt, 17 User-agent-Blöcke, alle KI-Bots ausdrücklich erlaubt, Sitemap referenziert | ✅ |
 | S2 | `site/sitemap.xml` angelegt, **10** indexierbare Seiten | ✅ Einreichung in der Search Console offen |
-| S3 | nginx-Kompression für CSS und JS | 📄 dokumentiert in `docs/deployment/nginx-kompression.md`, **Serverarbeit steht aus** |
+| S3 | nginx-Kompression für CSS und JS | ✅ **umgesetzt 17.08.2026, 19:02 Uhr** auf `72.61.153.206`. `site.css` 116 KB → 26 KB, renderblockierende Last der Startseite 193 KB → 49 KB, mobiler LCP der Startseite **2.704 ms → 1.356 ms**. Messwerte in `docs/deployment/nginx-kompression.md`. |
 | S4 | `signet-72.webp`, `signet-negative-72.webp`, `favicon-32.png` und `favicon-96.png` erzeugt, Referenzen in 14 Dateien umgestellt | ✅ Signets **192 KB auf 12 KB** pro Seite, Favicon **132 KB auf rund 9 KB** (32px für den Browser-Tab, 96px für die Google-Suche, beide mit `sizes` deklariert) |
 | S5 | `Organization`-Schema erweitert | ✅ mit Vorbehalten, siehe unten |
 | S6 | Canonical auf 7 Seiten ergänzt, jetzt genau eines auf allen 16 Seiten | ✅ |
@@ -646,4 +646,15 @@ Am Rande aufgefallen: `infotermin.html` und `interessent.html` setzen die Footer
 
 Alle 16 HTML-Dateien: genau ein Canonical je Seite, JSON-LD parst fehlerfrei, HTML-Grundstruktur unversehrt. Lokal im Browser gerendert: beide Signets laden (144×144 und 144×121 natürlich, dargestellt 36×36 wie zuvor, das Seitenverhältnis des Negativ-Signets wurde exakt erhalten), keine Konsolenfehler. `robots.txt` und `sitemap.xml` liefern 200, die Sitemap ist valides XML.
 
-**Nicht geprüft, weil noch nicht live:** die tatsächliche Wirkung auf den mobilen LCP. Die hängt an S3 und lässt sich erst nach der nginx-Änderung messen.
+**Nach S3 nachgemessen** (Playwright, 390 px, 4× CPU-Drossel, 1,6 Mbit/s, 150 ms RTT, also identisch zur Basislinie oben):
+
+| Seite | LCP vorher | LCP jetzt | |
+|---|---:|---:|---|
+| `/` | 2.704 ms | **1.356 ms** | −50 % 🟢 |
+| `klartag.html` | 2.992 ms | **1.612 ms** | −46 % 🟢 |
+| `baugewerbe.html` | 2.452 ms | **1.036 ms** | −58 % 🟢 |
+| `ki-helfer.html` | 4.320 ms | **2.856 ms** | −34 % 🟡 |
+
+CLS bleibt überall 0,000. Damit liegen drei der vier Seiten im grünen Bereich unter 2,5 s. `ki-helfer.html` ist von rot auf gelb gewandert und bleibt der einzige Ausreißer: dort ist der LCP ein CSS-Hintergrundbild, das erst nach dem Parsen des CSS entdeckt wird. Dafür ist Maßnahme M10 zuständig, nicht die Kompression.
+
+**Damit ist die Core-Web-Vitals-Note von 6,0/10 überholt.** Nach demselben Raster ergäbe sich jetzt etwa 8,5/10, die Gesamtnote läge bei rund 42,5/90. Die Zahlen im Dashboard bleiben bewusst auf dem Ausgangsstand stehen, damit der Nachaudit eine Basislinie hat.
