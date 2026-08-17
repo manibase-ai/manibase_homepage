@@ -112,24 +112,17 @@
     "schema_markup": [
       {
         "url": "https://manibase.de/",
-        "missing_type": "Organization.sameAs",
-        "note": "Organization-Block existiert, aber ohne sameAs. Groesste Einzelluecke im Entity SEO wegen Namenskollision mit Manbase/MANBASE.",
+        "missing_type": "Organization.sameAs (Wikidata)",
+        "note": "Erledigt am 17.08.2026: sameAs, founder, areaServed, legalName, identifier und knowsAbout sind eingetragen, sameAs enthaelt die LinkedIn-Unternehmensseite. Offen bleibt allein die Wikidata-Q-ID, die es noch nicht gibt.",
         "properties_needed": [
-          "sameAs",
-          "founder",
-          "foundingDate",
-          "areaServed",
-          "legalName",
-          "identifier",
-          "knowsAbout"
+          "sameAs (Wikidata-Q-ID)",
+          "foundingDate"
         ],
         "suggested_sameas": [
-          "LinkedIn-Unternehmensseite (muss noch angelegt werden)",
-          "LinkedIn-Profil Matthias Geisler",
-          "LinkedIn-Profil Nikolaus Schauersberger",
           "Wikidata-Q-ID (muss noch angelegt werden)"
         ],
-        "priority": "high"
+        "priority": "medium",
+        "status": "teilweise erledigt"
       },
       {
         "url": "https://manibase.de/klartag.html",
@@ -644,9 +637,10 @@
       },
       {
         "id": "S5",
-        "was": "Organization-Schema erweitert: ProfessionalService, alternateName, areaServed, knowsAbout, contactPoint, identifier (HRB 18632), founder mit Person-sameAs",
+        "was": "Organization-Schema erweitert: ProfessionalService, @id, legalName, alternateName, sameAs (LinkedIn-Unternehmensseite), areaServed, knowsAbout, contactPoint, identifier (HRB 18632), logo als ImageObject, founder mit beiden Gruendern und deren Person-sameAs",
         "status": "fertig",
-        "offen": "Organization.sameAs braucht LinkedIn-Unternehmensseite und Wikidata, beides existiert noch nicht. Nikolaus Schauersberger LinkedIn-URL fehlt. foundingDate fehlt."
+        "offen": "Wikidata-Eintrag existiert nicht und gehoert nach Anlage zusaetzlich in Organization.sameAs (Massnahme M8). foundingDate fehlt, Datum der Handelsregistereintragung nicht bekannt.",
+        "offen_organisatorisch": "Im LinkedIn-Firmenprofil das Feld Website auf https://manibase.de setzen. Ohne Rueckverweis ist die Verknuepfung nur einseitig."
       },
       {
         "id": "S6",
