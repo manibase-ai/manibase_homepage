@@ -148,6 +148,17 @@ Markup, CSS und JS liegen an genau einer Stelle: `.nav__*` in `styles/site.css`,
 
 Header und Footer werden nicht von Hand gepflegt. Vorlage und Generator: `scratchpad/nav.py` (Schema im Repo nicht versioniert) ersetzt in jeder Seite den Block `<header class="site-header …>…</header>` und `<footer class="site-footer…>…</footer>` und setzt `aria-current="page"` passend zur Datei.
 
+> ⚠️ **Der Generator liegt nicht im Repo, seine Vorlage kann also veralten.** Am 17.08.2026 sind vier Dinge in die generierten Blöcke gewandert, die ein Lauf mit alter Vorlage stillschweigend zurücknehmen würde:
+>
+> | in der Vorlage | Grund |
+> |---|---|
+> | `assets/signet-72.webp` statt `assets/signet.png` | das PNG wog 132 KB bei 36×36 px Darstellung |
+> | `assets/signet-negative-72.webp` statt `assets/signet-negative.png` | dito, zusammen 192 KB auf jedem Seitenaufruf |
+> | `favicon-32.png` und `favicon-96.png` statt `signet.png` als `rel="icon"` | dieselbe 132-KB-Datei diente als Favicon; 96px, weil Google für die Suche ein Vielfaches von 48 empfiehlt |
+> | `<a href="https://www.linkedin.com/company/manibase/" rel="me">LinkedIn</a>` in der Spalte „Unternehmen" | Entitätssignal gegen die Namensverwechslung mit „Manbase" |
+>
+> **Absicherung:** `scripts/test-frontend.mjs` prüft alle vier Punkte über sämtliche Seiten und läuft in `verify.yml` bei jedem Pull Request. Ein Generatorlauf mit alter Vorlage sieht im Diff harmlos aus, macht die CI aber rot. Wer die Vorlage bewusst ändert, zieht die Tests mit.
+
 ## Beim Relaunch entfernt
 Altes Helfer-Karussell und die vier alten Helden (Anton/Emma/Doreen/Wiktor), „Kennen Sie das?"-Pains, Wertband, Newsletter-Band auf der Startseite, die drei Mockup-Dateien samt CSS (`index-mockup*.html`, `styles/home-mockup*.css`), das sechsmonatige Einführungsprojekt und der Anker `#anwendungen`. Alte Verweise darauf zeigen jetzt auf `#arbeitssituationen`, `#module` oder `#helfer`.
 Der Newsletter-Backend-Pfad (`site/api/newsletter.php` → Odoo) bleibt bestehen, ist aber derzeit von keiner Seite aus verlinkt.

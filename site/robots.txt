@@ -1,0 +1,65 @@
+# robots.txt · manibase.de
+#
+# WICHTIG: Bis zum 17.08.2026 gab es diese Datei nicht. Dadurch war nichts gesperrt,
+# und alle KI-Crawler bekamen Zugriff. Diese Datei darf diesen Zustand nur halten,
+# nicht verschlechtern. Die KI-Bots stehen deshalb ausdruecklich drin.
+# Wer hier einen Standardblock aus dem Netz einsetzt, sperrt sie in aller Regel aus.
+#
+# Nicht indexierbare Seiten sind ueber <meta name="robots" content="noindex"> geregelt,
+# nicht ueber Disallow. Grund: eine per robots.txt gesperrte Seite kann Google nicht
+# lesen und damit auch das noindex nicht sehen.
+
+User-agent: *
+Allow: /
+
+# Suchmaschinen
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+# KI-Systeme: Training und Antwortgenerierung
+User-agent: Google-Extended
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+Sitemap: https://manibase.de/sitemap.xml
