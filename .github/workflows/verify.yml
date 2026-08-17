@@ -1,7 +1,8 @@
 name: Verify
 
-# Statische Gates fuer die Infotermin-n8n-Vorlagen (scripts/verify-n8n.sh) plus
-# ein Syntax-Check der PHP-Proxys.
+# Statische Gates fuer die Infotermin-n8n-Vorlagen (scripts/verify-n8n.sh), ein
+# Syntax-Check der PHP-Proxys und die Frontend-Regressionstests
+# (scripts/test-frontend.mjs).
 #
 # Warum als CI und nicht "vor dem Commit dran denken": beim Go-live am 21.07.2026
 # sind fuenf Fehler erst in der laufenden n8n-Instanz aufgeschlagen, obwohl es fuer
@@ -42,3 +43,10 @@ jobs:
       - name: PHP-Syntax der Proxys
         run: |
           for f in site/api/*.php; do php -l "$f"; done
+
+      # Nav-Umschaltpunkt und Pflichtfragen der Qualifizierungs-Maske. Beide Fehler
+      # waren im Diff unsichtbar und fielen erst im Browser auf (Review zu PR #11).
+      - name: Frontend-Regressionstests (Navigation, Qualifizierungs-Maske)
+        run: |
+          npm i --no-save jsdom
+          node scripts/test-frontend.mjs

@@ -1,0 +1,750 @@
+/* manibase Startseite - 14. August 2026
+   Visuelle Leitidee: die Startseite als WERKPLANSATZ.
+   Vier nummerierte Blaetter (Arbeitssituationen, System, Klartag, Architektur)
+   geben den Rhythmus; Blattkopf und Massketten kommen aus der technischen Zeichnung.
+   Helles Planpapier traegt, drei dunkle Baender setzen den Kontrast (60/30/10).
+   Ergaenzt site.css, ersetzt es nicht. */
+
+.hp-home{
+  --hp-ink:#101D47;
+  --hp-blue:#2F3FDB;
+  --hp-paper:#FBFCFE;
+  --hp-paper-2:#F2F5FB;
+  --hp-line:#DCE2EF;
+  --hp-line-strong:#B9C3DA;
+  --hp-muted:#5A6485;
+  background:var(--hp-paper);
+  color:var(--color-text-primary);
+}
+
+.hp-home h1,.hp-home h2,.hp-home h3{
+  color:var(--hp-ink);
+  font-family:var(--font-display);
+  font-weight:var(--fw-heading);
+  overflow-wrap:break-word;
+  hyphens:auto;
+}
+.hp-home h1{max-width:12ch;font-size:clamp(2.9rem,5.4vw,6.2rem);line-height:.96;letter-spacing:-.055em;}
+.hp-home h2{max-width:19ch;font-size:clamp(2.05rem,3.6vw,4.1rem);line-height:1.04;letter-spacing:-.045em;}
+.hp-home h3{font-size:clamp(1.3rem,1.6vw,1.75rem);line-height:1.2;letter-spacing:-.028em;}
+/* Footer-Spaltenüberschriften sind h2-Elemente und dürfen weder Display-Skala noch Ink-Farbe erben */
+.hp-home .footer__h{
+  max-width:none;color:var(--color-accent);
+  font-family:var(--font-body);font-size:var(--t-eyebrow);font-weight:var(--fw-semibold);
+  line-height:1.4;letter-spacing:var(--ls-eyebrow);
+}
+.hp-home p{line-height:1.65;}
+.hp-home section{scroll-margin-top:calc(var(--header-h) + 40px);}
+
+/* Plansatz-Rahmen: feine Randlinien wie ein Zeichnungsblatt (nur Desktop) */
+.hp-home::before,.hp-home::after{
+  content:"";position:fixed;top:0;bottom:0;z-index:5;width:1px;
+  background:rgba(20,34,79,.12);pointer-events:none;
+}
+.hp-home::before{left:14px;}
+.hp-home::after{right:14px;}
+@media (max-width:1240px){.hp-home::before,.hp-home::after{display:none;}}
+
+/* Header ----------------------------------------------------------------- */
+.hp-header{top:0;background:rgba(251,252,254,.85);}
+
+/* Kleine Überschriften ---------------------------------------------------- */
+/* Früher Mono-Marker in drei Größen. Seit 15.08.2026 dieselbe Stufe wie das
+   .eyebrow der Unterseiten, damit die ganze Seite eine Schrift führt. */
+.hp-kicker,.hp-label{
+  margin:0;color:var(--hp-blue);
+  font-family:var(--font-body);font-size:var(--t-eyebrow);font-weight:var(--fw-semibold);
+  line-height:1.4;letter-spacing:var(--ls-eyebrow);text-transform:uppercase;
+}
+.hp-kicker{display:flex;align-items:center;gap:12px;margin-bottom:24px;}
+.hp-kicker::before{content:"";width:36px;height:1px;flex:none;background:currentColor;}
+
+/* Blattkopf: "Blatt 02 — Name ————|" mit Maßlinien-Endstrichen ------------ */
+.hp-sheet{
+  display:flex;align-items:center;gap:16px;
+  margin-bottom:clamp(34px,4.5vw,56px);
+  color:var(--hp-ink);
+  font-family:var(--font-body);font-size:var(--t-eyebrow);font-weight:var(--fw-semibold);
+  line-height:1.4;letter-spacing:var(--ls-eyebrow);text-transform:uppercase;
+}
+.hp-sheet__no{
+  flex:none;padding:5px 10px;
+  border:1px solid var(--hp-ink);color:var(--hp-ink);font-weight:700;
+}
+.hp-sheet__name{flex:none;color:var(--hp-muted);}
+.hp-sheet i{
+  flex:1;height:9px;position:relative;
+  background:linear-gradient(var(--hp-line-strong),var(--hp-line-strong)) 0 50%/100% 1px no-repeat;
+}
+.hp-sheet i::before,.hp-sheet i::after{
+  content:"";position:absolute;top:0;bottom:0;width:1px;background:var(--hp-line-strong);
+}
+.hp-sheet i::before{left:0;}
+.hp-sheet i::after{right:0;}
+.hp-sheet--dark{color:#fff;}
+.hp-sheet--dark .hp-sheet__no{border-color:var(--color-accent);color:var(--color-accent);}
+.hp-sheet--dark .hp-sheet__name{color:rgba(255,255,255,.78);}
+.hp-sheet--dark i{background-image:linear-gradient(rgba(255,255,255,.35),rgba(255,255,255,.35));}
+.hp-sheet--dark i::before,.hp-sheet--dark i::after{background:rgba(255,255,255,.35);}
+
+/* Sektionsköpfe ----------------------------------------------------------- */
+.hp-head{max-width:860px;margin-bottom:clamp(42px,5.5vw,72px);}
+.hp-head>p:last-child{max-width:62ch;margin:22px 0 0;color:var(--hp-muted);font-size:1.05rem;}
+.hp-head--split{
+  display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.6fr);
+  max-width:none;gap:clamp(40px,7vw,110px);align-items:end;
+}
+.hp-head--split>*{min-width:0;}
+.hp-head--split>p:last-child{margin:0;}
+
+/* Prüfstempel (kein Fehlerzustand, sondern Plan-Stempel) ------------------ */
+.hp-stamp{
+  display:inline-block;padding:7px 12px;
+  border:1.5px solid var(--hp-blue);outline:1px solid var(--hp-blue);outline-offset:2.5px;
+  color:var(--hp-blue);background:transparent;text-decoration:none;
+  font-family:var(--font-mono);font-size:.6rem;font-weight:700;
+  letter-spacing:.09em;line-height:1.45;text-transform:uppercase;text-align:center;
+  transform:rotate(-2.5deg);
+}
+
+/* ======================= Blatt 01 · Hero ================================ */
+.hp-hero{
+  position:relative;isolation:isolate;overflow:hidden;
+  background:#fff;
+  border-bottom:1px solid var(--hp-line);
+}
+.hp-hero::before{
+  content:"";position:absolute;inset:0;z-index:-1;
+  background:
+    linear-gradient(var(--hp-grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--hp-grid) 1px,transparent 1px);
+  background-size:44px 44px;
+  mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.35) 55%,transparent 100%);
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.35) 55%,transparent 100%);
+}
+/* Ruhiger Textkopf ohne Bild: eine breite Spalte, Raster bleibt als Grund. */
+.hp-hero__copy{padding-block:clamp(64px,7.6vw,118px) clamp(44px,5vw,70px);}
+.hp-hero .hp-kicker{color:var(--hp-blue);}
+.hp-hero h1{max-width:30ch;font-size:clamp(2.6rem,5.05vw,5.05rem);}
+.hp-hero__lead{max-width:76ch;margin:30px 0 0;color:var(--hp-muted);font-size:clamp(1.08rem,1rem + .42vw,1.3rem);}
+.hp-hero__actions{margin-top:34px;}
+.hp-hero__microcopy{max-width:70ch;margin:18px 0 0;color:var(--hp-muted);font-size:.85rem;}
+
+/* Legende (Portfolio-Streifen unter dem Hero-Grid) */
+.hp-legende{
+  display:grid;grid-template-columns:auto repeat(3,minmax(0,1fr));
+  gap:0;margin:0;padding:22px 0 0;list-style:none;
+  border-top:1.5px solid var(--hp-ink);
+}
+.hp-legende li{min-width:0;padding:0 clamp(16px,2.4vw,32px);}
+.hp-legende li:first-child{padding-left:0;}
+.hp-legende li+li{border-left:1px solid var(--hp-line);}
+.hp-legende__title span{display:block;color:var(--hp-blue);font-family:var(--font-body);font-size:var(--t-eyebrow);font-weight:var(--fw-semibold);line-height:1.4;letter-spacing:var(--ls-eyebrow);text-transform:uppercase;}
+.hp-legende__title strong{display:block;margin-top:8px;max-width:11ch;color:var(--hp-ink);font-family:var(--font-display);font-weight:500;font-size:.95rem;line-height:1.3;}
+.hp-legende li:not(.hp-legende__title) span{color:var(--hp-blue);font-family:var(--font-mono);font-size:.62rem;letter-spacing:.08em;}
+.hp-legende li:not(.hp-legende__title) strong{display:block;margin-top:8px;color:var(--hp-ink);font-size:.9rem;line-height:1.3;}
+.hp-legende li:not(.hp-legende__title) small{display:block;margin-top:5px;color:var(--hp-muted);font-size:.74rem;line-height:1.4;}
+
+/* ==================== Blatt 02 · Arbeitssituationen ===================== */
+.hp-situations{padding-block:clamp(76px,9vw,130px);background:var(--hp-paper);}
+.hp-sit-list{border-top:1px solid var(--hp-line);}
+.hp-sit{
+  display:grid;grid-template-columns:64px minmax(0,1fr) minmax(340px,.78fr);
+  gap:clamp(26px,4.5vw,68px);padding-block:clamp(40px,5vw,68px);
+  border-bottom:1px solid var(--hp-line);
+}
+.hp-sit__index{
+  padding-top:4px;color:var(--hp-ink);
+  font-family:var(--font-mono);font-size:1.1rem;font-weight:700;
+}
+.hp-sit__index::after{content:"";display:block;width:26px;height:1px;margin-top:10px;background:var(--hp-blue);}
+.hp-sit__copy h3{max-width:30ch;margin:14px 0 16px;font-size:clamp(1.55rem,2.3vw,2.5rem);}
+.hp-sit__copy>p:last-child{max-width:64ch;margin-bottom:0;color:var(--hp-muted);}
+.hp-chain{margin:0;}
+.hp-chain>div:not(.hp-chain__ph){
+  position:relative;display:grid;grid-template-columns:118px 1fr;gap:16px;
+  padding:14px 0 14px 22px;
+}
+.hp-chain>div:not(.hp-chain__ph)::before{
+  content:"";position:absolute;left:4px;top:0;bottom:0;width:1px;background:var(--hp-line-strong);
+}
+.hp-chain>div:not(.hp-chain__ph)::after{
+  content:"";position:absolute;left:0;top:22px;width:9px;height:9px;
+  background:#fff;border:1.5px solid var(--hp-blue);border-radius:50%;
+}
+.hp-chain>div:first-child::before{top:22px;}
+.hp-chain>div:nth-last-child(2)::before{bottom:calc(100% - 22px);}
+.hp-chain dt{color:var(--hp-blue);font-family:var(--font-mono);font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+.hp-chain dd{margin:0;color:var(--hp-ink);font-size:.86rem;line-height:1.45;}
+.hp-chain__ph{margin-top:16px;padding:13px 15px;border:1px dashed var(--hp-line-strong);background:#fff;}
+.hp-chain__ph dt{color:var(--hp-blue);font-family:var(--font-mono);font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+.hp-chain__ph dd{margin:6px 0 0;color:var(--hp-muted);font-size:.73rem;line-height:1.45;}
+
+/* ==================== Blatt 03 · System (Tiefblau) ====================== */
+.hp-system{
+  position:relative;overflow:hidden;
+  padding-block:clamp(76px,9vw,128px);
+  background:var(--hp-ink);color:#fff;
+}
+.hp-system::before{
+  content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);
+  background-size:44px 44px;
+  mask-image:radial-gradient(120% 90% at 85% 10%,#000 0%,transparent 62%);
+  -webkit-mask-image:radial-gradient(120% 90% at 85% 10%,#000 0%,transparent 62%);
+}
+.hp-system .container{position:relative;z-index:1;}
+.hp-system h2{color:#fff;}
+.hp-system .hp-head>p:last-child{color:#C4CCE6;}
+
+/* Schnittzeichnung: Eingang → Räume → Fundament */
+.hp-sysd{display:grid;grid-template-columns:minmax(220px,.32fr) 1fr;grid-template-rows:auto auto;gap:0;}
+.hp-sysd__entry{
+  position:relative;grid-row:1;grid-column:1;
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:26px 28px 30px;min-height:250px;
+  background:var(--color-accent);color:var(--hp-ink);
+}
+.hp-sysd__entry span,.hp-sysd__mods span,.hp-sysd__base span{
+  font-family:var(--font-body);font-size:var(--t-eyebrow);font-weight:var(--fw-semibold);
+  line-height:1.4;letter-spacing:var(--ls-eyebrow);text-transform:uppercase;
+}
+.hp-sysd__entry span{position:absolute;top:24px;left:28px;}
+.hp-sysd__entry strong{font-family:var(--font-display);font-size:clamp(1.7rem,2.4vw,2.6rem);font-weight:500;letter-spacing:-.03em;line-height:1;}
+.hp-sysd__entry small{margin-top:10px;font-family:var(--font-mono);font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;}
+.hp-sysd__arrow{
+  position:absolute;top:50%;right:-13px;z-index:2;width:26px;height:26px;
+  transform:translateY(-50%) rotate(45deg);
+  background:var(--color-accent);
+  clip-path:polygon(0 0,100% 100%,100% 0);
+}
+.hp-sysd__mods{grid-row:1;grid-column:2;display:grid;grid-template-columns:repeat(3,1fr);gap:0;}
+.hp-sysd__mods>div{
+  display:flex;flex-direction:column;justify-content:flex-end;
+  min-height:250px;padding:24px 26px 30px;
+  background:#fff;color:var(--hp-ink);
+  border-left:1px solid var(--hp-line);
+}
+.hp-sysd__mods>div:first-child{border-left:0;padding-left:44px;}
+.hp-sysd__mods span{color:var(--hp-blue);}
+.hp-sysd__mods strong{margin-top:12px;max-width:13ch;font-family:var(--font-display);font-size:clamp(1.15rem,1.5vw,1.5rem);font-weight:500;line-height:1.2;}
+.hp-sysd__mods small{margin-top:9px;color:var(--hp-muted);font-size:.76rem;line-height:1.45;}
+.hp-sysd__base{
+  grid-row:2;grid-column:1/-1;
+  display:grid;grid-template-columns:auto 1fr;gap:26px;align-items:center;
+  margin-top:14px;padding:20px 28px;
+  background:
+    repeating-linear-gradient(45deg,rgba(255,255,255,.09) 0 1px,transparent 1px 9px),
+    rgba(47,63,219,.42);
+  border-top:2px solid var(--color-accent);
+}
+.hp-sysd__base span{color:var(--color-accent);}
+.hp-sysd__base strong{font-size:.9rem;font-weight:500;line-height:1.5;color:#fff;}
+.hp-sysd__note{
+  max-width:76ch;margin:26px 0 0;color:#AAB4D4;font-size:.85rem;line-height:1.6;
+}
+
+/* ======================= Blatt 04 · Module (Bento) ====================== */
+.hp-modules{padding-block:clamp(76px,9vw,130px);background:var(--hp-paper-2);}
+.hp-bento{
+  display:grid;grid-template-columns:repeat(12,1fr);
+  gap:0;border:1px solid var(--hp-line-strong);background:#fff;
+}
+.hp-mod{position:relative;padding:clamp(30px,3.6vw,50px);min-width:0;}
+.hp-mod--klartag{grid-column:span 5;background:var(--color-accent);color:var(--hp-ink);}
+.hp-mod--workspace{grid-column:span 7;border-left:1px solid var(--hp-line-strong);}
+.hp-mod--automation{grid-column:span 7;border-top:1px solid var(--hp-line-strong);}
+.hp-mod--helpers{grid-column:span 5;border-top:1px solid var(--hp-line-strong);border-left:1px solid var(--hp-line-strong);background:var(--hp-ink);color:#C9D0E7;}
+.hp-mod__tag{
+  margin:0;color:var(--hp-blue);
+  font-family:var(--font-body);font-size:var(--t-eyebrow);font-weight:var(--fw-semibold);
+  line-height:1.4;letter-spacing:var(--ls-eyebrow);text-transform:uppercase;
+}
+.hp-mod--klartag .hp-mod__tag{color:var(--hp-ink);}
+.hp-mod--helpers .hp-mod__tag{color:var(--color-accent);}
+.hp-mod h3{max-width:17ch;margin:18px 0 16px;font-size:clamp(1.75rem,2.5vw,2.7rem);}
+.hp-mod--helpers h3{color:#fff;}
+.hp-mod>p:not(.hp-mod__tag){max-width:52ch;margin:0;color:var(--hp-muted);}
+.hp-mod--klartag>p:not(.hp-mod__tag){color:#3A3714;}
+.hp-mod--helpers>p:not(.hp-mod__tag){color:#B8C1DE;}
+.hp-mod ul{display:grid;gap:10px;margin:26px 0 0;padding:22px 0 0;border-top:1px solid var(--hp-line);list-style:none;}
+.hp-mod--klartag ul{border-color:rgba(16,29,71,.28);}
+.hp-mod--helpers ul{border-color:rgba(255,255,255,.18);}
+.hp-mod li{position:relative;padding-left:17px;font-size:.88rem;line-height:1.45;}
+.hp-mod li::before{content:"";position:absolute;top:.56em;left:0;width:6px;height:6px;background:var(--hp-blue);}
+.hp-mod--klartag li::before{background:var(--hp-ink);}
+.hp-mod--helpers li::before{background:var(--color-accent);}
+.hp-mod>a{display:inline-flex;gap:8px;margin-top:28px;color:var(--hp-blue);font-weight:700;text-decoration:none;}
+.hp-mod--klartag>a{color:var(--hp-ink);}
+.hp-mod--helpers>a{color:var(--color-accent);}
+.hp-mod>a:hover{text-decoration:underline;}
+.hp-mod__way{
+  display:grid;grid-template-columns:56px 170px 1fr;gap:16px;align-items:baseline;
+  margin-top:14px;padding:16px 0 0;border-top:1px solid var(--hp-line);
+}
+.hp-mod__way:first-of-type{margin-top:28px;}
+.hp-mod__way span{color:var(--hp-blue);font-family:var(--font-mono);font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+.hp-mod__way strong{color:var(--hp-ink);font-size:.88rem;}
+.hp-mod__way em{color:var(--hp-muted);font-size:.8rem;font-style:normal;line-height:1.45;}
+
+/* ================= Blatt 05 · Helfer-Datenblätter ======================= */
+.hp-helpers{padding-block:clamp(76px,9vw,130px);background:var(--hp-paper);}
+.hp-sheet-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(18px,2.4vw,30px);}
+.hp-datenblatt{
+  display:flex;flex-direction:column;
+  border:1.5px solid var(--hp-ink);background:#fff;
+  box-shadow:12px 12px 0 rgba(20,34,79,.07);
+}
+.hp-datenblatt>header{padding:20px 24px 18px;border-bottom:1.5px solid var(--hp-ink);}
+.hp-datenblatt__title{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-top:16px;}
+.hp-datenblatt h3{
+  margin:0;font-size:clamp(2.3rem,3.4vw,3.4rem);font-weight:400;letter-spacing:-.045em;line-height:.95;
+}
+.hp-stamp--status{flex:none;margin-bottom:4px;}
+/* Ein Satz statt drei Feldzeilen: die Karte soll gelesen und nicht ueberflogen
+   werden. Der Prueffpunkt bleibt als einzelne Fusszeile erhalten. */
+.hp-datenblatt__lead{
+  flex:1;margin:0;padding:22px 24px 26px;
+  color:var(--hp-ink);font-size:1.02rem;line-height:1.5;letter-spacing:-.005em;
+}
+.hp-datenblatt>footer{
+  display:flex;align-items:baseline;gap:12px;
+  padding:14px 24px 16px;border-top:1px solid var(--hp-line);background:var(--hp-paper-2);
+  color:var(--hp-muted);font-size:.8rem;line-height:1.5;
+}
+.hp-datenblatt>footer span{
+  flex:none;color:var(--hp-blue);
+  font-family:var(--font-mono);font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+}
+
+/* ==================== Blatt 06 · Go-live-Maßkette ======================= */
+.hp-golive{
+  position:relative;padding-block:clamp(76px,9vw,128px);
+  background:var(--hp-paper-2);
+  border-block:1px solid var(--hp-line);
+}
+.hp-gates{
+  display:grid;grid-template-columns:repeat(5,1fr);
+  margin:0;padding:0;list-style:none;counter-reset:none;
+}
+.hp-gates li{position:relative;padding:64px 22px 26px 0;}
+.hp-gates li:last-child{padding-right:0;}
+/* durchlaufende Maßlinie oben */
+.hp-gates li::before{
+  content:"";position:absolute;top:21px;left:0;right:0;height:1px;background:var(--hp-line-strong);
+}
+.hp-gates li:last-child::before{right:auto;width:100%;}
+/* Endstriche der Maßkette an jeder Station */
+.hp-gates li::after{
+  content:"";position:absolute;top:14px;left:0;width:1px;height:15px;background:var(--hp-line-strong);
+}
+.hp-gates li>span{
+  position:absolute;top:0;left:12px;
+  display:grid;width:42px;height:42px;place-items:center;
+  background:var(--hp-paper-2);
+  border:1.5px solid var(--hp-blue);border-radius:50%;
+  color:var(--hp-blue);font-family:var(--font-mono);font-size:.66rem;font-weight:700;
+}
+.hp-gates strong{display:block;max-width:12ch;color:var(--hp-ink);font-family:var(--font-display);font-size:1.1rem;font-weight:500;line-height:1.25;}
+.hp-gates p{margin:10px 0 0;color:var(--hp-muted);font-size:.84rem;line-height:1.5;max-width:26ch;}
+.hp-gates small{
+  display:inline-block;margin-top:16px;padding:5px 9px;
+  border:1px solid var(--hp-ink);
+  color:var(--hp-ink);font-family:var(--font-mono);font-size:.58rem;font-weight:700;
+  letter-spacing:.05em;line-height:1.5;text-transform:uppercase;
+}
+.hp-vermerk{
+  display:flex;align-items:baseline;gap:18px;
+  margin:clamp(28px,4vw,44px) 0 0;padding:18px 22px;
+  border:1.5px solid var(--hp-ink);background:#fff;
+  color:var(--hp-ink);font-weight:600;line-height:1.55;
+}
+.hp-vermerk span{
+  flex:none;color:var(--hp-blue);
+  font-family:var(--font-mono);font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+}
+
+/* ==================== Blatt 07 · Governance (Cobalt) ==================== */
+.hp-governance{
+  position:relative;overflow:hidden;
+  padding-block:clamp(76px,9vw,124px);
+  background:var(--hp-blue);color:#fff;
+}
+.hp-governance::before{
+  content:"";position:absolute;inset:0 0 0 58%;
+  background:
+    linear-gradient(rgba(255,255,255,.1) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.1) 1px,transparent 1px);
+  background-size:44px 44px;
+  mask-image:linear-gradient(90deg,transparent,#000 40%);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 40%);
+}
+.hp-governance .container{position:relative;z-index:1;}
+.hp-governance h2{color:#fff;}
+.hp-governance__grid{
+  display:grid;grid-template-columns:minmax(0,.85fr) minmax(440px,1.05fr);
+  gap:clamp(44px,7vw,110px);align-items:start;
+}
+.hp-governance__grid>div>p:last-child{max-width:44ch;color:#DDE2F8;font-size:clamp(1.05rem,1.4vw,1.25rem);line-height:1.55;}
+/* Sechs Karten statt sechs Listenzeilen: die Punkte sind der Inhalt des Bandes,
+   nicht eine Fussnote dazu. */
+.hp-gov-list{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(10px,1.2vw,14px);
+  margin:0;padding:0;list-style:none;
+}
+.hp-gov-list li{
+  padding:20px 22px 22px;
+  border:1px solid rgba(255,255,255,.3);background:rgba(12,24,64,.4);
+}
+.hp-gov-list span{
+  display:block;margin-bottom:14px;color:var(--color-accent);
+  font-family:var(--font-mono);font-size:.7rem;font-weight:700;letter-spacing:.1em;
+}
+.hp-gov-list b{
+  display:block;font-family:var(--font-display);
+  font-size:clamp(1.05rem,1.35vw,1.28rem);font-weight:500;line-height:1.25;letter-spacing:-.015em;
+}
+.hp-gov-list em{
+  display:block;margin-top:9px;color:#C3CDF2;
+  font-size:.87rem;font-style:normal;line-height:1.5;
+}
+/* Steht in der linken Spalte unter dem Lead: fuellt den Raum neben den sechs
+   Karten und bleibt trotzdem als Einschraenkung erkennbar. */
+.hp-gov-note{
+  max-width:46ch;margin:clamp(26px,3.5vw,40px) 0 0;padding:15px 20px;
+  border-left:3px solid var(--color-accent);background:rgba(12,24,64,.4);
+  color:#C3CDF2;font-size:.82rem;line-height:1.55;
+}
+
+/* ======================= Blatt 08 · Klartag ============================= */
+.hp-klartag{padding-block:clamp(76px,9vw,130px);background:var(--hp-paper);}
+.hp-klartag__grid{
+  display:grid;grid-template-columns:minmax(0,.9fr) minmax(420px,.72fr);
+  gap:clamp(52px,8vw,128px);align-items:center;
+}
+.hp-klartag__copy>p:not(.hp-klartag__risk){max-width:62ch;margin:24px 0 0;color:var(--hp-muted);font-size:1.03rem;}
+.hp-klartag__risk{
+  margin:28px 0 0;padding:16px 20px;
+  border:1.5px solid var(--hp-ink);background:#fff;
+  color:var(--hp-ink);
+}
+.hp-ksheet{
+  position:relative;padding:clamp(28px,3.6vw,44px);
+  background:var(--color-accent);color:var(--hp-ink);
+  border:1.5px solid var(--hp-ink);
+  box-shadow:16px 16px 0 var(--hp-ink);
+}
+.hp-ksheet__meta{
+  display:flex;justify-content:space-between;align-items:baseline;gap:22px;
+  padding-bottom:22px;border-bottom:1.5px solid rgba(16,29,71,.4);
+  font-family:var(--font-mono);
+}
+.hp-ksheet__meta span{font-size:.66rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;}
+.hp-ksheet__meta strong{font-size:1.2rem;white-space:nowrap;}
+.hp-ksheet h3{margin:26px 0 16px;font-size:1.08rem;font-weight:600;}
+.hp-ksheet ul{display:grid;gap:11px;margin:0;padding:0;list-style:none;}
+.hp-ksheet li{position:relative;padding-left:18px;font-size:.86rem;line-height:1.4;}
+.hp-ksheet li::before{content:"";position:absolute;top:.5em;left:0;width:7px;height:7px;background:var(--hp-ink);}
+.hp-ksheet>p{margin:24px 0 0;padding-top:17px;border-top:1.5px solid rgba(16,29,71,.4);font-size:.82rem;font-weight:700;}
+.hp-ksheet>small{display:block;margin-top:11px;font-size:.68rem;line-height:1.45;}
+
+/* ====================== Blatt 09 · Architektur ========================== */
+.hp-architecture{padding-block:clamp(76px,9vw,130px);background:var(--hp-paper-2);}
+.hp-variants{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(14px,1.7vw,22px);}
+.hp-variants article{
+  position:relative;overflow:hidden;min-height:296px;
+  display:flex;flex-direction:column;
+  padding:clamp(22px,2.2vw,30px);
+  border:1px solid var(--hp-line-strong);background:#fff;
+}
+.hp-variants__letter{
+  position:absolute;top:14px;right:18px;
+  color:transparent;
+  font-family:var(--font-display);font-size:5.5rem;font-weight:600;line-height:.8;letter-spacing:-.05em;
+  -webkit-text-stroke:1px var(--hp-line-strong);
+  pointer-events:none;
+}
+.hp-variants h3{position:relative;max-width:15ch;margin:26px 0 14px;font-size:clamp(1.3rem,1.55vw,1.6rem);}
+.hp-variants p:not(.hp-label){position:relative;margin:0 0 20px;color:var(--hp-muted);font-size:.9rem;line-height:1.55;}
+.hp-variants small{
+  display:block;margin-top:auto;padding-top:16px;
+  border-top:1px solid var(--hp-line);
+  color:var(--hp-ink);font-size:.73rem;line-height:1.5;
+}
+/* Datenhoheit als eigenes Tiefblau-Band: die Aussage traegt den Abschnitt und
+   darf nicht als graue Fussnote unter den Karten liegen. */
+.hp-souveraen{
+  display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);
+  gap:clamp(26px,4vw,66px);align-items:center;
+  margin-top:clamp(16px,2vw,24px);padding:clamp(30px,3.6vw,50px);
+  background:var(--hp-ink);color:#fff;
+}
+.hp-souveraen .hp-label{margin-bottom:16px;color:var(--color-accent);}
+.hp-souveraen strong{
+  display:block;font-family:var(--font-display);
+  font-size:clamp(1.5rem,2.5vw,2.2rem);font-weight:400;line-height:1.14;letter-spacing:-.035em;
+}
+.hp-souveraen p{margin:0;color:#C3CDF2;font-size:1rem;line-height:1.6;}
+/* Gelb bleibt bei der Dachzeile: eine Gelb-Geste pro Band, der Link traegt
+   Papierweiss und wird ueber den Unterstrich als Link erkennbar. */
+.hp-souveraen a{
+  display:inline-block;margin-top:18px;color:#fff;
+  font-size:.9rem;font-weight:700;text-decoration:underline;text-underline-offset:5px;
+}
+.hp-souveraen a:hover{color:var(--color-accent);}
+
+/* ========================= Blatt 10 · Team ============================== */
+.hp-team{padding-block:clamp(76px,9vw,124px);background:var(--hp-paper);}
+.hp-team__grid{
+  display:grid;grid-template-columns:minmax(0,.95fr) minmax(440px,1fr);
+  gap:clamp(52px,8vw,125px);align-items:center;
+}
+.hp-team__grid>div:first-child>p:last-child{max-width:56ch;margin:24px 0 0;color:var(--hp-muted);}
+.hp-founders{border-top:1.5px solid var(--hp-ink);}
+.hp-founders article{
+  display:grid;grid-template-columns:132px 1fr;gap:28px;align-items:center;
+  padding-block:26px;border-bottom:1px solid var(--hp-line);
+}
+.hp-founders img{width:132px;height:132px;object-fit:cover;filter:saturate(.75) contrast(1.05);}
+.hp-founders h3{margin:0 0 6px;font-size:1.35rem;}
+.hp-founders .hp-label{margin-bottom:9px;}
+.hp-founders article p:last-child{margin:0;color:var(--hp-muted);font-size:.92rem;line-height:1.5;}
+
+/* ====================== Blatt 11 · Finaler CTA ========================== */
+.hp-final{
+  position:relative;overflow:hidden;
+  padding-block:clamp(76px,9vw,124px);
+  background:var(--hp-ink);color:#fff;
+}
+.hp-final::before{
+  content:"";position:absolute;inset:0 0 0 55%;
+  background:
+    linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);
+  background-size:44px 44px;
+  mask-image:linear-gradient(90deg,transparent,#000 45%);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 45%);
+}
+.hp-final .container{position:relative;z-index:1;}
+.hp-final h2{color:#fff;max-width:16ch;}
+.hp-final__grid{
+  display:grid;grid-template-columns:1fr minmax(380px,.68fr);
+  gap:clamp(52px,8vw,130px);align-items:start;
+}
+.hp-final__action p{margin:0 0 22px;color:#D3D9ED;font-size:1.04rem;}
+.hp-final__action small{display:block;margin-top:14px;color:#AAB4D4;font-size:.75rem;line-height:1.5;}
+.hp-footer .footer__top{grid-template-columns:1.4fr .8fr 1fr .85fr;}
+
+/* Fokus auf den dunklen Bändern: der globale blaue Ring ist dort zu schwach */
+.hp-system :focus-visible,
+.hp-governance :focus-visible,
+.hp-final :focus-visible,
+.hp-mod--helpers :focus-visible,
+.hp-footer :focus-visible{
+  box-shadow:0 0 0 3px var(--color-accent);
+  border-radius:4px;
+}
+
+
+/* ===================== Bildbausteine (KI-Illustrationen) ================= */
+/* Alle Inhaltsbilder sind KI-generiert und werden sichtbar gekennzeichnet.
+   Rahmen und Versatzschatten halten sie im Werkplan-Vokabular. */
+.hp-shot{margin:0;}
+.hp-shot img{
+  display:block;width:100%;height:auto;
+  border:1.5px solid var(--hp-ink);
+  background:var(--hp-paper-2);
+}
+.hp-shot figcaption{
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;
+  margin-top:12px;color:var(--hp-muted);font-size:.74rem;line-height:1.5;
+}
+.hp-shot figcaption b{
+  flex:none;color:var(--hp-blue);
+  font-family:var(--font-mono);font-size:.58rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+}
+
+/* ============ Blatt 01 · Arbeitssituationen mit Bild ==================== */
+/* Zeile = Bild plus Textkoerper, im Wechsel links und rechts. */
+.hp-sit{
+  grid-template-columns:minmax(0,.92fr) minmax(0,1fr);
+  align-items:center;
+}
+/* Bild wandert in geraden Zeilen nach rechts; die Spaltenbreiten tauschen mit,
+   damit alle drei Bilder gleich gross bleiben. */
+.hp-sit:nth-child(even){grid-template-columns:minmax(0,1fr) minmax(0,.92fr);}
+.hp-sit:nth-child(even) .hp-sit__media{order:2;}
+.hp-sit__body{display:grid;grid-template-columns:52px minmax(0,1fr);gap:clamp(20px,3vw,40px);}
+.hp-sit__copy h3{margin-top:12px;font-size:clamp(1.45rem,1.9vw,2.05rem);}
+.hp-sit .hp-chain{grid-column:2;margin-top:26px;}
+
+/* ================== Reifegrad-Ampel der KI-Helfer ======================= */
+/* Sachangabe im Datenblattkopf, kein Fehlerzustand. */
+/* Text bleibt Ink: die Ampelfarben sind bei dieser Schriftgroesse zu hell
+   fuer 4,5:1. Die Farbe traegt der Punkt, der Text bleibt sicher lesbar. */
+.hp-status{
+  display:inline-flex;align-items:center;gap:9px;flex:none;
+  padding:6px 12px 6px 10px;border:1.5px solid var(--hp-line-strong);
+  color:var(--hp-ink);font-family:var(--font-mono);font-size:.63rem;font-weight:700;
+  letter-spacing:.08em;line-height:1.4;text-transform:uppercase;white-space:nowrap;
+}
+.hp-status i{
+  width:11px;height:11px;flex:none;border-radius:50%;
+  background:var(--hp-lamp);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--hp-lamp) 26%,transparent);
+}
+.hp-status--live{--hp-lamp:var(--success);}
+.hp-status--pilot{--hp-lamp:var(--warning);}
+.hp-status--plan{--hp-lamp:var(--error);}
+.hp-datenblatt__note{
+  margin:14px 0 0;color:var(--hp-muted);font-size:.8rem;line-height:1.5;
+}
+/* Portraitfeld im Datenblattkopf: die Figur steht auf hellem Grund und
+   traegt das Raster des Blatts weiter, damit sie nicht wie ein Sticker wirkt. */
+.hp-datenblatt__portrait{
+  display:grid;place-items:center;
+  padding:22px 24px 18px;
+  border-bottom:1.5px solid var(--hp-ink);
+  background:
+    linear-gradient(var(--hp-grid) 1px,transparent 1px) 0 0/28px 28px,
+    linear-gradient(90deg,var(--hp-grid) 1px,transparent 1px) 0 0/28px 28px,
+    var(--hp-paper-2);
+}
+.hp-datenblatt__avatar{
+  display:block;width:clamp(150px,15vw,210px);height:auto;aspect-ratio:1;object-fit:contain;
+}
+/* Reifegrad rot: die Figur bleibt erkennbar, tritt aber sichtbar zurueck. */
+.hp-datenblatt--plan .hp-datenblatt__avatar{filter:saturate(.5);opacity:.75;}
+.hp-datenblatt__id{display:flex;align-items:center;gap:14px;}
+
+/* ==================== Klartag: Bildband ueber dem Raster ================ */
+.hp-klartag__figure{margin:0 0 clamp(38px,5vw,60px);}
+.hp-klartag__figure img{
+  display:block;width:100%;height:auto;aspect-ratio:24/7;object-fit:cover;object-position:50% 62%;
+  border:1.5px solid var(--hp-ink);
+}
+
+/* ======================= Buchungsstrecke ================================ */
+/* site.css bringt Maske und Kalender mit; hier nur die Anpassung an das
+   kuehle Planpapier der Startseite. */
+.hp-home .booking{
+  background:var(--hp-paper-2);
+  border-top:1px solid var(--hp-line);
+}
+.hp-home .booking .h1{color:var(--hp-ink);}
+.hp-home .booking .lead{color:var(--hp-muted);}
+.hp-home .wstep__q{color:var(--hp-ink);}
+.hp-home .qcard,.hp-home .cal{background:#fff;border-color:var(--hp-line-strong);}
+.hp-home .qcard:has(input:checked){border-color:var(--hp-blue);background:var(--cobalt-50);}
+.hp-home .field input{background:#fff;border-color:var(--hp-line-strong);}
+
+/* ========================== Responsive ================================== */
+@media (max-width:1180px){
+  .hp-sysd__mods>div:first-child{padding-left:30px;}
+  .hp-mod--klartag,.hp-mod--helpers{grid-column:span 6;}
+  .hp-mod--workspace,.hp-mod--automation{grid-column:span 6;}
+  .hp-mod--automation{border-left:0;}
+  .hp-mod--workspace{border-left:1px solid var(--hp-line-strong);}
+  .hp-mod--helpers{border-left:1px solid var(--hp-line-strong);}
+  /* schmalere Karte: Erklärung unter den Weg-Namen statt in eine dritte Spalte */
+  .hp-mod__way{grid-template-columns:58px 1fr;gap:6px 14px;}
+  .hp-mod__way em{grid-column:2;}
+  .hp-sheet-grid{grid-template-columns:1fr;gap:22px;}
+  .hp-gates{grid-template-columns:repeat(3,1fr);row-gap:34px;}
+  .hp-variants{grid-template-columns:repeat(2,1fr);}
+}
+
+@media (max-width:940px){
+  .hp-head--split{grid-template-columns:minmax(0,1fr);gap:20px;align-items:start;}
+  .hp-head--split>p:last-child{max-width:64ch;}
+  .hp-hero__copy{padding-block:52px 56px;}
+  .hp-legende{grid-template-columns:1fr;gap:0;}
+  .hp-legende li,.hp-legende li:first-child{padding:12px 0;}
+  .hp-legende li+li{border-left:0;border-top:1px solid var(--hp-line);}
+  .hp-legende__title strong{max-width:none;}
+  .hp-sit{grid-template-columns:52px 1fr;}
+  .hp-chain{grid-column:2;}
+  /* Stapel in Dokumentreihenfolge: Eingang, Module, dann Fundament darunter */
+  .hp-sysd{grid-template-columns:1fr;grid-template-rows:none;}
+  .hp-sysd__entry,.hp-sysd__mods,.hp-sysd__base{grid-column:1;grid-row:auto;}
+  .hp-sysd__entry{min-height:0;padding-top:56px;}
+  .hp-sysd__arrow{top:auto;right:auto;bottom:-13px;left:38px;transform:rotate(135deg);}
+  .hp-sysd__mods{grid-template-columns:1fr;}
+  .hp-sysd__mods>div,.hp-sysd__mods>div:first-child{min-height:0;padding:22px 26px;border-left:0;border-top:1px solid var(--hp-line);}
+  .hp-sysd__base{grid-template-columns:1fr;gap:10px;padding:20px 26px;}
+  .hp-governance__grid,.hp-klartag__grid,.hp-team__grid,.hp-final__grid{grid-template-columns:1fr;}
+  .hp-governance__grid{gap:38px;}
+  .hp-variants{grid-template-columns:1fr;}
+  .hp-variants article{min-height:0;}
+  .hp-souveraen{grid-template-columns:1fr;gap:26px;}
+  .hp-team__grid{gap:44px;}
+  .hp-founders{max-width:720px;}
+  .hp-final__grid{gap:36px;}
+}
+
+@media (max-width:700px){
+  .hp-home h1{font-size:clamp(2.25rem,10.6vw,3.5rem);}
+  .hp-home h2{font-size:clamp(1.9rem,9vw,3rem);}
+  .hp-sheet{gap:12px;flex-wrap:wrap;}
+  .hp-sheet i{min-width:60px;}
+  /* Erstes mobiles Sichtfeld: Kicker, Headline, Lead und primärer CTA müssen zusammen passen */
+  .hp-hero__copy{padding-block:36px 48px;}
+  .hp-hero h1{max-width:none;}
+  .hp-hero .hp-kicker{margin-bottom:16px;}
+  .hp-hero__lead{margin-top:20px;font-size:1rem;line-height:1.55;}
+  .hp-hero__actions{margin-top:24px;align-items:stretch;flex-direction:column;}
+  .hp-hero__actions .btn{width:100%;}
+  .hp-situations,.hp-system,.hp-modules,.hp-helpers,.hp-golive,.hp-governance,.hp-klartag,.hp-architecture,.hp-team,.hp-final{padding-block:64px;}
+  .hp-sit{grid-template-columns:1fr;gap:16px;padding-block:38px;}
+  .hp-chain{grid-column:1;}
+  .hp-mod--klartag,.hp-mod--workspace,.hp-mod--automation,.hp-mod--helpers{grid-column:span 12;border-left:0;}
+  .hp-mod--workspace,.hp-mod--automation,.hp-mod--helpers{border-top:1px solid var(--hp-line-strong);}
+  .hp-mod{padding:30px 24px 36px;}
+  .hp-mod__way{grid-template-columns:1fr;gap:5px;}
+  .hp-datenblatt__lead{padding:20px 20px 24px;}
+  .hp-datenblatt>header,.hp-datenblatt>footer{padding-inline:20px;}
+  .hp-gov-list{grid-template-columns:1fr;}
+  .hp-gates{grid-template-columns:1fr;row-gap:0;}
+  .hp-gates li{padding:8px 0 30px 68px;}
+  .hp-gates li::before{top:0;bottom:0;left:21px;right:auto;width:1px;height:auto;}
+  .hp-gates li::after{top:20px;left:14px;width:15px;height:1px;}
+  .hp-gates li:last-child::before{width:1px;height:20px;}
+  .hp-gates li>span{top:0;left:0;background:var(--hp-paper-2);}
+  .hp-gates p{max-width:52ch;}
+  .hp-vermerk{flex-direction:column;gap:8px;}
+  .hp-ksheet{margin-right:10px;padding:26px 22px;box-shadow:10px 10px 0 var(--hp-ink);}
+  .hp-ksheet__meta{display:grid;gap:6px;}
+  .hp-souveraen{padding:28px 22px 30px;}
+  .hp-founders article{grid-template-columns:96px 1fr;gap:18px;}
+  .hp-founders img{width:96px;height:96px;}
+  .hp-final__action .btn{width:100%;}
+  .hp-footer .footer__top{grid-template-columns:1fr;}
+}
+
+@media (max-width:430px){
+  .hp-chain>div:not(.hp-chain__ph){grid-template-columns:1fr;gap:4px;}
+  .hp-datenblatt__title{flex-direction:column;align-items:flex-start;gap:12px;}
+  .hp-stamp--status{margin-bottom:0;}
+  .hp-founders article{grid-template-columns:76px 1fr;}
+  .hp-founders img{width:76px;height:76px;}
+}
+
+/* ---- Bild und Situationen im Umbruch ---- */
+@media (max-width:940px){
+  .hp-sit{grid-template-columns:1fr;gap:26px;}
+  .hp-sit:nth-child(even) .hp-sit__media{order:0;}
+  .hp-sit__body{grid-template-columns:52px minmax(0,1fr);}
+  .hp-klartag__figure img{aspect-ratio:2/1;}
+}
+
+@media (max-width:700px){
+  .hp-sit__body{grid-template-columns:1fr;gap:14px;}
+  .hp-sit .hp-chain{grid-column:1;margin-top:18px;}
+  .hp-klartag__figure img{aspect-ratio:3/2;}
+  .hp-datenblatt__id{gap:10px;}
+  .hp-datenblatt__avatar{width:min(62vw,230px);}
+  .hp-datenblatt__portrait{padding:18px 20px 14px;}
+}

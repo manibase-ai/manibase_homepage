@@ -1,0 +1,1569 @@
+# Redesign-Entscheidungen
+
+Laufendes Protokoll. Jede Entscheidung mit Begründung, damit später nachvollziehbar
+ist, warum etwas so ist. Ergänzt `00-recherche.md`.
+
+---
+
+## E1 · Positionierung: Bau und Handwerk, verbindlich
+
+**Entscheidung:** manibase legt sich auf Bau und Handwerk fest. Die Startseite nennt
+die Branche. Die bisherige Regel „branchenoffen ansprechen, Bau ist nur ein möglicher
+Beachhead" aus `PRODUCT.md` und `CLAUDE.md` ist damit **aufgehoben**.
+
+**Begründung: die reale Kundenlage ist zu 100 % Bau.**
+
+| Kunde | Status | Inhalt |
+|---|---|---|
+| Architekturbüro, 18 MA | **laufendes Pilotprojekt** | Open Web UI als Corporate LLM, Projektmanagement, Use-Case-Findung, parallel Softwareentwicklung Baudokumentation (Spracheingabe + RAG) |
+| Spenglerbetrieb | Zielkunde | Baudokumentation, nichts geht verloren, Einsprechen auf der Baustelle und im Auto |
+| Dachdeckerbetrieb | laufende KI-Einführung (über vorgeschaltete Firma) | zunächst ChatGPT-Einführung, absehbar eigene Software für Angebotsabwicklung |
+| Garten- und Landschaftsbau | Zielkunde | Neuaufstellung im Bereich KI |
+| Raiffeisenbank Lohr | Vorstellung durch Architekten geplant | Standortanalyse und Projektentwicklung, KI-Tool mit API-Schnittstellen |
+
+**Segment genauer:** nicht nur ausführendes Handwerk, sondern **Planung und Ausführung**
+(Architekturbüro, Bank/Projektentwicklung auf der einen Seite, Spengler, Dachdecker,
+GaLaBau auf der anderen). Die Klammer ist das Bauprojekt, nicht das Gewerk.
+
+**Konsequenzen:**
+- `PRODUCT.md` und `CLAUDE.md` müssen nachgezogen werden (Abschnitt „Branchenoffen").
+- Headline darf die Branche nennen.
+- Bildsprache darf Baustelle sein.
+- Die Barriere „lohnt nur für größere Betriebe" (Bitkom 59 %) wird durch die reale
+  Kundengröße gedeckt: 18 MA im Pilotprojekt, exakt die Zielgröße.
+
+**Offen:** Segmentierungsachse für Unterseiten (siehe E2).
+
+---
+
+## E2 · Geschäftsmodell: Produkt plus Einführung, nicht Beratung
+
+**Entscheidung:** manibase ist kein Beratungshaus. Die operative Gesellschaft wurde
+gegründet, um aus der Beratung heraus **direkt in die Umsetzung** zu gehen. Beratung ist
+Aufhänger, nicht Produkt.
+
+**Zwei Standbeine:**
+
+1. **Eigene Assets (Helfer).** Benannte Software-Bausteine, die manibase gehören:
+   - **Bodo, der Baudokumentationshelfer** — Spracheingabe auf der Baustelle,
+     Wiederauffinden über RAG. Entsteht im Pilotprojekt Architekturbüro.
+   - **Anton, der Angebotsassistent** — nimmt Vorarbeiten der Angebotserstellung ab,
+     Spracheingabe auch während der Autofahrt.
+   - **Stefan, der Standortanalysehelfer** — holt über offene Schnittstellen erste
+     Daten zu einer Adresse.
+2. **Einführung und Projektgeschäft.** Open-WebUI-Implementierung als Dienstleister,
+   saubere KI-Einführung mit konkreten Use Cases, Projektmanagement,
+   Software-Deployment. Perspektivisch eigene Automatisierungen,
+   Prozessverbesserungen und eigene Softwarelösungen.
+
+**Der KI-Klartag wird nachrangig.** Begründung des Kunden: Ein Kunde muss bereits
+Vertrauen mitbringen, um 2.000 bis 3.000 € für einen reinen Beratungstag auszugeben.
+Vertrieblich schwierig als Einstieg. Es gibt Betriebe, die darauf warten, aber es ist
+nicht das Geschäft, das manibase machen will.
+
+**Konsequenzen für die Seite:**
+- Die heutige Seite ist ein einziger Funnel auf den Klartag, inklusive eigener
+  Landingpage `ki-klartag.html`. Diese Architektur bildet das neue Modell **nicht** ab.
+- Es braucht einen Produktbereich (11/11 Wettbewerber haben einen).
+- Die Helfer wechseln die Rolle: von dekorativen Maskottchen zur **Produktlinie**.
+  Das entkräftet Teil der Warnung aus `00-recherche.md` Abschnitt 5, aber nicht die
+  Warnung vor Cartoon-Stil und vor Personifizierung, die Ersetzungsangst weckt.
+
+**Offene Punkte:**
+- Preisangabe: Die Seite nennt durchgängig **1.800 €** Festpreis, der Kunde spricht von
+  **2.000 bis 3.000 €**. Muss geklärt werden, bevor irgendwo eine Zahl steht.
+- Was wird aus **Emma** (E-Mail-Assistenz), **Doreen** (Dokumentationshilfe) und
+  **Wiktor** (Wissensmanager) der heutigen Seite? Bodo deckt Doreen und Wiktor
+  inhaltlich ab. Emma ist im neuen Modell nicht erwähnt.
+- Die Namensreihe Bodo, Anton, Stefan ist rein männlich, die heutige Reihe war
+  paritätisch (Anton, Emma, Doreen, Wiktor). Bewusst entscheiden, nicht nebenbei.
+
+---
+
+## E3 · Leistungsspektrum: drei Bereiche, ein Flaggschiff
+
+**Flaggschiff ist die Dienstleistung**, nicht das Produkt: das **strukturierte
+KI-Einführungsprojekt**. Es läuft bereits gut und ist in den nächsten sechs Monaten
+reproduzierbar lieferbar, für Betriebe von 50 bis 150 Mitarbeitern.
+
+### Die drei Bereiche
+
+| # | Bereich | Inhalt | Haltung |
+|---|---|---|---|
+| 1 | **Diagnose und Strategie** | Workshop: Use Cases, Aufgaben und Prozesse definieren. KI-Vision. Roadmap mit wirtschaftlichem Nutzen je Use Case | Einstieg in die Leiter |
+| 2 | **Umsetzung auf bestehender Kundenarchitektur** | Kunde hat schon Copilot oder Langdock, manibase hilft beim Agentenbau | **wird ungern gemacht** („in einer bestehenden Architektur herumpfuschen") |
+| 3 | **Eigene Architektur (Premium)** | n8n, Open WebUI oder LibreChat auf privater Cloud des Kunden. Prozesse und Automatisierungen sauber aufgesetzt | Zielgeschäft |
+
+**Der KI-Klartag ist nicht verschwunden, er ist Bereich 1 geworden.** Aus einem
+alleinstehenden Produkt mit Preisschild wurde die erste Stufe einer Leiter. Das löst
+das Vertriebsproblem aus E2, ohne den Inhalt aufzugeben.
+
+### Das Einführungsprojekt im Detail
+
+- **Technische Bereitstellung:** private Cloud des Kunden, Basis Open WebUI,
+  modellagnostisch, in Deutschland auf Azure- oder Stackit-Modellen, alternativ
+  komplett lokal auf eigenen Servern. Zugang für alle Mitarbeitenden über die
+  hauseigene **Microsoft Entra ID**.
+- **Begleitung:** Workshops, Kick-offs, Projektmanagement, Change-Management.
+- **Erste Use Cases:** Wissensdatenbank für **DIN-Normen**, Text- und
+  Angebotsbausteine für den Betrieb.
+
+### Eigentum und Abrechnung
+
+- Der Code der Helfer (Bodo und folgende) **gehört manibase**, nicht dem Kunden.
+- Individualisierungen für den Kunden (Prompt-Vorlagen, Schnittstellen zur hauseigenen
+  Software) **gehören dem Kunden**.
+- Der Kunde **rechnet die Cloud selbst ab** und kann eigenständig weiterarbeiten,
+  auch wenn es manibase nicht mehr geben sollte.
+
+**Bewertung:** Der letzte Punkt ist das stärkste Vertrauensargument im gesamten
+Material. Er beantwortet gleichzeitig das 96-%-Hemmnis (Datensicherheit) und die
+unausgesprochene Lock-in-Angst. Gehört prominent auf die Seite, nicht ins Kleingedruckte.
+
+### Empfehlung zu Bereich 2
+
+Nicht mit gleichem Gewicht ausstellen. Was auf der Seite steht, bestimmt, welche
+Anfragen kommen. Wer Bereich 2 gleichrangig zeigt, bekommt Bereich-2-Anfragen.
+Entweder weglassen oder ausdrücklich als Brücke formulieren („Sie arbeiten schon mit
+Copilot? Wir helfen punktuell weiter, der saubere Weg ist aber eine eigene Architektur").
+
+---
+
+## E4 · Produktreife (Stand 3.8.2026)
+
+| Produkt | Funktion | Reifegrad | Konsequenz für die Seite |
+|---|---|---|---|
+| **Bodo** (Name nicht final) | Baudokumentation, Spracheingabe, Wiederauffinden | **Erste Versionen im Test.** Feedback von Architekturbüro und einem Spenglerbetrieb, der es ausprobiert hat | einziger zeigbarer Kandidat, aber ohne festen Namen |
+| **PIA** | Frühe Grundstücks- und Projektprüfung für Architektur- und Planungsbüros | **Entwurfsphase.** Infopaper vom 26.7.2026 geht an potenzielle Pilotpartner, Experteninterviews geplant | als Pilotpartner-Aufruf zeigbar, nicht als Produkt |
+| **Anton** | Angebotsvorarbeiten | **Existiert nicht, kein Konzept.** Angebotsprozess in den Betrieben muss erst verstanden werden | nicht zeigen |
+
+**Namenssystem:** Der Anfangsbuchstabe ist an die Funktion gekoppelt.
+**B**odo → **B**audokumentation · **P**IA → **P**lanung/Projektprüfung ·
+**A**nton → **A**ngebote. Das System trägt. „Stefan, der Standortanalysehelfer" ist
+durch PIA überholt und entfällt.
+
+Damit ist auch die Sorge aus E2 erledigt, die Reihe sei rein männlich: PIA ist weiblich.
+
+**Haltung des Kunden zu den Figuren:** „müssen nicht zwingend auf die Webseite, die
+vielleicht etwas kitschig aussehen". Eventuell später eigene Seite je Helfer mit Bild
+und Funktionsbeschreibung.
+
+**Empfehlung:** Helfer vorerst **nicht** auf die Startseite. Begründung: Bodos Name ist
+nicht final, Anton existiert nicht, PIA sucht noch Pilotpartner. Drei Produktkacheln,
+hinter denen nichts Kaufbares steht, treffen genau die 57-%-Skepsis gegenüber
+Praxisreife. Die Startseite verkauft das Einführungsprojekt. Produkte bekommen eigene
+Seiten, sobald sie liefern.
+
+---
+
+## E5 · Der unfaire Vorteil
+
+Zwei nachprüfbare Fakten, die im Wettbewerb unbesetzt sind:
+
+- **Nikolaus Schauersberger:** 15 Jahre als freiberuflicher Softwareentwickler vor der
+  Gründung.
+- **Matthias Geisler:** erfahrener IT-Projektmanager für die Einführung von
+  **Dokumentenmanagementsystemen**.
+
+Die DMS-Einführung ist strukturell dieselbe Disziplin wie eine KI-Einführung:
+Dokumentprozesse, Change-Management, Widerstand in der Belegschaft, Altbestand.
+Das ist keine Marketingbehauptung, sondern ein überprüfbarer Werdegang.
+
+Die Recherche (`00-recherche.md`, Abschnitt 4) zeigt: **Kein einziger der sechs
+untersuchten Wettbewerber zeigt Gründergesichter.** Das ist die offene Flanke, und
+manibase hat jetzt die Substanz, sie zu besetzen. Gehört above the fold.
+
+---
+
+## E6 · Beweisführung: Gründer statt Referenzen
+
+**Ausgangslage (Stand 3.8.2026):**
+
+| Kunde | Freigabe | Belastbarkeit |
+|---|---|---|
+| Architekturbüro (18 MA) | **vertraglich als Referenz vereinbart** | Pilotprojekt läuft noch, kein Ergebnis vorzeigbar |
+| Spenglerbetrieb | – | kein zitierbarer Satz |
+| Dachdecker | – | nichts Belastbares |
+| Garten- und Landschaftsbau | – | nichts Belastbares |
+
+**Entscheidung:** Kein Ergebnis-Testimonial. Stattdessen vier Anker:
+
+1. **Gründergesichter und Werdegang** (siehe E5). Im Wettbewerb unbesetzt, 0 von 6.
+2. **Das laufende Projekt als Tatsache**, nicht als Erfolgsmeldung:
+   „Wir führen derzeit bei einem Architekturbüro mit 18 Mitarbeitern ein KI-System ein."
+   Behauptet kein Ergebnis, belegt die Tätigkeit. Freigabe liegt vor.
+   Nebeneffekt: „18 Mitarbeiter" ist die wirksamste Antwort auf die 59-%-Barriere
+   („lohnt nur für größere Betriebe").
+3. **Der Prozess, minutiös beschrieben.** Überprüfbar statt behauptet.
+4. **Eigentum und Datenschutz konkret**: private Cloud, Kunde rechnet selbst ab,
+   kann ohne manibase weiterarbeiten.
+
+**Bauvorgabe:** Der Platz für ein echtes Kundenzitat wird eingeplant, aber leer
+gelassen. Nach Abschluss des Pilotprojekts wird eine Zeile getauscht, nicht die Seite
+umgebaut.
+
+**Verboten** (aus `00-recherche.md`, Abschnitt 4): erfundene Kundenzahlen, anonyme
+Zitate, die wie echte aussehen, gekaufte Siegel, Referenzbehauptungen aus dem Vorleben
+ohne Beleg.
+
+---
+
+## E7 · Kontaktadresse vereinheitlicht
+
+`kontakt@demiospace.ai` war eine Legacy-Adresse und stand noch an 5 Stellen
+(impressum.html, datenschutz.html 2×, index.html, scripts/site.js), während der Rest
+der Seite bereits `kontakt@manibase.de` nannte. Umgestellt am 3.8.2026, die Seite ist
+jetzt durchgängig. Inhaltlich sonst nichts an Impressum und Datenschutz geändert.
+
+---
+
+## E8 · Preis: keine Zahl auf der Seite, aber die Form
+
+**Entscheidung: kein Preis auf der Website.**
+
+**Interne Kalkulation (nicht öffentlich):** Retainer **2.000 bis 5.000 € im Monat**,
+Projektlaufzeit **3 bis 6 Monate**, bei größeren Organisationen standardmäßig eher 6.
+Zielgröße 5.000 €/Monat. Ein zweiter Kunde würde noch zu vergünstigten
+Pilotkonditionen aufgenommen.
+
+**Warum kein Preis:** Zu viele Faktoren, und es fehlen Ankerwerte aus abgeschlossenen
+Projekten. Der Preis hängt an Organisationsgröße, Schulungsbedarf, Umfang der
+Compliance-Arbeit (Nutzungsrichtlinien), Anzahl Schulungssitze, Teamgröße, Zeit für
+Use Cases, Onboarding und KI-Champion-Training.
+
+**Im Markt vertretbar:** capmo und hero nennen ebenfalls keinen Preis (2 von 6).
+Aber NN/g (Loranger 2013) gilt weiter: Wer den Preis verbirgt, wirkt ausweichend.
+
+**Deshalb wird statt der Zahl die Form gezeigt:**
+
+1. **Die Struktur:** „Projektlaufzeit drei bis sechs Monate, Abrechnung als monatlicher
+   Retainer." Keine Zahl, aber eine Größenordnung zum Einordnen.
+2. **Die Preistreiber offen auflisten:** Teamgröße, Schulungsbedarf, Compliance-Umfang,
+   Anzahl Use Cases, KI-Champion-Training. Wirkt souverän statt ausweichend.
+3. **Was der Kunde *nicht* an manibase zahlt:** laufende Modell- und Cloudkosten gehen
+   direkt an Azure oder Stackit. Entschärft die Abo-Fallen-Angst und stützt das
+   Eigentumsargument aus E3.
+
+**Konsequenz:** Die 16 Nennungen von „1.800 € Festpreis" auf der Seite gehören zum
+Klartag und passen nicht mehr zum Modell. Muss beim Umbau aufgelöst werden.
+
+---
+
+## E9 · Pilotkonditionen als Haltung, nicht als Schwäche
+
+Auf `infotermin.html` und `interessent.html` steht bereits:
+„Wir nehmen aktuell nur noch **3 Projektpartner** auf, die Plätze vergeben wir nach
+Eingang und einer kurzen Eignung."
+
+Das ist die richtige Formulierung und wird auf die neue Startseite gehoben. Ein junges
+Unternehmen ohne Referenzen wirkt schwach; ein Unternehmen, das bewusst nur drei
+Partner aufnimmt, wirkt selektiv. Dieselbe Tatsache, andere Haltung, und sie ist wahr.
+
+Gekoppelt an den Werdegang aus E5 ergibt das die Position: junges Unternehmen,
+erfahrene Leute, sucht gerade die richtigen ersten Partner.
+
+---
+
+## Gefundene Fehler auf der Live-Seite
+
+| Fund | Ort | Status |
+|---|---|---|
+| Kontaktadresse uneinheitlich | 5 Stellen | **behoben** (E7) |
+| Infotermin-Termine abgelaufen (29.07./31.07., heute 3.8.) | `infotermin.html` | offen, Entscheidung des Kunden |
+| „per Zoom" im Text, „per Teams" in der Auswahl | `infotermin.html` | offen |
+
+---
+
+## E10 · Eingänge: aus vier Türen werden zwei
+
+**Ist-Zustand:** Die Seite hat vier konkurrierende Eingänge — 15-Minuten-Gespräch
+(Startseite), Infotermin (`infotermin.html`), „Ich habe Interesse"
+(`interessent.html`), KI-Klartag (`ki-klartag.html`).
+
+Die Recherche ist eindeutig: immer ein CTA-**Paar**, nie mehr. 11 von 11 Anbietern
+haben genau einen Button im Header. Der einzige Ausreißer (openhandwerk, vier
+Hero-CTAs) wird in der Auswertung als verwässert beschrieben.
+
+**Entscheidung:**
+
+```
+Primär    Erstgespräch buchen        für die, die reden wollen
+Sekundär  Nächste KI-Sprechstunde    für die, die erst zuhören wollen
+```
+
+Das entspricht dem Sales-led-Muster von capmo, sablono und moser.
+
+- `ki-klartag.html` entfällt als eigener Eingang (der Klartag ist Bereich 1 eines
+  Projekts, siehe E3).
+- `interessent.html` wird Auffangformular, keine eigene Tür mehr.
+
+---
+
+## E11 · Veranstaltungsformate
+
+### KI-Sprechstunde für Bau und Handwerk (das Zielformat)
+
+Kostenlos, online, rund eine Stunde. Inhalt: was heute machbar ist, wie man es selbst
+umsetzen könnte (Open WebUI installieren, eigenes Projekt anlegen, Workshops).
+Haltung ausdrücklich: „Das könnten die Betriebe vermutlich auch selbst, wir können es
+besser begleiten." Am Ende ein QR-Code, unverbindlich, ohne Druck. Vorbild Baulig.
+
+**Als wiederkehrender Rhythmus bauen, nicht als Einzeltermine.**
+„Jeden ersten Mittwoch, 19:30 Uhr" veraltet nie. Zwei feste Daten veralten am dritten
+Tag, genau das ist im Juli passiert.
+
+### Weitere Formate
+
+- **Infotermin kommende Woche:** eigenes Format für **SHK-Handwerksbetriebe**, um
+  Baudokumentation und Angebotserstellung in einem **Verbundprojekt mit fünf Betrieben**
+  zu starten. Einmalig, nicht das wiederkehrende Format.
+- **Vorträge bei Branchenverbänden** (Bauplaner- und Bau-Info-Veranstaltungen) als
+  fester Kanal. Termine auf der Website, direkte Anmeldung.
+
+### Einwilligungsstruktur
+
+Das Dilemma „Daten vorab sammeln oder nicht" ist ein Scheinwiderspruch: Für einen
+Online-Termin ist die E-Mail-Adresse zwingend, sonst kann der Einwahllink nicht
+zugestellt werden. Die eigentliche Frage ist die spätere Werbenutzung, und die braucht
+eine **getrennte** Einwilligung (Zweckbindung).
+
+| | |
+|---|---|
+| **Pflicht-Checkbox** | „Einladung, Einwahllink und Erinnerung." Zweckgebunden, kein Marketing |
+| **Optionale zweite Checkbox** | „Außerdem alle paar Wochen eine kurze Mail." Ungehakt voreingestellt |
+| **QR-Code am Ende der Veranstaltung** | Für alle, die danach mehr wollen |
+
+Die Pflicht-Variante ist auf `infotermin.html` bereits sauber gebaut. Es fehlt nur die
+zweite, optionale Box. Vom externen DSB (DSZ365) gegenprüfen lassen.
+
+---
+
+## E12 · Zwei Marken, ein Layer-Modell
+
+**Das ist die zentrale Entscheidung des ganzen Konzepts.** Es gibt nicht eine Zielgruppe
+mit zwei Formaten, sondern **zwei Marken mit getrennten Märkten**.
+
+| Ebene | Inhalt | Marke |
+|---|---|---|
+| **Layer 0** · Reine Information | YouTube (Long- und Shortform), LinkedIn, Instagram. Kein Gegenwert verlangt, reiner Goodwill | matthias-geisler.com |
+| **Layer 1** · Erste Interaktion und Community | kostenlose Community · kostenlose KI-Sprechstunden · kostenfreie Workshops (verlost, bis 5 Teilnehmer, 4 Stunden hands-on, erste reale Ergebnisse) · E-Mail-Newsletter | matthias-geisler.com |
+| **Layer 2** · Schulung und Einführung | Schulungen, saubere KI-Einführung, **Compliance-Check mit AVV, TOMs und VVT**, vom DSB abgesegnet, einmalige Hilfe oder leichtes Coaching | matthias-geisler.com |
+| **Layer 3** · Diagnose und Strategie | Der **Klartag als strategisches Instrument**, im besten Fall integraler Teil eines großen Projekts. Kanal: kostenlose Infoveranstaltungen bei **Handwerksinnungen und Kreishandwerkerschaften**. Auftritt als strategischer Partner, nicht als Sprechstunde | **manibase.de** |
+| **Layer 4** · Prozessbegleitung | Hilfe auf der Kundenwelt: Microsoft Copilot, erste RAG-Systeme, NotebookLM. **Krücke, nicht nachhaltig.** Nur wenn der Kunde wirklich Hilfe braucht und gut bezahlt | **manibase.de** |
+| **Layer 5** · Infrastruktur und Assets | **Flaggschiff.** Assets, Agents und Workflows auf hauseigener Infrastruktur: n8n, Open WebUI, manibase-Worker, Cockpit mit Standardmodulen. Teurer, steigert aber den Firmenwert des Kunden. Langfristige Partnerschaft, monatliche Retainer für Wartung, Service, Weiterentwicklung. Perspektive: einzelne Module als SaaS | **manibase.de** |
+
+### Zielgruppen der beiden Marken
+
+- **matthias-geisler.com:** kleine Handwerksbetriebe, die Orientierung und Hilfe suchen.
+  Wenig Geld, viel Reichweite, Vertrauen aufbauen, Referenzen und Testimonials sammeln.
+- **manibase.de:** größere Handwerksbetriebe, Bauplaner, Bauingenieure und
+  baubranchenspezifische Unternehmen mit **dutzenden bis hunderten Mitarbeitern**,
+  Zielkorridor **100 bis 200**. Auftritt als strategischer Partner.
+  Geschäftsziel: 100 bis 200 solcher Kunden bedeuten volle Auslastung.
+
+### Damit ist Frage 7 beantwortet, gegen die Empfehlung
+
+Empfohlen war die Startseite für 10 bis 30 Mitarbeiter. **Entschieden ist das Gegenteil:
+manibase.de schreibt für die Großen.** Die Begründung trägt: Der kleine Markt ist nicht
+verloren, er wandert nur auf die persönliche Marke, wo er ohne Preisdruck bedient
+werden kann.
+
+### Konsequenzen, die daraus zwingend folgen
+
+1. **Der Claim „Holen Sie sich Ihre Abende zurück" gehört nicht mehr auf manibase.de.**
+   Er ist auf einen Inhaber gemünzt, der selbst abends Angebote schreibt. In einem
+   Betrieb mit 150 Mitarbeitern entscheidet eine Geschäftsführung oder IT-Leitung, und
+   deren Problem ist nicht der eigene Feierabend. Der Claim ist gut, aber er gehört
+   nach matthias-geisler.com.
+2. **Die gesamte heutige Startseite ist auf den falschen Kunden geschrieben**
+   (Pains, Helden, Wertband, Klartag-Funnel). Das ist kein Redesign mehr, das ist
+   ein Neubau der Texte.
+3. **Teile der Recherche müssen neu gewichtet werden.** Die Bitkom-Studie 2025 befragt
+   **Handwerksunternehmen**, überwiegend klein. Für Betriebe mit 100 bis 200
+   Mitarbeitern tragen Befunde wie „84 % kein Thema" oder „lohnt nur für größere
+   Betriebe" **nicht mehr**. Was bleibt: Datenschutz- und Sicherheitsbedenken,
+   Zweifel an Praxisreife, Angst vor Kontrollverlust.
+4. **Der relevante Wettbewerb verschiebt sich.** Nicht mehr plancraft, craftnote,
+   meisterwerk, hero (Werkzeuge für kleine Handwerksbetriebe), sondern **capmo,
+   nevaris, sablono, cosuno**. Und genau diese vier zeigen keine Preise, machen keine
+   Gewerke-Seiten und segmentieren nach Rolle und Unternehmenstyp. Die
+   Preisentscheidung aus E8 und die Absage an Gewerke-Seiten sind damit rückwirkend
+   besser begründet als vorher.
+
+### Offen
+
+- **Sekundärer CTA:** Die KI-Sprechstunde scheidet aus (gehört zu Layer 1 und damit
+  zur anderen Marke). Ersatz noch offen.
+- **„Erstgespräch buchen" gilt dem Kunden als ausgelutscht.** Bessere Formulierung
+  gesucht. Aus der Recherche: CTA wörtlich benennen, nicht „Jetzt durchstarten".
+  Kandidat mit Substanz, weil er den unfairen Vorteil aus E5 nutzt:
+  ein Gespräch **direkt mit den Gründern**, nicht mit einem Vertrieb.
+- **Übergabe zwischen den Marken:** Was passiert, wenn ein Zwölf-Mann-Betrieb auf
+  manibase.de landet? Verweis auf matthias-geisler.com oder stiller Verlust?
+- Schreibweise **manibase-Worker** bestätigen (im Diktat stand „Manybase").
+
+---
+
+## E13 · Segmentierungsachse: nach Betriebsgröße, nicht nach Gewerk
+
+**Status: durch E12 weitgehend erledigt.** Die Achse ist Betriebsgröße und Reifegrad,
+und sie verläuft zwischen den beiden Marken statt innerhalb einer Seite.
+
+---
+
+## E14 · Werteangebot für manibase.de: fünf Argumente, zwei Lager
+
+Die Kaufgründe, die der Kunde nennt. Sortiert nach Funktion im Verkaufsgespräch.
+
+### Der Rahmen: Kosten des Wartens
+
+Kein eigenes Argument, sondern die Klammer, die alle anderen dringlich macht:
+
+> Alles, was jetzt unstrukturiert eingeführt wird und woran sich die Belegschaft
+> gewöhnt, führt in ein bis zwei Jahren zu einem schmerzhaften Transformationsprojekt,
+> wenn der Wildwuchs wieder eingesammelt und sauber neu aufgesetzt werden muss.
+> Jetzt ist das Fenster, es von Anfang an richtig zu bauen.
+
+Das ist die stärkste Erzählung im ganzen Material, weil sie „wir haben noch Zeit" in
+„Warten wird teurer" umdreht. Gehört in den Hero oder direkt darunter.
+
+### Lager A: Risiko vermeiden (verschafft das Gespräch)
+
+| # | Argument | Substanz |
+|---|---|---|
+| 1 | **Schatten-KI und Compliance** | Belegschaft nutzt irgendwelche Tools. Keine Einführung, keine Schulung, kein Onboarding, keine Richtlinien, keine TOMs. manibase liefert Compliance-Check mit AVV, TOMs und VVT, vom DSB abgesegnet |
+| 2 | **Datensouveränität** | Baubranche ist besonders empfindlich (Entwürfe, geistiges Eigentum). Kein US-Transfer. Eigener Server beim Kunden, den er selbst betreut, ein- und ausschaltet, sichert. Für hochsensible Daten komplett lokale Verarbeitung möglich (z. B. Mac Mini vor Ort) mit Open-Source-Modellen |
+
+### Lager B: Wert schaffen (rechtfertigt das Budget)
+
+| # | Argument | Substanz |
+|---|---|---|
+| 3 | **Kosteneffizienz** | Lizenzmodelle wie Copilot skalieren linear mit der Kopfzahl. Eine tokenbasierte Architektur ist deutlich günstiger: für die breite Masse der Verwaltung ein kleineres, spezialisiertes Modell per API-Inferenz statt überall Frontier-Modelle |
+| 4 | **Firmen-Assets statt Abhängigkeiten** | Was auf eigenen Servern läuft, ist ein Asset, keine Liability. Proprietäre Prozesse und Automatisierungen steigern Unternehmenswert und Bewertung, besonders relevant bei einer **Unternehmensübergabe** |
+| 5 | **Systemintegration** | Mit ChatGPT oder Claude sind tiefe Integrationen schwer. Die eigene Infrastruktur ist das Bindeglied, um bestehende Systeme und Datenbestände anzuzapfen und intern weiterzuverwerten |
+
+### Empfohlene Reihenfolge auf der Seite
+
+Defensive Argumente verschaffen Termine, offensive rechtfertigen Budgets.
+Also: **Rahmen (Kosten des Wartens) → 1 → 2 → 3 → 4**, Nummer 5 als technische Tiefe
+weiter unten oder auf einer Unterseite.
+
+Nummer 4 ist der ungewöhnlichste Gedanke im ganzen Material und im Wettbewerb
+unbesetzt. In inhabergeführten Bauunternehmen dieser Größe ist die Nachfolge ein
+Dauerthema.
+
+### Zwei Warnungen
+
+**Zu Nummer 4:** „steigert EBITDA und Bewertung erheblich" ist ohne Beleg eine
+Behauptung der Sorte, vor der `00-recherche.md` Abschnitt 4 ausdrücklich warnt.
+Die Logik (proprietäre Prozesse sind Vermögenswerte) trägt, die Bezifferung nicht.
+Formulieren als Eigentumsfrage, nicht als Renditeversprechen.
+
+**Zu Nummer 3:** Das ist das einzige Argument, zu dem eine **harte Zahl** möglich ist.
+manibase kann den eigenen Preis nicht zeigen (E8), aber die **Kostenrechnung des
+Kunden** sehr wohl: Lizenzkosten pro Kopf und Jahr gegen tokenbasierte Inferenz für
+dieselbe Belegschaft. Aktuelle Lizenzpreise vor Veröffentlichung verifizieren.
+Das wäre die einzige belastbare Zahl auf der ganzen Seite und entsprechend wertvoll.
+
+Die zwei vom Kunden beschriebenen Formate beschreiben nicht zwei Veranstaltungen,
+sondern **zwei verschiedene Kundentypen**:
+
+| | KI-Sprechstunde | Strukturierte Einführung |
+|---|---|---|
+| Zielgruppe | Handwerksbetriebe, kleinere Planungsbüros | „größere Betriebe" |
+| Haltung | „Das könnt ihr auch selbst, wir begleiten besser" | „Um Systematik kommen Sie nicht herum" |
+| Ergebnis | Hilfe zur Selbsthilfe | Retainer 3–6 Monate, eigene Infrastruktur |
+
+Damit ist die Achse **Betriebsgröße und Reifegrad**, nicht Gewerk. Das entspricht
+capmo, nevaris und plancraft („Segmente" nach Betriebsgröße auf der Startseite) und
+umgeht das Substanzproblem der Gewerke-Seiten (nur 30–40 % echter Inhalt, siehe
+`00-recherche.md`).
+
+**Ungeklärter Widerspruch, blockiert die Tonalität der ganzen Seite:**
+
+| Quelle | Betriebsgröße |
+|---|---|
+| `PRODUCT.md`, heutige Seite | 10–20 Mitarbeiter |
+| Pilotkunde Architekturbüro | 18 |
+| Einführungsprojekt laut E3 | 50, 100 oder 150 |
+| Spengler, Dachdecker, GaLaBau | vermutlich unter 20 |
+
+**Empfehlung:** Startseite für 10–30 Mitarbeiter schreiben, mit einer sichtbaren Tür
+für Größere. Begründung: reale Kundenliste, das beste Argument („18 Mitarbeiter, und
+es funktioniert") und der Claim „Holen Sie sich Ihre Abende zurück" zeigen alle in
+dieselbe Richtung. Der Claim ist auf einen Inhaber gemünzt, nicht auf eine
+Geschäftsführung. Größere Betriebe kommen ohnehin über Verband und Vortrag, nicht über
+die Startseite.
+
+Drei Achsen stehen zur Wahl. Aus der Recherche (`00-recherche.md`, Abschnitt 2):
+
+- **Nach Gewerk** (plancraft 18 Seiten, hero ~26, meisterwerk 21, craftnote 9).
+  Ehrlicher Substanzanteil nur 30–40 %, echte Differenzierung braucht
+  gewerkespezifische Schnittstellen (DATANORM, IDS Connect). Für manibase heute
+  nicht einlösbar.
+- **Nach Rolle oder Unternehmenstyp** (capmo, nevaris, sablono, openhandwerk).
+  Capmo, das optische Vorbild, macht es so.
+- **Nach Anwendungsfall.** Ergibt sich neu aus der Kundenlage: Baudokumentation ·
+  Angebotsabwicklung · Standortanalyse und Projektentwicklung · Corporate LLM.
+  Zwei unabhängige Kunden (Architekturbüro, Spengler) fragen dasselbe nach, das ist
+  ein Produktsignal.
+
+---
+
+## E15 · Was gezeigt wird: die Architektur, nicht die Gesichter
+
+**Entscheidung des Kunden:** Gesichter und Helfer-Figuren sind nicht das Beweismittel
+für manibase.de. Sie gehören zum kleinen Handwerksbetrieb, also zur anderen Marke
+(E12). Gezeigt wird stattdessen **die Architektur**.
+
+### Das Leitbild der Seite: der Architektur-Vergleich
+
+Zwei Schaubilder nebeneinander auf einer Seite:
+
+| | |
+|---|---|
+| **links** | die manibase-Grundarchitektur, grob als Referenzdiagramm. Bewusst **ohne** Produktnamen wie n8n oder Open WebUI im Bild, sonst verliert man sich im Werkzeugkasten |
+| **rechts** | die herkömmliche Variante: über Microsoft gelöst, im schlimmsten Fall direkt über ChatGPT |
+| **darunter** | Vor- und Nachteile beider Wege gegenübergestellt |
+
+**Bewertung: das ist der stärkste Inhalt der neuen Seite.** Er beweist Kompetenz, macht
+das Datensouveränitäts-Argument (E14 Nummer 2) sichtbar statt behauptet, trägt
+gleichzeitig das Kosten- (Nummer 3) und das Eigentumsargument (Nummer 4) und verrät
+kein einziges Kundengeheimnis. Ein Bild statt drei Absätzen Text.
+
+**Warnung, ernst gemeint:** Eine Gegenüberstellung, bei der links alles grün und rechts
+alles rot ist, liest sich als Werbung und verliert genau den Leser, den sie gewinnen
+soll. Eine IT-Leitung in einem Betrieb mit 150 Mitarbeitern kennt die Microsoft-Welt
+besser als wir. Der Vergleich ist nur glaubwürdig, wenn er die echten Vorteile der
+Gegenseite benennt: tiefe Integration in eine vorhandene Microsoft-Landschaft, kein
+eigener Betrieb, sofort verfügbar, ein Vertragspartner. Die manibase-Seite gewinnt
+trotzdem, weil sie bei Datenhoheit, Kosten pro Kopf und Eigentum vorne liegt. **Ein
+fairer Vergleich, den man verliert, überzeugt mehr als ein unfairer, den man gewinnt.**
+
+### Screenshots: was geht, was nicht
+
+| Motiv | Verfügbar | Entscheidung |
+|---|---|---|
+| Open WebUI / LibreChat | ja, sofort | zeigen, aber **ehrlich beschriften**: „So sieht der Zugang für Ihre Mitarbeitenden aus." Es ist Open-Source-Software, nicht manibase-Eigenentwicklung. Als eigenes Produkt ausgegeben wäre es genau die Sorte Behauptung, die ein technischer Leser in zehn Sekunden auffliegen lässt |
+| n8n-Workflow | ja, sofort | zeigen, als Beleg für „hier läuft echte Automatisierung", nicht als Produkt |
+| **Cockpit mit den Helfern** | technisch ja, **UX noch nicht vorzeigbar** | **vorerst nicht zeigen** |
+| Bodo im Einsatz (UGC-Video, Baustelle + Bildschirm) | machbar | gute Idee, **nicht Priorität 1**. Kommt, wenn Bodos Name final ist (E4) |
+| Fotos aus echten Projekten, Workshop-Situationen | nein | später |
+
+**Zum Cockpit:** Das ist der wunde Punkt. Es ist das Flaggschiff-Asset aus Layer 5, und
+es ist das Einzige, was manibase wirklich selbst gebaut hat. Nicht zeigen ist richtig,
+solange es nicht dem Branchenstandard entspricht. Aber: **das Designsystem, das wir
+gerade für die Website bauen, ist zugleich das Designsystem fürs Cockpit.** Dieselben
+Farben, dieselbe Typoskala, dieselben Karten und Abstände. Wer beides in einer
+Handschrift baut, spart sich die zweite Grundsatzentscheidung und bekommt einen
+Screenshot, der irgendwann von selbst passt. Das sollte beim Bau mitgedacht werden.
+
+### Korrektur zur Ausgangslage
+
+„Fotos von uns haben wir noch nicht" trifft nur auf Projekt- und Workshop-Fotos zu.
+**Zwei brauchbare Porträts liegen bereits im Repository** (`site/assets/matthias.jpg`,
+`site/assets/nikolaus.webp`) und sind auf der heutigen Seite im Einsatz. Sie bleiben
+verwendbar.
+
+### Was das an E5 und E6 ändert
+
+E6 hatte die Gründergesichter zum ersten Beweisanker erklärt und „above the fold"
+verortet. **Das wird korrigiert, aber nicht gestrichen.** Für eine Geschäftsführung
+mit 150 Mitarbeitern lautet die stille Frage nicht „sind das sympathische Leute",
+sondern „gibt es diesen kleinen Anbieter in zwei Jahren noch, und kann er das
+überhaupt". Auf die erste Hälfte antwortet der Werdegang (E5), auf die zweite
+antwortet die Architektur.
+
+**Neue Rangfolge der Beweismittel auf manibase.de:**
+
+1. **Architektur-Vergleich** — beweist Können
+2. **Screenshots** (Open WebUI, n8n) — beweist, dass es real läuft
+3. **Das laufende Projekt als Tatsache** (E6 Punkt 2) — beweist Praxis
+4. **Gründer mit Werdegang** (E5) — beweist Verlässlichkeit, aber weiter unten,
+   nicht im Hero
+5. **Platzhalter für das erste echte Kundenzitat** (E6) — bleibt leer
+
+### Produktionsaufwand, ehrlich benannt
+
+Von den fünf Beweismitteln existiert heute genau eines fertig (Gründerfotos). Der
+Architektur-Vergleich ist **noch zu erstellen**, und er ist kein Nebenprodukt: zwei
+saubere Diagramme plus eine faire Vor-/Nachteil-Tabelle. Das ist Arbeit, die vor dem
+Bau der Seite erledigt sein muss, nicht währenddessen. Screenshots sind eine Stunde,
+das Diagramm ist ein Termin.
+
+---
+
+## E16 · Ein Leser, ein Vetogeber
+
+**Befund aus der Praxis:** In allen bisherigen Gesprächen war der Ansprechpartner die
+**Geschäftsführung**. Ein Gegenbeispiel gibt es, und es ist lehrreich.
+
+> **Der Fall Bruxafort.** Workshop zum Konzept der eigenen Architektur. Am Tisch saßen
+> der IT-Leiter, einige Mitarbeitende und die Assistenz der Geschäftsführung. Die beiden
+> Geschäftsführer **nicht**. Ergebnis: kein Projekt.
+
+**Interpretation, vorsichtig:** Ein einzelner gescheiterter Workshop beweist keine
+Regel, es können Budget, Zeitpunkt oder Passung dahinterstecken. Aber er passt zum
+Muster aller anderen Gespräche, und die Richtung ist eindeutig genug, um danach zu
+bauen.
+
+### Die Asymmetrie
+
+**Die IT kann dieses Projekt nicht kaufen, aber sie kann es verhindern.**
+
+Das ist kein klassisches Buying Center mit zwei Entscheidern, sondern ein Entscheider
+und ein Vetogeber. Daraus folgt für die Seite etwas anderes, als ich in Frage 10
+vermutet hatte:
+
+| | |
+|---|---|
+| **Die Startseite hat genau einen Leser:** die Geschäftsführung | Nutzen, Risiko, Kosten, Eigentum. Keine Halbtechnik, die niemanden erreicht |
+| **Die IT bekommt eine eigene Seite** | Aufgabe ist **nicht**, die IT zum Kauf zu überreden. Aufgabe ist, ihr das Nein zu nehmen |
+
+Eine Seite, die versucht, beide gleichzeitig zu bedienen, wird für die Geschäftsführung
+zu technisch und für die IT zu dünn. Getrennte Ebenen sind hier keine Bequemlichkeit,
+sondern Voraussetzung.
+
+### Die technische Unterseite (erste inhaltlich begründete Unterseite)
+
+Trocken, vollständig, ohne Verkaufston. Sie beantwortet die Fragen, die eine IT-Leitung
+stellt, bevor sie gefragt wird:
+
+- Wer **betreibt** das System, wer hat Root, wer patcht?
+- Was passiert bei **Ausfall**, wie sieht **Backup** und Wiederanlauf aus?
+- Wie hängt es an der vorhandenen **Entra ID**, wie an bestehenden Systemen?
+- **Wo liegen die Daten**, welcher Anbieter, welche Region, welcher Vertrag?
+- Was passiert, **wenn es manibase nicht mehr gibt** (Antwort steht in E3 und ist stark)?
+- Was muss die IT selbst leisten, und was ausdrücklich nicht?
+
+### Das Veto vorab entschärfen: die IT einladen, nicht umgehen
+
+Die zweite Frage des Kunden („wie decken wir das IT-Veto im Vorfeld ab") hat eine
+Antwort, die zugleich die Lehre aus Bruxafort umsetzt: **Die Einladung zum Erstgespräch
+sagt selbst, wer dabei sein soll.**
+
+> „Das Gespräch führen wir mit der Geschäftsführung, gern zusammen mit Ihrer IT."
+
+Das leistet drei Dinge auf einmal:
+
+1. Es macht die Anwesenheit der Geschäftsführung zur Bedingung, ohne unhöflich zu sein.
+   Der Bruxafort-Fall wäre so nicht zustande gekommen.
+2. Es holt die IT **früh** an den Tisch. Eine IT-Leitung, die erst erfährt, dass etwas
+   läuft, wenn entschieden ist, legt aus Prinzip das Veto ein. Eine, die von Anfang an
+   gefragt wurde, wird zum Fürsprecher.
+3. Es signalisiert Ebenbürtigkeit: Wer sagt, wer am Tisch sitzen soll, verkauft nicht,
+   sondern prüft mit.
+
+Die vorhandene **Qualifizierungs-Maske** auf der heutigen Seite fragt die Rolle bereits
+ab. Der Mechanismus ist gebaut, er muss nur diesem Zweck dienen.
+
+### Was der Geschäftsführer davon hat
+
+Die erste Frage des Kunden („welchen konkreten Nutzen hat der Geschäftsführer") ist mit
+E14 schon beantwortet, aber die Zuordnung wird hier scharf:
+
+| Leser | Argumente aus E14 |
+|---|---|
+| **Geschäftsführung** | Rahmen (Kosten des Wartens) · 1 Schatten-KI und Haftung · 2 Datensouveränität · 3 Kosten pro Kopf · 4 Firmen-Asset und Nachfolge |
+| **IT-Leitung** | 2 Datensouveränität technisch · 5 Systemintegration · plus die Betriebsfragen oben |
+
+Argument 5 (Systemintegration) war in E14 als „technische Tiefe weiter unten" markiert.
+**Es gehört jetzt konkret auf die IT-Seite** und hat dort einen Adressaten.
+
+### Konsequenz für den CTA
+
+Der seit E12 offene Punkt bekommt Kontur: Der CTA muss **selektieren**, nicht nur
+einladen. Ein Gespräch, das ohne Geschäftsführung stattfindet, ist verlorene Zeit für
+beide Seiten. Formulierungen, die das leisten, ohne abweisend zu wirken, sind der
+nächste offene Punkt.
+
+---
+
+## E17 · Die Microsoft-Frage
+
+**Frage 11 (konkrete IT-Einwände) wird zurückgestellt**, bis mehr Datenpunkte
+vorliegen. Richtig so: Bruxafort ist eine **Folienfirma**, kein Bauunternehmen. Ob
+Architekturbüros und Bauunternehmen dieselben Einwände bringen, ist unbelegt. Die Seite
+auf drei erfundene Einwände zu bauen, wäre schlechter als eine ehrliche Lücke.
+Sammelvorlage dafür: `02-einwand-log.md`.
+
+### Was der Fall Bruxafort trotzdem zeigt
+
+Der Betrieb hatte eine **interne Taskforce**, hatte in **Microsoft Copilot** bereits
+erste Dinge gebaut und ein kleines **RAG-System** versucht. Das ist kein Einwand, das
+ist eine Ausgangslage, und sie dürfte für das Zielsegment typisch sein.
+
+**Damit gibt es eine zweite Erklärung für das Scheitern, und sie ist mindestens so
+plausibel wie die aus E16:** Nicht nur die Geschäftsführung fehlte, sondern im Raum saß
+die Gruppe, die das Projekt selbst angefangen hatte. Wer einer Taskforce erklärt, dass
+ihr Weg der falsche ist, verliert den Raum, egal wer daneben sitzt. Beide Erklärungen
+können gleichzeitig zutreffen.
+
+**E16 bleibt gültig**, weil es sich auf das Muster aller Gespräche stützt, nicht nur auf
+Bruxafort. Aber das Bruxafort-Gewicht darin wird kleiner, und ein neuer Punkt kommt
+dazu: **Wie redet man mit einem Betrieb, der schon selbst angefangen hat, ohne ihn
+vorzuführen?** Diese Betriebe sind nicht die schlechteren Kunden, sondern die reiferen.
+Sie haben bewiesen, dass sie das Thema ernst nehmen, und sie kennen die Grenzen ihres
+Bastelstands aus eigener Erfahrung. Das ist ein besserer Gesprächseinstieg als ein
+unberührter Betrieb.
+
+### Die eigentliche Frage: konkurrieren oder koexistieren?
+
+Der Kunde stellt sie selbst und nennt drei mögliche Gründe für eine Konfrontation:
+Kostenersparnis, hauseigene Architektur, komplexere Workflows (Power Automate und
+Copilot-Agenten seien funktional deutlich schwächer).
+
+**Analyse, mit den Gegenargumenten zuerst:**
+
+1. **Frontal gegen Microsoft zu positionieren ist unglaubwürdig**, weil manibase
+   modellagnostisch **auf Azure** läuft (E3). Wer Azure nutzt und Microsoft angreift,
+   widerspricht sich im eigenen Architekturbild.
+2. **Es greift eine Entscheidung an, die der Leser schon getroffen hat.** M365 ist im
+   Haus, jemand hat das verantwortet. Das Gespräch beginnt mit einem Vorwurf.
+3. **Es macht den IT-Leiter zum Gegner.** Er verteidigt dann seine Welt und nicht mehr
+   die Sache. Genau das Veto aus E16.
+4. **Die Aussage „Power Automate und Copilot Studio können das nicht" ist ein
+   bewegliches Ziel.** Sie kann in sechs Monaten falsch sein und steht dann auf der
+   Website. Wer sie trotzdem verwenden will, muss sie vorher prüfen und als
+   Momentaufnahme kennzeichnen.
+
+**Empfehlung: Koexistenz statt Konfrontation.**
+
+> Copilot bleibt, wo es stark ist: im Word-Dokument, in der Mail, in der Teams-Sitzung.
+> Daneben entsteht eine eigene Ebene für das, was Copilot nicht macht: Bauprojekte
+> dokumentieren, DIN-Normen durchsuchbar halten, Angebote aus dem Bestand aufbauen,
+> Systeme miteinander verbinden.
+
+Was das leistet:
+
+- Es entwaffnet die IT vollständig. Keine Migration, kein Rauswurf, kein Angriff.
+- Es macht die Entscheidung der Geschäftsführung **klein statt groß**. Für ein junges
+  Unternehmen ohne Referenzen (E9) ist das der entscheidende Vorteil: Ein Zusatz ist
+  leichter zu genehmigen als ein Systemwechsel.
+- Es ist inhaltlich einfach wahr. manibase baut keine Office-Suite.
+
+### Der Einwand gegen die eigene Empfehlung
+
+**Koexistenz schwächt das Kostenargument** (E14 Nummer 3). Wer Copilot behält, spart
+zunächst nichts.
+
+**Auflösung, und sie ist präziser als die ursprüngliche Fassung:** Das Kostenargument
+richtet sich nicht gegen Copilot, sondern gegen den **flächendeckenden Rollout**. In
+einem Betrieb mit 150 Mitarbeitenden brauchen vielleicht 20 Leute Copilot dort, wo sie
+den ganzen Tag in Office arbeiten. Die übrigen 130 bekommen ihren Zugang über
+tokenbasierte Inferenz, zu einem Bruchteil. Das ist eine rechenbare, verteidigbare
+Aussage. „Copilot ist zu teuer, werft es raus" ist es nicht.
+
+### Was daraus für den Architektur-Vergleich (E15) folgt
+
+Die Achse der Gegenüberstellung ändert sich. Nicht **manibase gegen Microsoft**,
+sondern:
+
+| | |
+|---|---|
+| **links** | gewachsen: Copilot-Lizenzen hier, ein selbstgebautes RAG dort, private Konten dazwischen, kein Betriebskonzept |
+| **rechts** | gebaut: eine Ebene, ein Zugang über Entra ID, klare Datenwege, dokumentierter Betrieb |
+
+Das ist derselbe Vergleich, aber er beschreibt einen **Zustand statt eines Herstellers**.
+Er trifft den Bruxafort-Fall genau, ohne die Taskforce vorzuführen, und er kommt ohne
+eine einzige Behauptung über ein fremdes Produkt aus. Er ist damit auch der Vergleich,
+der in E15 als „fair" gefordert wurde.
+
+Er trägt zusätzlich den Rahmen aus E14 (Kosten des Wartens): Die linke Seite ist genau
+das, woran sich die Belegschaft gewöhnt und was in ein bis zwei Jahren wieder
+eingesammelt werden muss.
+
+---
+
+## E18 · Koexistenz bestätigt, und der eigentliche Unterschied
+
+**Entscheidung: Koexistenz mit Microsoft.** Keine Konfrontation, kein Vergleich, der
+ein fremdes Produkt schlechtredet. Damit ist E17 bestätigt und der Architektur-Vergleich
+aus E15 liegt fest auf der Achse **gewachsen gegen gebaut**.
+
+### Zwei Angebote statt einem
+
+Der Kunde nennt hier zum ersten Mal beide Wege nebeneinander:
+
+| | Für wen | Was manibase liefert |
+|---|---|---|
+| **In der Microsoft-Welt** | Betriebe, die M365 und Copilot bereits haben | **strukturell und organisatorisch**: welche Use Cases, in welcher Reihenfolge, wie abgebildet. Kein Agentenbau in fremder Architektur |
+| **Eigene Ebene** | Betriebe ohne passende Lösung, oder für die Copilot-Lizenzen in dreistelliger Zahl zu teuer sind | die vollständige Architektur (E3, Bereich 3) |
+
+**Das korrigiert E3, Bereich 2.** Dort stand „wird ungern gemacht, in einer bestehenden
+Architektur herumpfuschen". Die Abneigung galt dem **Agentenbau in fremder Umgebung**,
+nicht der Einführungsarbeit darüber. Die organisatorische Schicht (Use Cases,
+Reihenfolge, Schulung, Richtlinien) ist markenunabhängig und bleibt vollwertiges
+Angebot. Bereich 2 darf damit auf die Seite, anders geschnitten als bisher gedacht.
+
+### Der Satz, um den es geht
+
+> **Bei uns bekommt jeder einen Zugang.**
+
+Das ist die schärfste Formulierung im gesamten bisherigen Material. Sie ist wahr,
+nachprüfbar, greift kein fremdes Produkt an und beantwortet das Kostenargument aus E14
+Nummer 3 in fünf Wörtern. Lizenzmodelle vergeben **Plätze**, eine eigene Ebene vergibt
+**Zugänge**.
+
+### Warum das im Bau stärker wirkt als anderswo
+
+In einem Bauunternehmen mit 150 Mitarbeitenden sitzen vielleicht 30 im Büro. Die
+übrigen sind auf der Baustelle, im Auto, im Lager. **Diese Gruppe bekommt in keinem
+Lizenzmodell der Welt einen Platz**, weil sie den ganzen Tag nicht in Word arbeitet.
+
+Genau für sie ist **Bodo** gebaut (E4): Spracheingabe auf der Baustelle,
+Wiederauffinden über RAG. Damit schließt sich der Kreis zwischen Produktlinie und
+Positionierung. Der Zugang für alle ist nicht nur billiger, er erreicht überhaupt erst
+die Leute, um die es im Bau geht.
+
+Nebenwirkung, die dem Zielkunden gefallen dürfte: Es verhindert eine
+**Zwei-Klassen-Belegschaft**, in der das Büro Werkzeuge hat und der Bau nicht.
+
+### Zwei Warnungen
+
+**1. „Jeder bekommt Zugang" erzeugt Pflichten.** Wer eine ganze Belegschaft anschließt,
+braucht Schulung, Nutzungsrichtlinien und eine Antwort auf Missbrauch. In einem Betrieb
+dieser Größe kommt die **Mitbestimmung** dazu: Ein System, das Leistung sichtbar machen
+könnte, ist betriebsratspflichtig. Das ist kein Hindernis, sondern Umsatz. manibase
+liefert Richtlinien, TOMs und Compliance-Check ohnehin (E14 Nummer 1) und kann die
+Betriebsvereinbarung gleich mitdenken. Auf der Seite gehört es als Kompetenz genannt,
+nicht als Risiko verschwiegen.
+
+**2. Die Kostenaussage braucht eine Rechnung, keine Behauptung.** Tokenbasierte Inferenz
+für 150 Menschen ist nicht kostenlos, und Vielnutzer können teurer werden als ein
+Lizenzplatz. Belastbar ist die Aussage in dieser Form: **Sie zahlen Nutzung statt
+Plätze.** Bei einer Belegschaft, in der die meisten das System gelegentlich verwenden,
+ist der Unterschied groß. Vor Veröffentlichung mit echten Lizenzpreisen und einer
+realistischen Nutzungsannahme durchrechnen (siehe Warnung in E14).
+
+---
+
+## E19 · Korrektur zu E18: Agentenbau überall, und zwei Leistungsbausteine
+
+### Korrektur 1: Agentenbau in der Microsoft-Welt gehört dazu
+
+E18 stand „kein Agentenbau in fremder Architektur". **Falsch.** manibase baut auch in
+der Microsoft-Welt: kleine RAG-Systeme, interne Wikis anbinden, SharePoint-Anbindungen,
+Inhalte in Teams durchsuchbar machen. Und umgekehrt entstehen agentische Systeme
+perspektivisch gemeinsam mit dem Kunden auf der eigenen Plattform.
+
+**Quintessenz des Kunden:** Für welche Organisation was besser passt, lässt sich vorab
+nicht entscheiden. Es hängt am Reifegrad. Also muss manibase beides können.
+
+**Das ist inhaltlich richtig und für eine Website ein Problem.** „Wir können beides"
+liest sich als „wir wissen es nicht", und alle elf untersuchten Wettbewerber führen ein
+klares Angebot. Die Auflösung liegt nicht darin, eine Technik zu streichen, sondern
+darin, das Konstante nach vorn zu stellen:
+
+> **Konstant ist die Einführung.** Use Cases finden, Reihenfolge festlegen, Menschen
+> schulen, Richtlinien schreiben, Betrieb sichern. Das ist dieselbe Arbeit, egal wo es
+> am Ende läuft.
+>
+> **Variabel ist die Plattform.** Ob in Ihrer Microsoft-Umgebung oder auf eigener
+> Infrastruktur, entscheiden wir, wenn wir Ihre Ausgangslage kennen.
+
+So wird aus Unentschiedenheit eine Haltung: **erst schauen, dann bauen.** Das passt
+exakt zu E16 („wer sagt, wer am Tisch sitzt, verkauft nicht, sondern prüft mit") und
+ist genau das, was ein Geschäftsführer von einem Partner erwartet und von einem
+Verkäufer nicht bekommt. Die Plattformfrage gehört damit **nicht** in den Hero, sondern
+auf die technische Unterseite und ins Erstgespräch.
+
+### Korrektur 2: „Zugang für alle" gilt nicht überall
+
+E18 hatte „Bei uns bekommt jeder einen Zugang" zum stärksten Satz erklärt und ihn
+ausgerechnet im Bauunternehmen am stärksten verortet. **Der Kunde widerspricht, und er
+hat recht.**
+
+| | **Planungs- und Bürobetrieb** | **Ausführender Betrieb** |
+|---|---|---|
+| Beispiel | Architekturbüro, 50 Mitarbeitende | Bauunternehmen, Spengler, Dachdecker |
+| Anteil mit Schreibtisch und Rechner | nahezu alle | ein Drittel bis ein Fünftel |
+| Was gebraucht wird | **Zugang für jeden**, ganzheitliche KI-Einführung | **eine Funktion**, einmal eingerichtet |
+| Skaliert mit | Kopfzahl | Funktionsumfang, **nicht** mit der Nutzerzahl |
+| Leistungsbaustein | strukturiertes Einführungsprojekt | Helfer (Bodo, PIA) |
+
+**Damit ist „jeder bekommt einen Zugang" der richtige Satz für das Architekturbüro und
+der falsche für das Bauunternehmen.** Im ausführenden Betrieb lautet das Versprechen
+anders: eine Funktion, die läuft, und es ist gleichgültig, ob zwei, fünf oder zwanzig
+Leute sie benutzen.
+
+Die Beobachtung aus E18 (die Baustellen-Belegschaft bekommt in keinem Lizenzmodell
+einen Platz) bleibt gültig. Nur die Schlussfolgerung war falsch: Es folgt daraus kein
+Zugang für alle, sondern ein **Helfer statt Lizenzplätze**.
+
+### Die Segmentierungsachse, die daraus folgt
+
+E13 hatte die Segmentierung zwischen die beiden Marken gelegt und damit innerhalb von
+manibase.de offengelassen. **Hier ist die erste inhaltlich begründete Achse innerhalb
+der Seite: die Schreibtischquote.**
+
+Sie ist tragfähig, wo Gewerke-Seiten es nicht sind. Die Recherche beziffert den
+ehrlichen Substanzanteil einer Gewerke-Seite auf 30 bis 40 Prozent. Hier unterscheiden
+sich **Leistung, Preislogik und Ergebnis** wirklich, nicht nur die Überschrift.
+
+**Einschränkung:** Die beiden Bausteine schließen sich nicht aus. Ein Bauunternehmen
+mit 150 Mitarbeitenden hat ein Büro *und* eine Baustelle und braucht am Ende beides,
+nur in anderer Gewichtung. Die Seite sollte sie deshalb als **zwei Bausteine eines
+Angebots** zeigen, nicht als zwei Produkte mit getrennten Türen. Sonst entstehen wieder
+konkurrierende Eingänge, die E10 gerade abgeschafft hat.
+
+### Folge für die Preisdarstellung (E8)
+
+E8 hatte entschieden, statt einer Zahl die **Form** zu zeigen. Diese Form ist jetzt
+konkreter: **zwei Preislogiken.** Das Einführungsprojekt skaliert mit der Kopfzahl, der
+Helfer nicht. Das lässt sich ohne eine einzige Zahl darstellen und beantwortet die
+stille Frage „wird das mit 150 Leuten unbezahlbar" für den ausführenden Betrieb
+mit einem klaren Nein.
+
+---
+
+## E20 · Der Ablauf, und die Rückkehr des Klartags
+
+### Drei Stufen, sieben Schritte
+
+**Stufe 1 · Gespräch auf Augenhöhe.** Geklärt wird, ob überhaupt etwas geht:
+Weiterentwicklung in der Microsoft-Welt, eigene Einführung, oder **gar nichts**, weil
+Programme und Schnittstellen im Haus sind, die sich heute nicht anbinden lassen.
+Abgefragt werden Systemlandschaft, Mitarbeiter- und Arbeitsplatzzahl und das Aufkommen
+in den Prozessen (Baudokumentation, Angebotserstellung, Verwaltung).
+
+**Stufe 2 · Klartag.** Tagesworkshop, kostenpflichtig, wird bei einem Folgeprojekt
+angerechnet. Ergebnis: Roadmap und geklärte Infrastruktur.
+
+**Stufe 3 · Einführungsprojekt, sechs Monate.**
+
+| # | Schritt | Inhalt |
+|---|---|---|
+| 1 | Kick-off | Starttermin, idealerweise mit den Führungskräften |
+| 2 | Erste Projektwochen | E-Mail-Vorlagen für Geschäftsleitung und Führungskräfte, Bestellung der Projektgruppe |
+| 3 | Laufendes Projektmanagement | mindestens wöchentliche Termine, Kanban-Board, Stakeholder eingebunden |
+| 4 | AI Champions | Early Access auf die Plattform, prüfen sie, entwickeln Use Cases für die Kollegen mit |
+| 5 | Interne Kommunikation | damit das Thema nicht versandet |
+| 6 | Individualisierung und Rollout | Standardbereitstellung für die ganze Organisation statt Einzeleinrichtung |
+| 7 | Schulung und Zugänge | breitflächig, mit **Zertifikaten** |
+
+**Abschlusskriterien des Projekts** (klar formuliert, gehört so auf die Seite):
+drei bis fünf Anwendungsfälle vollständig umgesetzt · Compliance-Vorgaben berücksichtigt
+und implementiert · Mitarbeitende geschult und zertifiziert · onboardet · System läuft
+produktiv.
+
+**Bewertung:** Die Selbstbegrenzung auf **maximal drei bis fünf Use Cases** ist ein
+Qualitätssignal. Wer eine Obergrenze nennt, hat schon einmal ein Projekt geliefert.
+Die **Zertifikate** sind ein greifbares Ergebnis, das im Wettbewerb niemand nennt.
+
+### Der Klartag ist zurück, und er ist teurer
+
+| | E2 / E3 (3.8.) | E20 (4.8.) |
+|---|---|---|
+| Rolle | „nachrangig", schwer verkäuflich | **integraler Standardbestandteil** vor jedem Projekt |
+| Preis | 1.800 € auf der Seite, 2.000–3.000 € im Gespräch | **3.900 € netto als Festpreis** |
+| Anrechnung | voll | voll |
+
+**Und der Retainer hat sich verdoppelt.** E8 nannte 2.000 bis 5.000 € im Monat, hier
+stehen **6.000 bis 10.000 €**. Kein Widerspruch, sondern die Folge von E12: E8 wurde
+formuliert, bevor der Zielkorridor auf 100 bis 200 Mitarbeitende festgelegt war. Aber
+die Zahlen in E8 sind damit **überholt** und dürfen nicht versehentlich weiterverwendet
+werden.
+
+**Warum die Rückkehr des Klartags richtig ist:** Er löst genau das Problem, an dem er in
+E2 gescheitert war. Als alleinstehendes Beratungsprodukt für 1.800 € brauchte er
+Vertrauen, das ein Erstkontakt nicht mitbringt. Als **Risikopuffer vor einem
+Sechs-Monats-Retainer** verkauft er sich von selbst: Der Kunde muss nicht 36.000 bis
+60.000 € entscheiden, sondern einen Tag. Derselbe Workshop, andere Funktion.
+
+### Der stärkste Satz des gesamten Konzepts
+
+> „Du kannst mit dieser Roadmap gerne zur Konkurrenz gehen, das ist völlig in Ordnung.
+> Oder wir machen daraus ein gemeinsames Projekt über sechs Monate."
+
+Das ist eine echte Risikoumkehr ohne Geld-zurück-Garantie, und die Recherche hält fest,
+dass **kein einziger** der sechs untersuchten Wettbewerber irgendeine Form von
+Risikoumkehr anbietet. Es beantwortet außerdem die Lock-in-Angst, es beweist Vertrauen
+in die eigene Arbeit, und es ist überprüfbar wahr.
+
+**Gehört wörtlich auf die Seite.** Nicht paraphrasiert, nicht geglättet. Das Du in der
+Originalfassung wird auf Sie umgestellt, sonst nichts.
+
+### Damit ist die Preisfrage aus E8 neu zu stellen
+
+E8 entschied: keine Zahl auf der Seite. Das galt dem **Retainer**, und das bleibt
+richtig. Der **Klartag** ist ein anderer Fall:
+
+- Es ist der tatsächliche Einstiegspreis, der Retainer ist es nicht.
+- Er ist anrechenbar, das Risiko für den Kunden ist also gering.
+- Eine Zahl an dieser Stelle nimmt der Seite den ausweichenden Eindruck, vor dem
+  NN/g (Loranger 2013) warnt, ohne den Retainer offenzulegen.
+- Die alte Seite hatte diese Mechanik bereits (1.800 €, voll anrechenbar). Sie
+  funktioniert, nur Zahl und Zielgruppe stimmten nicht mehr.
+
+**Entscheidung vom 13. August 2026: den Klartag-Preis mit 3.900 € netto als Festpreis
+nennen** und die volle Anrechnung direkt danebenstellen. Enthalten sind Vorbereitung,
+der gemeinsame Tag im Unternehmen und eine schriftliche Roadmap im Anschluss.
+
+### Konsequenz für den Seitenaufbau
+
+Sieben Schritte sind zu viel für eine Startseite. **Drei Stufen auf die Startseite**
+(Gespräch → Klartag → Projekt), die vollständige Roadmap auf eine Unterseite. Das
+vorhandene Timeline-Bauteil der heutigen Seite trägt genau das, es muss nur neu
+befüllt werden: aus „So läuft ein KI-Klartag" wird „So läuft eine Einführung".
+
+### Zwei Unklarheiten aus dem Diktat
+
+- **„150 Lizenzen für Open Web UI"** — Open WebUI ist Open Source und kennt keine
+  Lizenz pro Arbeitsplatz. Gemeint ist vermutlich der Einrichtungs- und
+  Onboarding-Aufwand pro Nutzer, oder es geht um Copilot-Lizenzen. Vor der Verwendung
+  im Text klären, ein technischer Leser stolpert darüber.
+- **„Die Kunden sind erfolgreich geonboardet"** — gemeint sind vermutlich die
+  Mitarbeitenden des Kunden.
+
+### Was der Antwort noch fehlt
+
+Beschrieben ist der Ablauf **wie geplant**. Es fehlt der Ablauf **wie erlebt**:
+Zeitaufwand für den Kunden und die Stelle, an der es hakt. Siehe Frage 14.
+
+---
+
+## E21 · Was das Projekt den Kunden an eigener Zeit kostet
+
+| Posten | Aufwand | Wer |
+|---|---|---|
+| **Klartag** | mindestens 1 Tag | Geschäftsleitung, Führungsteam, IT |
+| **Projektgruppe** | mindestens 1 Std./Woche pro Person, **5 bis 6 Personen** = 5 bis 6 Std./Woche | Projektteam |
+| **Live-Tests und Review** | nicht beziffert, aber verbindlich: jemand muss testen und Rückmeldung geben, damit Feedback-Schleifen entstehen | Fachanwender |
+| **Schulung** | einmalig, Dauer noch offen | alle künftigen Nutzer |
+
+Der Umfang schwankt mit dem Bedarf.
+
+### Die Zahl, die auf die Seite gehört
+
+Sechs Stunden pro Woche über ein halbes Jahr klingt nach viel. **Pro Kopf gerechnet
+klingt dieselbe Zahl völlig anders:**
+
+> Rund eine Stunde pro Woche für fünf bis sechs Leute. Über sechs Monate sind das
+> **etwa drei Arbeitstage pro Person**. Dazu der Klartag und die Schulung.
+
+Das ist dieselbe Wahrheit, nur aus der Perspektive dessen, der sie freigeben muss. Für
+eine Geschäftsführung, die „sechs Monate Projekt" hört und insgeheim mit einem
+Vollzeit-Äquivalent rechnet, ist das eine Entwarnung. **Ein Aufwand, den man beziffern
+kann, ist immer kleiner als einer, den man sich ausmalt.**
+
+**Zwei Ehrlichkeitsauflagen:**
+
+1. Der Kunde sagt „mindestens". Auf der Seite muss das **mitgesagt** werden, sonst wird
+   aus einer Untergrenze ein Versprechen. Formulierung: „mindestens", oder eine Spanne.
+2. Die Rechnung enthält Schulung und Test-Reviews **nicht**. Solange die
+   Schulungsdauer pro Kopf nicht feststeht, darf die Zahl nicht als Gesamtaufwand
+   ausgegeben werden.
+
+### Noch offen
+
+- **Schulungsdauer pro Person** (halber Tag? zwei Stunden?). Wird gebraucht, sobald der
+  Gesamtaufwand genannt werden soll.
+- **Zeitanteil der Geschäftsführung selbst.** E16 hat gezeigt, dass ohne sie nichts
+  läuft. Ein Geschäftsführer, der freigibt, will wissen, was **er** leisten muss, nicht
+  nur sein Team.
+- **Die Stelle, an der es hakt.** Dreimal gefragt, dreimal nicht beantwortet. Siehe
+  Frage 15.
+
+---
+
+## E22 · Wo es hakt, und warum das auf die Seite gehört
+
+Fünf reale Reibungspunkte aus dem laufenden Projekt. Das ist der glaubwürdigste Inhalt
+im ganzen Material, weil ihn nur schreiben kann, wer es gemacht hat.
+
+### 1 · Die leeren ersten Wochen
+
+Die technische Einrichtung hängt an den IT-Dienstleistern des Kunden oder am
+Rechenzentrum. Verträge unterschreiben, installieren, freischalten: **zwei bis drei
+Wochen**, in denen für die Belegschaft nichts Sichtbares passiert. Im Architekturbüro
+war es genau so. Die Leute werden ungeduldig, weil sie bezahlt haben und etwas sehen
+wollen.
+
+**Auf der Seite:** vorher sagen. „Die ersten zwei bis drei Wochen passiert für Ihre
+Belegschaft nichts Sichtbares. Es werden Verträge geschlossen und Systeme eingerichtet.
+Wir sagen es vorher, damit niemand nervös wird." Ein Anbieter, der die unangenehme
+Phase von sich aus benennt, wird beim Rest geglaubt.
+
+**Produktseitig prüfen:** Ließe sich die Lücke schließen, indem die AI Champions
+vorübergehend auf einer manibase-Instanz starten, während beim Kunden noch installiert
+wird? Dann gäbe es ab Woche 1 etwas zu sehen. Kein Website-Thema, aber ein
+Projektthema.
+
+### 2 · Die älteren Hasen
+
+Erfahrene Mitarbeitende und Bedenkenträger machen weniger mit. Erwartbar, in jedem
+Veränderungsprojekt.
+
+**Auf der Seite:** nicht abwertend formulieren. Wer über die eigenen Leute spottet,
+gewinnt keinen Geschäftsführer, der genau diese Leute seit zwanzig Jahren beschäftigt.
+Die brauchbare Fassung ist die Antwort darauf: AI Champions, interne Kommunikation,
+Schulung mit Zertifikat. Also **Methode statt Klage**.
+
+### 3 · Use Cases, die pivotieren müssen
+
+Was im Workshop gut klang, ist in der Praxis nicht umsetzbar. Das kostet Vertrauen,
+wenn sich jemand darauf eingestellt hat.
+
+**Auf der Seite, und das ist der Trick:** vorher ansagen, dass es passiert. „Von fünf
+Anwendungsfällen wird erfahrungsgemäß einer bis zwei ausgetauscht, weil die Praxis
+etwas anderes zeigt als der Workshop." Wer das vorher sagt, für den ist der Pivot
+**Bestätigung des Plans statt Scheitern**. Wer es verschweigt, steht beim ersten Pivot
+als jemand da, der sich geirrt hat.
+
+### 4 · Legacy-Systeme ohne echte Schnittstellen
+
+Alte Systeme lassen sich nicht anbinden, **obwohl die Hersteller behaupten, es gäbe
+Schnittstellen**.
+
+**Das ist ein Kompetenzbeleg, kein Problem.** Daraus wird ein Versprechen, das kein
+Wettbewerber gibt:
+
+> Wir sagen Ihnen im Klartag, was sich anbinden lässt und was nicht. Auch dann, wenn
+> Ihr Softwarehersteller etwas anderes behauptet.
+
+Nach E16 ist das zugleich der beste Satz für die IT-Leitung. Sie kennt dieses Problem
+aus eigener Erfahrung und hat es vermutlich schon einmal verloren. Ein Anbieter, der es
+von sich aus anspricht, wird vom Vetogeber zum Verbündeten.
+
+Er stützt außerdem Stufe 1 aus E20, wo ausdrücklich auch das Ergebnis „gar nichts
+machen" vorgesehen ist.
+
+### 5 · Niemand weiß, wie der Betrieb wirklich arbeitet
+
+> „Viele Workflows im Betrieb sind nie bis zur Geschäftsleitung durchgedrungen. Es
+> passieren Arbeitsabläufe, von denen die Führungsebene gar nichts weiß."
+
+**Das ist die wertvollste Beobachtung der ganzen Antwort.** Sie begründet den Klartag
+besser als jedes Nutzenversprechen: Wer nicht weiß, wie im eigenen Haus gearbeitet
+wird, kann keine sinnvollen Anwendungsfälle bestellen.
+
+Formulierung muss vorsichtig sein, sie darf dem Geschäftsführer nicht Unwissenheit
+vorwerfen. Tragfähig ist die verallgemeinerte Fassung: „In jedem Betrieb, den wir
+gesehen haben, arbeiten die Leute anders, als es auf dem Papier steht. Das ist normal
+und der Grund, warum wir mit der Arbeitsebene sprechen und nicht nur mit der Leitung."
+
+### Ein Widerspruch, der wichtiger ist als die Website
+
+E20 besetzt den Klartag mit **Geschäftsleitung, Führungsteam und IT**. Punkt 5 sagt,
+dass genau diese Runde die realen Abläufe **nicht kennt**.
+
+**Damit fehlt im Klartag die Arbeitsebene.** Das ist kein Textproblem, sondern ein
+Produktproblem: Ein Workshop, der Anwendungsfälle festlegen soll, aber nur mit Leuten
+besetzt ist, die den Alltag nicht im Detail kennen, produziert genau die Use Cases, die
+später pivotiert werden müssen (Punkt 3). Die beiden Reibungspunkte hängen zusammen.
+
+**Empfehlung: Klartag-Besetzung überdenken.** Entweder die Arbeitsebene mit an den
+Tisch, oder ein kurzer vorgeschalteter Termin mit zwei bis drei Leuten aus der Praxis.
+Das würde Punkt 3 und Punkt 5 gleichzeitig entschärfen und wäre nebenbei ein
+Verkaufsargument: „Wir fragen die Leute, die die Arbeit machen."
+
+### 6 · Fehlende Mitwirkung
+
+Termine fallen aus, Zusagen verzögern sich. Gegenmittel des Kunden: genug „Hausaufgaben"
+verteilen und schnell genug Output liefern, damit die Leute bei der Stange bleiben.
+
+**Auf der Seite als Bedingung formulieren, nicht als Beschwerde:** „Das Projekt
+gelingt nur, wenn Ihre Leute mitarbeiten. Wie viel Zeit das kostet, sagen wir vorher"
+(Zahlen aus E21). Das filtert die falschen Kunden vor dem Erstgespräch heraus und passt
+zur selektiven Haltung aus E9 und E16.
+
+### Format auf der Seite
+
+Diese sechs Punkte gehören **nicht** in eine Mängelliste, sondern paarweise:
+**Reibung → wie wir damit umgehen.** Sechs Zeilen, zwei Spalten. Das ist zugleich der
+Abschnitt, der die Recherche-Anforderung „Upfront Disclosure" (NN/g, Harley 2016)
+erfüllt, und der einzige Inhalt der Seite, den ein Wettbewerber nicht abschreiben kann,
+ohne es selbst erlebt zu haben.
+
+---
+
+## E23 · Seitenstruktur
+
+### Startseite (ein Leser: die Geschäftsführung)
+
+Hero mit dem Rahmen „Kosten des Wartens" (E14) · Architektur-Vergleich *gewachsen gegen
+gebaut* (E17) · die zwei Bausteine Einführung und Helfer (E19) · fünf Kaufargumente in
+der Reihenfolge aus E14 · drei Stufen Gespräch → Klartag → Projekt (E20) · Reibung und
+Umgang, zweispaltig (E22) · Gründer (E5) · Pilotkonditionen (E9) · Termin.
+
+### Unterseiten
+
+| Seite | Inhalt | Status |
+|---|---|---|
+| **Der Klartag** | Ablauf, Besetzung, Preis, Anrechnung, der „gehen Sie gern zur Konkurrenz"-Satz | ersetzt `ki-klartag.html` |
+| **Das Einführungsprojekt** | volle Sieben-Schritte-Roadmap, Zeitaufwand (E21), Abschlusskriterien | neu |
+| **Für Ihre IT** | Betrieb, Backup, Entra ID, Datenwege, Schnittstellen-Ehrlichkeit, Exit | neu (E16) |
+| **Über uns** | Gründer, Werdegang, Haltung | bestätigt |
+| **Veranstaltungen** | siehe unten | neu, später |
+| **Karriere** | – | **entfällt.** 11 von 11 Wettbewerbern haben eine, bei zwei Personen wäre sie gelogen |
+| **Produktseiten Bodo, PIA** | – | **entfallen vorerst.** Bestätigt E4: erst wenn spruchreif |
+
+### Veranstaltungen: ja, aber mit einer Bedingung
+
+Passt zu E12, wo Infoveranstaltungen bei Handwerksinnungen und Kreishandwerkerschaften
+sowie Verbandsvorträge ausdrücklich als **Kanal von manibase.de** benannt sind. Nicht zu
+verwechseln mit der KI-Sprechstunde, die zu matthias-geisler.com gehört.
+
+**Bedingung: Die Seite geht erst online, wenn ein Termin in der Zukunft liegt.** Eine
+Veranstaltungsseite mit abgelaufenen Daten ist schlechter als keine. Genau das ist im
+Juli passiert (`infotermin.html` mit Terminen vom 29. und 31.07.). Wo es geht, mit
+wiederkehrendem Rhythmus arbeiten statt mit Einzeldaten.
+
+**Platzierung:** Footer und „Über uns", nicht in die Hauptnavigation. Vier bis sechs
+Punkte oben, mehr nicht (Median der Recherche: 5 bis 6).
+
+**Nicht als sekundärer CTA im Hero**, solange kein verlässlicher Rhythmus existiert.
+Verbandsvorträge terminieren Dritte, die Lücken sind unvermeidlich. Der offene Punkt aus
+E12 wird deshalb anders gelöst: **sekundärer CTA = „So läuft ein Klartag"** (Lesen statt
+Reden). Immer verfügbar, nie leer, und er führt genau auf die Seite, die die
+Kaufentscheidung vorbereitet. Entspricht dem Muster der alten Seite, die im Hero auf den
+Ablauf verwies.
+
+### Legacy-Seiten: bleiben, ohne Schaden
+
+Geprüft am 4.8.2026:
+
+| Seite | robots | eingehende Links |
+|---|---|---|
+| `infotermin.html` | `noindex, follow` | keine |
+| `interessent.html` | `noindex, nofollow` | keine |
+| `ki-klartag.html` | `noindex, follow` | keine |
+
+Alle drei sind unverlinkt und aus dem Index genommen. Die abgelaufenen Juli-Termine
+schaden also weder Auffindbarkeit noch Vertrauen, weil sie praktisch niemand erreicht.
+**`infotermin.html` bleibt als Vorlage liegen**, sie wird zur Grundlage der künftigen
+Veranstaltungsseite (Anmeldung und Einwilligungsstruktur sind dort bereits sauber
+gebaut, siehe E11).
+
+Der Widerspruch „per Zoom" im Text gegen „per Teams" in der Auswahl bleibt offen und
+muss vor einer Wiederverwendung raus.
+
+### Blog: Bewertung und Gegenvorschlag
+
+**Der Befund:** 11 von 11 Wettbewerbern haben einen Blog. Trotzdem lautet die Empfehlung
+**nicht** „Blog bauen".
+
+*Gegen den Blog:*
+
+- Der Vertrieb läuft über Innungen, Verbände, Vorträge und persönliche Kontakte (E12).
+  Suchmaschinen sind nicht der Kanal. Bei einem Geschäftsziel von 100 bis 200 Kunden
+  **insgesamt** ist Reichweite nicht das Nadelöhr.
+- Für GEO (Zitiertwerden durch KI-Systeme) gilt dasselbe in klein: Die Suchanfragen in
+  diesem Feld sind wenige, und der Ertrag ist nicht seriös prognostizierbar. Wer einen
+  Blog **für GEO** baut, baut auf eine Vermutung.
+- **Der heutige Blog ist schlechter als keiner:** ein einziger Beitrag. Ein sichtbar
+  eingeschlafener Blog beschädigt Vertrauen (NN/g Harley 2016, Kriterium
+  Vollständigkeit und Aktualität). Reichweite ohne Pflege ist ein Minusgeschäft.
+
+*Für Inhalte spricht etwas anderes, und zwar stark:*
+
+Ein Geschäftsführer, der den Vortrag bei der Innung gehört hat, **googelt danach die
+Firma**. Was er findet, entscheidet über den Rückruf. Dafür braucht es keine Frequenz,
+sondern Substanz.
+
+**Gegenvorschlag: keine Blog, sondern drei bis fünf dauerhafte Texte ohne Datum.**
+
+| | |
+|---|---|
+| **Ohne Datum** | veraltet nie sichtbar, kein Pflegedruck, keine tote Frequenz |
+| **Themen, die ohnehin gebraucht werden** | Was eine KI-Einführung im Bauunternehmen kostet und wovon es abhängt (E8) · Copilot oder eigene Plattform, und wann was passt (E18) · Schatten-KI: was ein Betrieb rechtlich riskiert (E14) · Warum Schnittstellen versprochen und nicht geliefert werden (E22) |
+| **Doppelnutzen** | dasselbe Material dient im Verkaufsgespräch, als Nachfass-Mail und als Vortragsunterlage |
+| **GEO nebenbei** | Genau solche konkreten, bezifferten, zitierfähigen Texte werden von KI-Systemen ausgewertet. Als Nebeneffekt mitnehmen, nicht als Begründung |
+
+**Der bestehende Beitrag** („Papierkram am Chef") ist auf den alten Zielkunden getextet
+(Inhaber, Abende, kleiner Betrieb) und passt nach E12 nicht mehr zu manibase.de.
+Kandidat für den Umzug auf matthias-geisler.com.
+
+---
+
+## E24 · Tonalität und Einstieg
+
+**Kein Nickerlebnis vorhanden.** Zu wenige Gespräche bisher. Die Suche nach dem einen
+Satz aus der Praxis entfällt damit, ehrlich festgehalten statt ersetzt durch eine
+Erfindung.
+
+**Was der Kunde stattdessen nennt:** verstanden werden „strukturierte
+KI-Einführungsprojekte, individuell für den Betrieb zugeschnitten", getragen von vier
+Argumenten: kein teures Lizenzchaos · keine Schatten-KI · Anwendungsfälle mit messbarem
+wirtschaftlichem Nutzen · Befähigung der Mitarbeitenden.
+
+### Entscheidung: nüchterne Überschrift, scharfe Unterzeile
+
+Keine der drei vorgeschlagenen Richtungen (Warnung / Fenster / Zugang) wird gewählt.
+Stattdessen das Muster, das die Vorbilder aus der Recherche tatsächlich verwenden:
+**Die Überschrift sagt, was verkauft wird. Die Unterzeile sagt, warum es anders ist.**
+
+Für einen Geschäftsführer, der in drei Sekunden entscheidet, ob er weiterliest, ist eine
+klare Kategoriebezeichnung wertvoller als ein kluger Einfall. Bei einer
+Investitionsentscheidung dieser Größe gewinnt Verständlichkeit gegen Originalität.
+
+**Entwurf:**
+
+> **KI im Betrieb einführen. Strukturiert, und auf Ihre Abläufe zugeschnitten.**
+>
+> Ohne Lizenzchaos, ohne Schatten-KI. In sechs Monaten drei bis fünf Anwendungsfälle,
+> die sich rechnen, und Mitarbeitende, die damit arbeiten können.
+
+Der Rahmen „Kosten des Wartens" (E14) bleibt die stärkste Erzählung, rutscht aber
+**eine Sektion nach unten**. Als Eröffnung wäre er eine Drohung, direkt nach der
+Einordnung ist er ein Argument.
+
+### Zwei Formulierungsauflagen
+
+**„individuell zugeschnitten"** ist die häufigste Floskel im deutschen B2B und sagt
+nichts. Ersetzt durch **„auf Ihre Abläufe, nicht auf eine Branchenschablone"**. Deckt
+sich mit E22 Punkt 5: In jedem Betrieb wird anders gearbeitet, als auf dem Papier steht.
+
+**„messbar wirtschaftlicher Nutzen"** ist ein Versprechen, kein Adjektiv. Es hält nur,
+wenn im Klartag je Anwendungsfall eine Messgröße festgelegt wird. Wenn ja, ist es ein
+Alleinstellungsmerkmal und gehört so formuliert: **„Anwendungsfälle, deren Nutzen wir
+vorher beziffern."** Wenn nein, muss es weicher werden. **Zu klären.**
+
+### Die vier Argumente werden das Wertband
+
+Sie ersetzen das heutige `.valueband` unter dem Hero (bisher: 1.800 € · 1 Tag · voll
+anrechenbar · DSGVO). Das Bauteil bleibt, der Inhalt wechselt. Vier Felder:
+Lizenzchaos · Schatten-KI · bezifferter Nutzen · befähigte Mitarbeitende.
+
+### Beobachtung zur Argumentliste
+
+Die vier spontan genannten Argumente decken sich nur teilweise mit den fünf aus E14:
+
+| E14 | in der spontanen Liste |
+|---|---|
+| 1 Schatten-KI und Compliance | **ja** |
+| 2 Datensouveränität | **nein** |
+| 3 Kosteneffizienz | ja (Lizenzchaos) |
+| 4 Firmen-Assets und Nachfolge | **nein** |
+| 5 Systemintegration | nein (gehört nach E16 auf die IT-Seite) |
+| – | **neu: messbarer Nutzen** |
+| – | **neu: Befähigung der Mitarbeitenden** |
+
+Was jemand spontan nennt, ist ein Hinweis darauf, was im Gespräch funktioniert.
+**Auflösung: Die vier spontanen Argumente werden das Wertband, die fünf aus E14 bleiben
+die Textabschnitte darunter.** Datensouveränität verschwindet damit nicht, sie eröffnet
+nur nicht. Für die Baubranche (geistiges Eigentum, Entwürfe) bleibt sie zu wichtig, um
+sie zu streichen.
+
+---
+
+## E25 · CTA und die Warteschlangen-Idee
+
+### Klarstellung zu E24
+
+Die vier spontan genannten Argumente **ersetzen** die fünf aus E14 nicht. Sie waren
+das, was gerade präsent war. Alle bisherigen Argumente gelten weiter, die Aufbereitung
+für die Website erfolgt später. Diese Sammlung ist die **Single Source of Truth**, aus
+der die Texte entstehen, nicht die Texte selbst.
+
+### Der CTA
+
+**Primär: „Machbarkeit klären."** Verb plus Objekt, beschreibt ehrlich, was in Stufe 1
+passiert (E20), und denkt das mögliche Ergebnis „geht nicht" mit. Ein Anbieter, der das
+mitdenkt, wirkt glaubwürdiger als einer, der bucht.
+
+Darunter als Kleintext die Auswahlfunktion aus E16, die der Knopf selbst nicht leisten
+kann, ohne unfreundlich zu werden:
+
+> 30 Minuten, mit der Geschäftsführung, gern zusammen mit Ihrer IT.
+
+**Sekundär: „So läuft ein Klartag"** (E23).
+
+### Die Warteliste: richtige Wahrheit, falscher Mechanismus
+
+**Der Gedanke stimmt.** Zwei Personen, begrenzte Kapazität, das ändert sich vorerst
+nicht. E9 hat die Knappheit bereits als Haltung festgehalten („wir nehmen aktuell nur
+noch 3 Projektpartner auf"), und echte Knappheit ist die einzige Form, die man ohne
+Risiko zeigen kann.
+
+**Vier Einwände gegen die Warteliste als Haupteingang:**
+
+1. **Eine Warteliste ohne Warten ist eine Lüge.** Wer sich einträgt und zwanzig Minuten
+   später einen Anruf bekommt, erkennt den Trick. Bei einem Geschäftsführer eines
+   150-Mann-Betriebs, der solche Mechaniken kennt, kostet das genau die Währung, die
+   diese Seite als einzige hat: Glaubwürdigkeit. Der ausformulierte Satz
+   („witzigerweise sind Sie gerade ganz oben") liest sich als einstudiert.
+2. **Sie verzögert Umsatz.** Laut E8 wird noch ein zweiter Kunde zu Pilotkonditionen
+   gesucht. Einem kaufbereiten Interessenten „nicht jetzt" zu sagen, ist das Gegenteil
+   dessen, was ein junges Unternehmen braucht.
+3. **Sie ersetzt das Gespräch durch ein Formular.** E16 hat gezeigt, dass alles davon
+   abhängt, wer am Tisch sitzt. Eine Eintragung wählt nicht aus, ein Gespräch schon.
+4. Sie kostet die Gelegenheit, im Erstkontakt die Machbarkeit zu prüfen, also genau das,
+   was Stufe 1 leisten soll.
+
+**Auflösung: Knappheit zeigen, ohne den Eingang zu verschließen.**
+
+Die Warteliste wird kein Mechanismus, sondern ein **Zustand**. Neben dem CTA steht eine
+wahre Kapazitätsaussage:
+
+> Wir arbeiten zu zweit und nehmen bis Jahresende drei Projekte an.
+> Zwei Plätze sind vergeben.
+
+Das leistet dasselbe wie eine Warteliste (Druck raus, Selektion sichtbar, Knappheit
+belegt), ohne den kaufbereiten Kunden wegzuschicken. **Zahlen nur nennen, wenn sie
+stimmen, und pflegen.** Eine veraltete Kapazitätsangabe ist so schädlich wie ein
+abgelaufener Veranstaltungstermin (E23).
+
+**Wenn tatsächlich ausgebucht:** Dann wird der CTA selbst zur Warteliste, offen benannt
+(„Wir sind bis März ausgebucht. Auf die Liste setzen lassen."). Ehrlich, weil dann
+wirklich gewartet wird.
+
+### Wo die Warteliste jetzt schon passt
+
+**Bei PIA.** Laut E4 sucht PIA Pilotpartner, das Infopaper ging am 26.7. raus. Eine
+begrenzte Zahl von Pilotplätzen ist dort real und überprüfbar. Das ist der richtige Ort
+für die Mechanik, nicht der Haupteingang.
+
+### Die Maske vor dem Kalender
+
+Von fünf auf **drei Schritte** gekürzt: Mitarbeiterzahl (trennt nach E12 zwischen den
+Marken) · **Wer wäre dabei** (E16, fängt den Bruxafort-Fall ab) · Kontakt und
+Einwilligung. Kürzer heißt mehr Abschlüsse. Der bestehende Wizard-Mechanismus bleibt,
+nur die Fragen wechseln.
+
+**Festgelegt (4.8.):** vier Schritte, so kurz wie möglich.
+
+| # | Schritt | Zweck |
+|---|---|---|
+| 1 | **Mitarbeiterzahl** | trennt nach E12 zwischen den beiden Marken |
+| 2 | **Art des Unternehmens** (Planungsbüro, Architekturbüro, TGA-Planung, ausführender Betrieb …) | siehe unten |
+| 3 | **Wer wäre dabei** | Geschäftsführung (verbindlich) · weitere strategische Führungskräfte · jemand aus der IT |
+| 4 | **Kontakt und Einwilligung** | so knapp wie möglich |
+
+„Wo brennt's" und Dringlichkeit entfallen. Sie gehören ins Gespräch, nicht ins Formular.
+
+**Schritt 2 ist mehr als eine Branchenabfrage.** Er ermittelt genau die Achse aus E19,
+die **Schreibtischquote**: Ein Planungs- oder Architekturbüro braucht das
+Einführungsprojekt mit Zugang für alle, ein ausführender Betrieb eher einen Helfer.
+Die Antwortoptionen müssen deshalb **beide Seiten** abdecken, nicht nur die
+Planungsseite — sonst spricht das Formular nur die Hälfte des Zielmarkts an.
+Also ergänzen: Bauunternehmen, Dachdecker, Spengler, Garten- und Landschaftsbau, SHK.
+
+Das widerspricht nicht E13 (keine Gewerke-Seiten). Die Abfrage steuert intern, sie ist
+keine öffentliche Segmentierung.
+
+**Schritt 3 als Frage, nicht als Schranke.** Die Lehre aus E16 gilt, aber ein
+IT-Leiter, der im Vorfeld recherchiert, darf nicht ausgesperrt werden. Wenn die
+Geschäftsführung nicht angehakt ist, erscheint ein Hinweis statt einer Blockade:
+„Erfahrungsgemäß führt ein Gespräch ohne Geschäftsführung selten weiter. Wir sprechen
+trotzdem gern mit Ihnen und planen dann einen zweiten Termin ein."
+
+---
+
+## E26 · Hero und Erklärvideo
+
+**Kundenwunsch:** animiertes Erklärvideo im Hero, rund 90 Sekunden, mit KI erstellt,
+fiktive Figuren, damit keine Deepfake-Kennzeichnung nötig wird. Ziel: Der Kunde weiß
+auf einen Blick, was er bekommt.
+
+**Bewertung: gutes Mittel, falscher Platz, und kein Grund zu warten.**
+
+### Warum nicht im Hero
+
+1. **Bewegung ist das Gegenteil von Ruhe.** Die Vorgabe des Kunden lautete: cleaner,
+   aufgeräumter, ruhiger, Capmo-Richtung, keine großen Farbflächen. Ein automatisch
+   startendes Video ist das lauteste Element, das eine Seite haben kann. Capmo hat
+   keines.
+2. **Niemand sieht 90 Sekunden kalt.** Die Entscheidung weiterzulesen fällt in drei bis
+   fünf Sekunden und wird von der Überschrift getroffen. Ein Video erreicht die, die
+   schon interessiert sind. Es gehört also **hinter** die Überschrift, nicht an ihre
+   Stelle.
+3. **Datenschutz.** Eine Einbindung über YouTube oder Vimeo baut eine
+   Drittanbieter-Verbindung auf, bevor jemand eingewilligt hat. Die ganze Seite ist
+   darauf gebaut, das zu vermeiden (E11). **Video selbst hosten**, auf dem
+   Hostinger-Server, kein Fremdanbieter.
+4. **Das Risiko liegt in der Ausführung.** Ein mittelmäßiges Erklärvideo beschädigt
+   Glaubwürdigkeit stärker, als ein gutes sie aufbaut, gerade bei einem
+   Geschäftsführer, der so etwas schon oft gesehen hat. Es ist das Bauteil mit dem
+   höchsten Risiko auf der Seite.
+
+### Entscheidung
+
+| | |
+|---|---|
+| **Hero** | Überschrift, Unterzeile, CTA, statisches Bild. Kann sofort gebaut werden |
+| **Video** | eigener Abschnitt direkt unter dem Hero, **Klick zum Abspielen** mit Standbild, nicht automatisch. So macht es der Sales-led-Wettbewerb, und die Seite bleibt ruhig |
+| **Zeitplan** | Der Platz wird reserviert. Das Video kommt, wenn es fertig ist. **Es blockiert den Bau nicht** |
+
+### Zur Bildidee: keine Cartoon-Figuren
+
+Fiktive Figuren im Zeichentrickstil sind dasselbe Risiko, das den Helfer-Maskottchen die
+Startseite gekostet hat: Der Kunde selbst nannte sie „vielleicht etwas kitschig" (E4),
+und die Recherche hat auf sieben Wettbewerberseiten **null** Maskottchen gemessen.
+An der prominentesten Stelle der Seite wäre das die riskanteste Variante.
+
+**Besserer Vorschlag: das Architekturdiagramm animieren.** Linien, die sich zeichnen,
+Daten, die fließen, der Übergang von „gewachsen" zu „gebaut" (E17). Das ist
+branchenüblich, markenkonform, günstiger in der Produktion, und **ein Asset mit zwei
+Verwendungen**: Das erste Standbild ist zugleich das statische Hero-Bild. Menschen
+kommen als kurze reale Aufnahmen dazu, wenn es sie gibt, nicht als Zeichentrick.
+
+### Zur Deepfake-Frage
+
+Der Instinkt ist richtig: Wer keine realen Personen nachbildet, umgeht Persönlichkeits-
+rechte und die Kennzeichnungspflicht für täuschend echte Darstellungen. Eine erkennbar
+stilisierte Animation ist kein Deepfake. **Trotzdem vor Veröffentlichung vom DSB
+(DSZ365) bestätigen lassen**, weil die Transparenzpflichten für KI-erzeugte Inhalte
+gerade in Bewegung sind. Das ist eine Fünf-Minuten-Frage an eine Stelle, die ohnehin
+beauftragt ist.
+
+### Bildmaterial: Bestandsaufnahme
+
+Die Frage nach vorhandenem Material blieb offen. Bekannt ist aus E15: Porträts beider
+Gründer liegen vor, Screenshots von Open WebUI und n8n sind kurzfristig machbar, das
+Cockpit ist nicht vorzeigbar, Projekt- und Workshopfotos existieren nicht.
+**Damit ist das Diagramm nicht nur die beste, sondern faktisch die einzige Option für
+ein starkes Bild oben.**
+
+---
+
+## E27 · Weg B: bauen, live gehen, nachliefern
+
+**Entscheidung: Weg B.** Struktur und Texte werden gebaut und eingespielt, ohne auf
+Diagramm und Video zu warten. Fehlende Bausteine bekommen sichtbare Platzhalter mit
+einem Hinweis wie „Dieser Bereich wird gerade erweitert".
+
+**Bewertung:** Richtig, weil die heutige Seite auf den falschen Kunden getextet ist
+(E12). Jede Woche, die sie länger steht, ist ein Verlust. Eine ehrlich beschriftete
+Lücke ist besser als eine falsche Aussage.
+
+**Auflage: Platzhalter müssen wie Absicht aussehen, nicht wie Vergessen.**
+Ein grauer Kasten mit „Bild folgt" ist ein Baustellenschild. Ein sauber gesetzter
+Bereich mit einer Zeile Erklärung ist ein Hinweis. Höchstens **zwei** solcher Stellen
+auf der Startseite, sonst wirkt die ganze Seite unfertig.
+
+**Erlaubt:** Videoabschnitt, Architektur-Vergleich.
+**Nicht erlaubt:** Platzhalter bei Gründern, Leistungen, Ablauf, Preisen oder Kontakt.
+Diese Abschnitte sind vollständig oder gar nicht.
+
+### Zur Frage eines frischen Farbdesigns
+
+Der Kunde erwägt „ein komplett frisches Farbdesign, weil das bisherige eher für kleine
+Betriebe gedacht war". **Empfehlung: keine neue Palette, aber eine neue Leinwand.**
+
+Ein vollständiger Farbwechsel wäre ein Markenwechsel, nicht ein Redesign. Cobalt,
+Tiefblau und Gelb stecken in Wortmarke, Signet und allen Unterlagen. Sie zu tauschen,
+kostet die Wiedererkennung und war ausdrücklich nicht der Auftrag („Corporate Design
+grundsätzlich beibehalten").
+
+**Was tatsächlich „klein und gemütlich" signalisiert, ist nicht die Farbe, sondern die
+Wärme des Hintergrunds.** Das cremige `#F8F4EC` liest sich handwerklich und
+wohnzimmerhaft. Die gemessene Cosuno-Palette, deren Marken-Töne den manibase-Tönen fast
+entsprechen, arbeitet dagegen mit **kühlen** Off-Weiß-Stufen (`#f8fafc`, `#f1f5fa`,
+`#f4f6fb`).
+
+**Vorschlag, eine Zeile Wirkung:** Die warme Leinwand wird durch eine kühle
+Off-Weiß-Treppe ersetzt, Cobalt, Tiefblau und Gelb bleiben unverändert. Das ergibt
+genau den Sprung von „inhabergeführter Kleinbetrieb" zu „Partner für 150 Mitarbeitende",
+ohne die Marke anzufassen. Zusammen mit der Verteilung 88/6/5/1 aus `00-recherche.md`
+ist das der gesamte optische Kurswechsel.
+
+Zu entscheiden beim Bau, mit einem direkten Vergleich beider Varianten.
+
+---
+
+## Unberührt
+
+`impressum.html`, `datenschutz.html`, `site/api/*.php` und alles rund um Sicherheit
+bleiben inhaltlich unverändert (Kundenvorgabe).

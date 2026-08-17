@@ -8,6 +8,81 @@
   'use strict';
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  /* Navigation: Aufklappmenues (Desktop) und Panel mit Akkordeon (Mobil) ---- */
+  var header = document.querySelector('.site-header');
+  var navTriggers = Array.prototype.slice.call(document.querySelectorAll('.nav__trigger'));
+
+  function closeDropdowns(keepOpen) {
+    navTriggers.forEach(function (trigger) {
+      var item = trigger.closest('.nav__item');
+      if (item === keepOpen) return;
+      var panel = document.getElementById(trigger.getAttribute('aria-controls'));
+      item.classList.remove('is-open');
+      trigger.setAttribute('aria-expanded', 'false');
+      if (panel) { panel.hidden = true; }
+    });
+  }
+
+  navTriggers.forEach(function (trigger) {
+    trigger.addEventListener('click', function () {
+      var item = trigger.closest('.nav__item');
+      var panel = document.getElementById(trigger.getAttribute('aria-controls'));
+      var opening = !item.classList.contains('is-open');
+      closeDropdowns(item);
+      item.classList.toggle('is-open', opening);
+      trigger.setAttribute('aria-expanded', String(opening));
+      if (panel) { panel.hidden = !opening; }
+    });
+  });
+
+  var navToggle = document.querySelector('.nav__toggle');
+  var navPanel = document.querySelector('.nav__mobile');
+
+  function closeMobileNav(returnFocus) {
+    if (!navToggle || !navPanel) return;
+    var wasOpen = navToggle.getAttribute('aria-expanded') === 'true';
+    navToggle.setAttribute('aria-expanded', 'false');
+    navToggle.setAttribute('aria-label', 'Menü öffnen');
+    navPanel.classList.remove('is-open');
+    navPanel.hidden = true;
+    document.body.classList.remove('menu-open');
+    if (wasOpen && returnFocus) { navToggle.focus(); }
+  }
+
+  if (navToggle && navPanel) {
+    navToggle.addEventListener('click', function () {
+      var opening = navToggle.getAttribute('aria-expanded') !== 'true';
+      navToggle.setAttribute('aria-expanded', String(opening));
+      navToggle.setAttribute('aria-label', opening ? 'Menü schließen' : 'Menü öffnen');
+      navPanel.classList.toggle('is-open', opening);
+      navPanel.hidden = !opening;
+      document.body.classList.toggle('menu-open', opening);
+    });
+    navPanel.addEventListener('click', function (ev) {
+      if (ev.target && ev.target.closest && ev.target.closest('a')) { closeMobileNav(false); }
+    });
+  }
+
+  Array.prototype.slice.call(document.querySelectorAll('.nav__acc>button')).forEach(function (button) {
+    button.addEventListener('click', function () {
+      var panel = document.getElementById(button.getAttribute('aria-controls'));
+      var opening = button.getAttribute('aria-expanded') !== 'true';
+      button.setAttribute('aria-expanded', String(opening));
+      if (panel) { panel.hidden = !opening; }
+    });
+  });
+
+  document.addEventListener('click', function (ev) {
+    if (header && !header.contains(ev.target)) { closeDropdowns(); }
+  });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key !== 'Escape') return;
+    var open = document.querySelector('.nav__trigger[aria-expanded="true"]');
+    closeDropdowns();
+    closeMobileNav(true);
+    if (open) { open.focus(); }
+  });
+
   /* 1) Reveal --------------------------------------------------------------- */
   var reveals = Array.prototype.slice.call(document.querySelectorAll('.reveal'));
   if (reduce || !('IntersectionObserver' in window)) {
@@ -38,6 +113,27 @@
         rotWord.classList.remove('is-pre');
       }, 400);
     }, 2400);
+  }
+
+  /* 2b) KI-Helfer: Wortwechsel im Seitenkopf (aus Phase 3 zurueckgeholt).
+     Die vollstaendige Liste steht als .sr-only im h1, hier wechselt nur die
+     sichtbare Zeile. */
+  var helperRotator = document.querySelector('[data-helper-rotator]');
+  if (helperRotator && !reduce) {
+    var helperWords = ['Angebotserstellung', 'Berichte', 'Schriftverkehr', 'E-Mails',
+                       'Wissensmanagement', 'Kundensupport', 'Dokumentation', 'Terminplanung',
+                       'Baudokumentation', 'Aktenvermerke', 'Normen und Vorgaben',
+                       'Auftragsvorbereitung', 'Auftragsprüfung'];
+    var hi = 0;
+    window.setInterval(function () {
+      if (document.hidden) return;
+      helperRotator.classList.add('is-changing');
+      window.setTimeout(function () {
+        hi = (hi + 1) % helperWords.length;
+        helperRotator.textContent = helperWords[hi];
+        helperRotator.classList.remove('is-changing');
+      }, 200);
+    }, 2600);
   }
 
   var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -80,7 +176,7 @@
         if (btn) { btn.disabled = false; }
         if (err) {
           err.hidden = false;
-          err.textContent = 'Das hat gerade nicht geklappt. Bitte versuchen Sie es später erneut oder schreiben Sie an kontakt@demiospace.ai.';
+          err.textContent = 'Das hat gerade nicht geklappt. Bitte versuchen Sie es später erneut oder schreiben Sie an kontakt@manibase.de.';
         }
       });
     });
@@ -221,17 +317,19 @@
     var counter = form.querySelector('.wizard__count');
 
     function clearErr() { if (errBox) { errBox.hidden = true; errBox.textContent = ''; } }
-    function showErr(msg) { if (errBox) { errBox.hidden = false; errBox.textContent = msg; } }
+    function showErr(msg, field) {
+      if (errBox) { errBox.hidden = false; errBox.textContent = msg; }
+      if (field) { field.setAttribute('aria-invalid', 'true'); }
+    }
 
     function render(doFocus) {
       steps.forEach(function (s, i) { s.classList.toggle('is-active', i === idx); });
       var step = steps[idx];
       var isLast = idx === total - 1;
-      var isAuto = step.hasAttribute('data-auto');
 
       backBtn.hidden = idx === 0;
       submitBtn.hidden = !isLast;
-      nextBtn.hidden = isLast || isAuto;
+      nextBtn.hidden = isLast;
 
       if (barFill) { barFill.style.width = ((idx + 1) / total * 100) + '%'; }
       if (counter) { counter.innerHTML = 'Schritt <b>' + (idx + 1) + '</b> von ' + total; }
@@ -246,11 +344,36 @@
     }
 
     function valid(step) {
+      // Einfach-Auswahl: jede Radio-Gruppe des Schritts braucht eine Antwort. Der
+      // "Weiter"-Button steht auch auf den data-auto-Schritten (Tastaturbedienung),
+      // ohne diese Pruefung liessen sich Groesse, Unternehmensart und KI-Stand
+      // ueberspringen und fehlten anschliessend im Zeeg-Prefill.
+      var radios = step.querySelectorAll('input[type="radio"]');
+      if (radios.length) {
+        var answered = Object.create(null);
+        Array.prototype.forEach.call(radios, function (r) {
+          if (!(r.name in answered)) { answered[r.name] = false; }
+          if (r.checked) { answered[r.name] = true; }
+        });
+        var offen = Object.keys(answered).filter(function (n) { return !answered[n]; });
+        if (offen.length) {
+          var first = step.querySelector('input[type="radio"][name="' + offen[0] + '"]');
+          showErr('Bitte wählen Sie eine Antwort aus.');
+          if (first) { first.focus(); }
+          return false;
+        }
+      }
       // Multi-Select: mindestens eine Auswahl
       var checks = step.querySelectorAll('input[type="checkbox"]:not([name="consent"])');
       if (checks.length) {
         var any = Array.prototype.some.call(checks, function (c) { return c.checked; });
         if (!any) { showErr('Bitte wählen Sie mindestens einen Punkt.'); return false; }
+      }
+      var management = step.querySelector('input[name="teilnehmer"][value="gf"]');
+      if (management && !management.checked) {
+        showErr('Bitte beziehen Sie die Geschäftsführung in das Erstgespräch ein.');
+        management.focus();
+        return false;
       }
       return true;
     }
@@ -262,7 +385,12 @@
     function back() { if (idx > 0) { idx--; render(true); } }
 
     form.addEventListener('change', function (ev) {
+      if (ev.target) { ev.target.removeAttribute('aria-invalid'); }
       if (ev.target && (ev.target.type === 'checkbox' || ev.target.type === 'radio')) clearErr();
+    });
+    form.addEventListener('input', function (ev) {
+      if (ev.target) { ev.target.removeAttribute('aria-invalid'); }
+      clearErr();
     });
 
     // Auto-Advance nur bei aktiver Auswahl (Klick/Tap oder Leertaste), nicht bei
@@ -283,10 +411,12 @@
       ev.preventDefault();
       var name = form.querySelector('[name="name"]');
       var mail = form.querySelector('[name="email"]');
+      var firma = form.querySelector('[name="firma"]');
       var consent = form.querySelector('[name="consent"]');
-      if (!name.value.trim()) { showErr('Bitte geben Sie Ihren Namen an.'); name.focus(); return; }
-      if (!EMAIL_RE.test(mail.value.trim())) { showErr('Bitte geben Sie eine gültige E-Mail-Adresse an.'); mail.focus(); return; }
-      if (!consent.checked) { showErr('Bitte bestätigen Sie die Verarbeitung Ihrer Angaben.'); consent.focus(); return; }
+      if (!name.value.trim()) { showErr('Bitte geben Sie Ihren Namen an.', name); name.focus(); return; }
+      if (!EMAIL_RE.test(mail.value.trim())) { showErr('Bitte geben Sie eine gültige E-Mail-Adresse an.', mail); mail.focus(); return; }
+      if (firma && !firma.value.trim()) { showErr('Bitte geben Sie Ihr Unternehmen an.', firma); firma.focus(); return; }
+      if (!consent.checked) { showErr('Bitte bestätigen Sie die Verarbeitung Ihrer Angaben.', consent); consent.focus(); return; }
       clearErr();
       // Antworten der Maske einsammeln und in den Kalender (Zeeg) vorbefüllen,
       // damit sie nicht verloren gehen und das Gespräch sofort beim Thema ist.
@@ -307,12 +437,18 @@
     var lastName = parts.join(' ');
 
     var TXT = {
-      '1-9': '1 bis 9 Mitarbeitende', '10-20': '10 bis 20 Mitarbeitende',
-      '21-50': '21 bis 50 Mitarbeitende', '50+': 'mehr als 50 Mitarbeitende',
-      inhaber: 'Inhaber oder Geschäftsführung', buero: 'Büro oder Verwaltung', sonstige: 'andere Rolle',
-      angebote: 'Angebote & Rechnungen', email: 'E-Mails & Schriftverkehr', doku: 'Dokumentation & Berichte',
-      wissen: 'Unterlagen & Wissen finden', termine: 'Termine & Planung', anderes: 'etwas anderes',
-      akut: 'akut', quartal: 'dieses Quartal', info: 'erstmal informieren'
+      'unter-50': 'unter 50 Mitarbeitende', '50-99': '50 bis 99 Mitarbeitende',
+      '100-249': '100 bis 249 Mitarbeitende', '250-500': '250 bis 500 Mitarbeitende',
+      'ueber-500': 'mehr als 500 Mitarbeitende',
+      'architektur-planung': 'Architektur- oder Planungsbüro',
+      'ingenieur-tga': 'Ingenieur- oder TGA-Büro', bau: 'Bauunternehmen',
+      gebaeudetechnik: 'Gebäudetechnik (SHK, Elektro, Lüftung)',
+      'dach-ausbau': 'Dach- oder Ausbaugewerk', andere: 'anderes Unternehmen',
+      'einzelne-versuche': 'einzelne Versuche',
+      'lizenzen-ohne-rahmen': 'Lizenzen ohne gemeinsamen Rahmen',
+      'erste-anwendungen': 'erste Anwendungen oder Piloten', 'noch-offen': 'noch offen',
+      gf: 'Geschäftsführung', fuehrung: 'weitere Führungskräfte',
+      it: 'interne IT oder IT-Dienstleister', fachbereich: 'Fachverantwortliche'
     };
     var label = function (v) { return TXT[v] || v; };
     var radio = function (n) { var el = form.querySelector('[name="' + n + '"]:checked'); return el ? label(el.value) : ''; };
@@ -324,9 +460,9 @@
 
     var lines = [];
     if (radio('groesse')) { lines.push('Betriebsgröße: ' + radio('groesse')); }
-    if (radio('rolle')) { lines.push('Rolle: ' + radio('rolle')); }
-    if (checks('thema')) { lines.push('Wo brennt es: ' + checks('thema')); }
-    if (radio('dringlichkeit')) { lines.push('Dringlichkeit: ' + radio('dringlichkeit')); }
+    if (radio('art')) { lines.push('Unternehmensart: ' + radio('art')); }
+    if (radio('ki-stand')) { lines.push('Stand der KI-Nutzung: ' + radio('ki-stand')); }
+    if (checks('teilnehmer')) { lines.push('Teilnehmende: ' + checks('teilnehmer')); }
     if (val('firma')) { lines.push('Unternehmen: ' + val('firma')); }
     if (val('telefon')) { lines.push('Telefon: ' + val('telefon')); }
 
@@ -341,8 +477,10 @@
     var box = document.getElementById('booking-calendar');
     if (!box) return;
     box.hidden = false;
+    box.setAttribute('tabindex', '-1');
     loadBookingCalendar(box, booking);
     box.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    box.focus({ preventScroll: true });
   }
 
   // Einziger Wechselpunkt für das Buchungstool (Zeeg).
