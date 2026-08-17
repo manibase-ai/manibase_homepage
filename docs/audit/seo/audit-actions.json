@@ -638,9 +638,9 @@
       },
       {
         "id": "S4",
-        "was": "signet-72.webp, signet-negative-72.webp, favicon-32.png erzeugt, 36 Referenzen in 14 Dateien umgestellt",
+        "was": "signet-72.webp, signet-negative-72.webp, favicon-32.png und favicon-96.png erzeugt, Referenzen in 14 Dateien umgestellt",
         "status": "fertig",
-        "ersparnis": "192 KB auf 12 KB pro Seite, Favicon 132 KB auf 1,7 KB"
+        "ersparnis": "Signets 192 KB auf 12 KB pro Seite, Favicon 132 KB auf rund 9 KB (32px Browser-Tab, 96px Google-Suche, beide mit sizes deklariert)"
       },
       {
         "id": "S5",
@@ -668,12 +668,18 @@
       },
       "platziert": [
         "Schema: Organization.sameAs (Firmenseite) und founder[].sameAs (beide Personenprofile)",
-        "Footer, Spalte Unternehmen, alle 10 Seiten: <a>LinkedIn</a>, identisches Element wie die Geschwisterlinks",
-        "ueber-uns.html: Textlink je Gruender-Karte mit rel=me, unter der Biografie"
+        "Footer, Spalte Unternehmen, alle 10 Seiten: <a rel=me>LinkedIn</a> auf die Firmenseite. rel=me ist dort korrekt.",
+        "ueber-uns.html: Textlink je Gruender-Karte unter der Biografie, OHNE rel-Attribut. Die Personenzuordnung leistet Person.sameAs im JSON-LD."
       ],
       "bewusst_nicht_platziert": "Startseite Blatt 05, die Karten dort sind zu eng getaktet",
       "offen_organisatorisch": "Im LinkedIn-Firmenprofil das Feld Website auf https://manibase.de setzen. Ohne Rueckverweis ist die Verknuepfung nur einseitig."
     },
-    "korrektur_eeat": "Die erste Fassung fuehrte 'keine Zertifikate' als Luecke. Falsch: ueber-uns.html belegt fuer beide Gruender die TUEV-SUED-Qualifikation 'AI Strategy & Application Expert'. E-E-A-T 4,0 auf 4,5, Gesamtnote 39,5 auf 40,0."
+    "korrektur_eeat": "Die erste Fassung fuehrte 'keine Zertifikate' als Luecke. Falsch: ueber-uns.html belegt fuer beide Gruender die TUEV-SUED-Qualifikation 'AI Strategy & Application Expert'. E-E-A-T 4,0 auf 4,5, Gesamtnote 39,5 auf 40,0.",
+    "review_fixes": {
+      "P1": "scratchpad/nav.py liegt weder im Repo noch auf der Maschine, der Generator liess sich nicht versionieren. Stattdessen CI-Gate: scripts/test-frontend.mjs prueft ueber alle Seiten Signets, Favicon, LinkedIn-Link, Canonical, Open Graph, Sitemap-Deckung, robots.txt, Organization-Schema und rel=me. Laeuft in verify.yml bei jedem Pull Request. Vorlagenzeilen dokumentiert in CLAUDE.md, Abschnitt Navigation.",
+      "P2": "rel=me von den beiden Gruenderlinks entfernt. Die Relation bezeichnet laut IANA eine Ressource ueber den Autor des Link-Kontexts. Am Footer-Link auf die Unternehmensseite bleibt rel=me, dort ist es korrekt.",
+      "P3": "favicon-96.png ergaenzt, beide Groessen mit sizes deklariert. Google empfiehlt ein Vielfaches von 48px.",
+      "P3_doku": "Bestandsbeschreibungen im Bericht auf den korrigierten Stand gebracht, Lesehinweis ergaenzt, PR-Beschreibung aktualisiert."
+    }
   }
 }

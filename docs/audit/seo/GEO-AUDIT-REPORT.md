@@ -562,12 +562,14 @@ Der direkteste Wettbewerber kozoa.de liegt bei etwa 38 von 90 und wird gefunden,
 
 ## 10. Umsetzungsstand S1 bis S7 (17. August 2026)
 
+> **Lesehinweis.** Dieser Abschnitt beschreibt durchgehend den **aktuellen Stand des Codes**, nicht den ersten Wurf. Der Unterabschnitt „Nachbesserungen aus dem Review" ist reine Änderungshistorie: was dort steht, ist bereits umgesetzt und in den Tabellen darüber schon berücksichtigt. Wer wissen will, wie das Markup heute aussieht, liest die Tabellen. Wer wissen will, warum, liest die Historie.
+
 | # | Maßnahme | Stand |
 |---|---|---|
 | S1 | `site/robots.txt` angelegt, 17 User-agent-Blöcke, alle KI-Bots ausdrücklich erlaubt, Sitemap referenziert | ✅ |
 | S2 | `site/sitemap.xml` angelegt, **10** indexierbare Seiten | ✅ Einreichung in der Search Console offen |
 | S3 | nginx-Kompression für CSS und JS | 📄 dokumentiert in `docs/deployment/nginx-kompression.md`, **Serverarbeit steht aus** |
-| S4 | `signet-72.webp`, `signet-negative-72.webp`, `favicon-32.png` erzeugt, 36 Referenzen in 14 Dateien umgestellt | ✅ **192 KB auf 12 KB** pro Seite, Favicon **132 KB auf 1,7 KB** |
+| S4 | `signet-72.webp`, `signet-negative-72.webp`, `favicon-32.png` und `favicon-96.png` erzeugt, Referenzen in 14 Dateien umgestellt | ✅ Signets **192 KB auf 12 KB** pro Seite, Favicon **132 KB auf rund 9 KB** (32px für den Browser-Tab, 96px für die Google-Suche, beide mit `sizes` deklariert) |
 | S5 | `Organization`-Schema erweitert | ✅ mit Vorbehalten, siehe unten |
 | S6 | Canonical auf 7 Seiten ergänzt, jetzt genau eines auf allen 16 Seiten | ✅ |
 | S7 | Open Graph und `twitter:card` auf 13 Seiten ergänzt | ✅ |
@@ -583,8 +585,8 @@ Die drei LinkedIn-URLs lagen nach dem ersten Durchgang vor und wurden an drei St
 | Ort | Was | Designrisiko |
 |---|---|---|
 | Schema | `Organization.sameAs` → Firmenseite · `founder[].sameAs` → beide Personenprofile | keins, unsichtbar |
-| Footer, Spalte „Unternehmen", alle 10 Seiten | `<a>LinkedIn</a>` | keins, identisches Element wie die vier Geschwisterlinks. Nachgemessen: gleiche Farbe, Größe, Abstand, Breite. |
-| `ueber-uns.html`, unter jeder Gründer-Biografie | Textlink „LinkedIn-Profil von …", `rel="me"` | gering, `<a>` im `<p>` ist auf derselben Seite bereits im Kontaktblock im Einsatz. Rendert in Cobalt `#2F3FDB` mit Unterstreichung, also die Rolle, die Cobalt laut Markenregeln hat. |
+| Footer, Spalte „Unternehmen", alle 10 Seiten | `<a rel="me">LinkedIn</a>` auf die **Firmen**seite. `rel="me"` ist hier korrekt: die eigene Domain verweist auf das eigene Profil. | keins, identisches Element wie die vier Geschwisterlinks. Nachgemessen: gleiche Farbe, Größe, Abstand, Breite. |
+| `ueber-uns.html`, unter jeder Gründer-Biografie | Textlink „LinkedIn-Profil von …", **ohne `rel`-Attribut**. Die Personenzuordnung leistet `Person.sameAs` im JSON-LD, nicht das Markup. Begründung unter „Nachbesserungen aus dem Review". | gering, `<a>` im `<p>` ist auf derselben Seite bereits im Kontaktblock im Einsatz. Rendert in Cobalt `#2F3FDB` mit Unterstreichung, also die Rolle, die Cobalt laut Markenregeln hat. |
 
 **Bewusst nicht platziert: Blatt 05 „Ihre Ansprechpartner" auf der Startseite.** Die Karten dort sind eng getaktet (132px-Porträt, `h3`, `hp-label`, ein Satz). Eine fünfte Zeile pro Karte stört den Rhythmus des Planblatts, und die Startseite verlinkt ohnehin auf „Über uns". Kleiner Gewinn, größtes Risiko am sichtbarsten Ort.
 
@@ -625,11 +627,11 @@ Neu abgesichert sind:
 | Sitemap deckt sich mit den indexierbaren Seiten | neue Seite ohne Sitemap-Eintrag |
 | robots.txt sperrt keinen KI-Crawler | ein kopierter Standardblock |
 | Organization-Schema mit `sameAs`, `founder`, `knowsAbout` … | S5 |
-| `rel="me"` nur für die Unternehmensseite | siehe Korrektur unten |
+| `rel="me"` genau einmal je Seite, und zwar auf der Firmenseite | Wiedereinführung von `rel="me"` an den Gründerlinks |
 
 Für die Vorlage selbst stehen die vier Zeilen in `CLAUDE.md` im Abschnitt „Navigation".
 
-### Nachbesserungen aus dem Review
+### Nachbesserungen aus dem Review (Änderungshistorie, bereits umgesetzt)
 
 | Punkt | Änderung |
 |---|---|
