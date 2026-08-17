@@ -326,7 +326,6 @@
       steps.forEach(function (s, i) { s.classList.toggle('is-active', i === idx); });
       var step = steps[idx];
       var isLast = idx === total - 1;
-      var isAuto = step.hasAttribute('data-auto');
 
       backBtn.hidden = idx === 0;
       submitBtn.hidden = !isLast;
@@ -345,6 +344,25 @@
     }
 
     function valid(step) {
+      // Einfach-Auswahl: jede Radio-Gruppe des Schritts braucht eine Antwort. Der
+      // "Weiter"-Button steht auch auf den data-auto-Schritten (Tastaturbedienung),
+      // ohne diese Pruefung liessen sich Groesse, Unternehmensart und KI-Stand
+      // ueberspringen und fehlten anschliessend im Zeeg-Prefill.
+      var radios = step.querySelectorAll('input[type="radio"]');
+      if (radios.length) {
+        var answered = Object.create(null);
+        Array.prototype.forEach.call(radios, function (r) {
+          if (!(r.name in answered)) { answered[r.name] = false; }
+          if (r.checked) { answered[r.name] = true; }
+        });
+        var offen = Object.keys(answered).filter(function (n) { return !answered[n]; });
+        if (offen.length) {
+          var first = step.querySelector('input[type="radio"][name="' + offen[0] + '"]');
+          showErr('Bitte wählen Sie eine Antwort aus.');
+          if (first) { first.focus(); }
+          return false;
+        }
+      }
       // Multi-Select: mindestens eine Auswahl
       var checks = step.querySelectorAll('input[type="checkbox"]:not([name="consent"])');
       if (checks.length) {

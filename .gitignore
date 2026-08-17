@@ -15,6 +15,10 @@ __pycache__/
 .agents/
 .claude/
 
+# --- npm-Pakete der Test-Skripte (jsdom, luxon; CI installiert sie mit --no-save) ---
+node_modules/
+package-lock.json
+
 # --- Brand kit & design source (single source of truth lives here locally) ---
 # Optimized, site-ready copies are committed under site/assets & site/styles.
 Claude Design/

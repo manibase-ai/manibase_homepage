@@ -880,7 +880,7 @@ section[id]{scroll-margin-top:calc(var(--header-h) + 8px);}
 
 /* Aktive Seite in der Navigation */
 .nav__links a[aria-current="page"],
-.menu-mobile__panel a[aria-current="page"]{color:var(--color-primary);}
+.nav__mobile>a[aria-current="page"]{color:var(--color-primary);}
 
 /* Seitenkopf der Unterseiten */
 .phero{background:var(--color-surface);border-bottom:1px solid var(--color-border);
@@ -1241,19 +1241,10 @@ body{background:var(--color-background);}
 .nav__links > a,.nav-project > a{font-size:.91rem;white-space:nowrap;}
 .nav__cta .btn{padding-inline:17px;font-size:.91rem;}
 
-/* Mobiles Projektmenü */
-.menu-mobile__group{padding:8px 0 4px;border-bottom:1px solid var(--color-border);}
-.menu-mobile__group > span{display:block;padding:7px 4px;color:var(--color-text-secondary);font-size:.71rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;}
-.menu-mobile__group a{padding:10px 4px 10px 18px;border-bottom:0;}
-@media (max-width:1120px){
-  .nav__links{display:none;}
-  .menu-mobile{display:block;}
-  .menu-mobile[open]{display:block;}
-  .menu-mobile summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border:1px solid var(--color-border);border-radius:6px;}
-  .menu-mobile summary::-webkit-details-marker{display:none;}
-  .menu-mobile__panel{position:absolute;left:0;right:0;top:100%;max-height:calc(100vh - var(--header-h));overflow:auto;background:var(--color-surface);border-bottom:1px solid var(--color-border);padding:12px clamp(1.25rem,4vw,2.5rem) 20px;display:flex;flex-direction:column;gap:4px;box-shadow:var(--shadow-md);}
-  .menu-mobile__panel > a{padding:12px 4px;text-decoration:none;color:var(--color-text-primary);font-weight:var(--fw-medium);border-bottom:1px solid var(--color-border);}
-}
+/* Das alte details/summary-Menü (.menu-mobile) samt eigenem 1120px-Umschaltpunkt ist
+   entfernt. Es versteckte .nav__links bereits ab 1120px, während der Hamburger
+   (.nav__toggle) erst ab 1100px erscheint: zwischen 1101 und 1120px war deshalb keine
+   Navigation sichtbar. Einziger Umschaltpunkt ist jetzt der 1100px-Block oben. */
 
 /* Allgemeiner Startseiten-Hero */
 .home-hero--overview .home-hero__copy .h-hero{max-width:15ch;font-size:clamp(2.55rem,4vw,4.45rem);}
@@ -1575,7 +1566,7 @@ body{background:var(--color-background);}
   box-shadow:none;
 }
 button,a,summary,input,label{touch-action:manipulation;}
-.btn,.menu-mobile summary{min-height:46px;}
+.btn{min-height:46px;}
 .btn{padding:12px 21px;letter-spacing:.005em;}
 .btn--secondary{background:rgba(255,255,255,.62);}
 .text-link{min-height:30px;}
