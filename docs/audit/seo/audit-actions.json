@@ -7,7 +7,7 @@
     "overall_max": 90,
     "auditor_skill": "seo-geo-audit",
     "companion_report": "docs/audit/seo/GEO-AUDIT-REPORT.md",
-    "notes": "Statische Website ohne Framework. Schema-Erkennung im Roh-HTML ist verlaesslich, da kein JS-Injektionspfad existiert. CWV-Werte aus Playwright-Laborlauf vom selben Tag; PageSpeed-Insights-API war kontingentbedingt nicht verfuegbar.",
+    "notes": "Statische Website ohne Framework. Schema-Erkennung im Roh-HTML ist verlaesslich, da kein JS-Injektionspfad existiert. CWV-Werte aus Playwright-Laborlauf vom selben Tag; PageSpeed-Insights-API war kontingentbedingt nicht verfuegbar. S3 am 17.08.2026 auf dem Server umgesetzt und nachgemessen; die CWV-Note 6,0 ist damit ueberholt (neu etwa 8,5).",
     "status": "S1 bis S7 umgesetzt am 17.08.2026, siehe implementation_log",
     "indexable_pages": 10
   },
@@ -284,7 +284,8 @@
         "issue": "no_compression_css_js",
         "details": "nginx komprimiert HTML, aber nicht text/css und nicht application/javascript. Gemessen mit Accept-Encoding gzip,br am 17.08.2026: site.css 116032 B, home.css 36090 B, site.js 23578 B, jeweils ohne content-encoding. site.css ist renderblockierend und faellt auf Mobil bei 2605 ms, der LCP bei 2704 ms.",
         "fix": "gzip_types bzw. brotli_types in nginx um text/css und application/javascript erweitern. Alle drei Wettbewerber liefern brotli.",
-        "priority": "high"
+        "priority": "done",
+        "status": "erledigt 17.08.2026"
       },
       {
         "issue": "oversized_images",
@@ -365,7 +366,7 @@
         "effort_hours": 0.5,
         "impact": "Core Web Vitals",
         "roi_estimate": "rund 105 KB weniger, mobiler LCP von 2,7 s auf voraussichtlich unter 1,5 s",
-        "status": "dokumentiert, Serverarbeit offen",
+        "status": "umgesetzt 17.08.2026 auf dem Produktivserver",
         "id": "S3"
       },
       {
@@ -626,8 +627,9 @@
       {
         "id": "S3",
         "was": "nginx-Kompression fuer text/css und application/javascript",
-        "status": "dokumentiert, NICHT umgesetzt",
-        "hinweis": "docs/deployment/nginx-kompression.md, muss auf dem Server ausgefuehrt werden"
+        "status": "fertig, umgesetzt am 17.08.2026 auf 72.61.153.206",
+        "hinweis": "gzip_types im Vhost manibase.de, bewusst nicht global wegen der Nachbar-Vhosts librechat.manibase.de und librechat-admin.manibase.de. Backup: manibase.de.bak-20260817-190213.",
+        "ergebnis": "site.css 116032 auf 25943 B (-78%), renderblockierende Last der Startseite 193 auf 49 KB. Mobiler LCP: Startseite 2704 auf 1356 ms, klartag 2992 auf 1612, baugewerbe 2452 auf 1036, ki-helfer 4320 auf 2856. CLS unveraendert 0,000."
       },
       {
         "id": "S4",
