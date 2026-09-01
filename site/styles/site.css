@@ -844,6 +844,9 @@ section[id]{scroll-margin-top:calc(var(--header-h) + 8px);}
 .ctaband{background:var(--color-ink);border-radius:var(--radius-xl);}
 .ctaband h2{font-weight:400;}
 .ctaband p{color:#C7D0EA;}
+/* Link im dunklen Abschlussband: weiss mit Unterstrich. Cobalt als Linkfarbe
+   faellt auf Tiefblau durch, und Gelb ist hier vergeben (eine Geste je Band). */
+.ctaband p a{color:#fff;text-decoration:underline;text-underline-offset:3px;}
 
 /* ---------- Buchung ---------- */
 .booking{background:var(--color-surface);}
