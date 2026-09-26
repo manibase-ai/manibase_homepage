@@ -295,6 +295,8 @@ h1,h2,h3{margin:0;color:var(--color-ink);font-family:var(--font-display);text-wr
 .footer__h{font-family:var(--font-body);font-size:var(--t-eyebrow);font-weight:var(--fw-semibold);letter-spacing:var(--ls-eyebrow);line-height:1.4;text-transform:uppercase;color:var(--color-accent);margin:0 0 14px;}
 .footer__col a{display:block;color:var(--warm-200);text-decoration:none;font-size:.95rem;margin-bottom:10px;}
 .footer__col a:hover{color:#fff;}
+.footer__bottom a{color:var(--warm-200);text-decoration:none;white-space:nowrap;}
+.footer__bottom a:hover{color:#fff;}
 .footer__bottom{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;margin-top:40px;padding-top:22px;border-top:1px solid rgba(255,255,255,.1);font-size:.82rem;color:var(--warm-400);}
 
 /* ---------- Legal pages ---------- */
@@ -404,6 +406,8 @@ section[id]{scroll-margin-top:84px;}
 .booking{background:var(--color-surface-sunken);border-top:1px solid var(--color-border);padding-block:var(--section-y);}
 .booking__head{max-width:60ch;margin-bottom:clamp(24px,3vw,36px);}
 .booking__head .lead{margin-top:var(--space-3);}
+.booking__direct{margin-top:var(--space-3);color:var(--color-text-secondary);}
+.booking__direct a{font-weight:600;}
 .cal{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:clamp(12px,1.6vw,18px);box-shadow:var(--shadow-md);}
 /* Injiziertes Buchungs-Widget (Zeeg) + dessen iframe tool-neutral einpassen. */
 .zeeg-inline-widget,#cal-target,#cal-target iframe{min-width:0;width:100%;border-radius:var(--radius-lg);overflow:hidden;}

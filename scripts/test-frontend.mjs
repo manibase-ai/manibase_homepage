@@ -378,6 +378,43 @@ test('ueber-uns: rel="me" nur fuer die eigene Unternehmensseite', () => {
     'Das rel="me" zeigt nicht auf die Unternehmensseite: ' + meLinks[0]);
 });
 
+test('Voller Footer: Telefonnummer als tel:-Link', () => {
+  // Seit dem Folgeaudit vom 26.09.2026 Teil der Generator-Vorlage (footer__bottom).
+  // Ein nav.py-Lauf mit alter Vorlage nimmt ihn sonst lautlos wieder heraus.
+  for (const s of SEITEN.filter(hatUnternehmensSpalte)) {
+    assert(s.html.includes('href="tel:+4915565697065"'),
+      s.name + ': tel:-Link im Footer fehlt, vermutlich nav.py mit alter Vorlage');
+  }
+});
+
+test('Startseite: Title und Description passen in die Suchergebnisanzeige', () => {
+  const html = readFileSync(HTML_PATH, 'utf8');
+  const title = /<title>([^<]*)<\/title>/.exec(html)[1];
+  const desc = /<meta name="description" content="([^"]*)"/.exec(html)[1];
+  // Google schneidet Titel bei rund 600 px (ca. 60 Zeichen) und Descriptions bei rund
+  // 160 Zeichen ab. Vor dem 26.09.2026 standen hier 87 und 258 Zeichen.
+  assert(title.length <= 60, 'Title hat ' + title.length + ' Zeichen: ' + title);
+  assert(desc.length <= 160, 'Description hat ' + desc.length + ' Zeichen');
+});
+
+test('llms.txt verweist nur auf vorhandene Seiten', () => {
+  const llms = readFileSync('site/llms.txt', 'utf8');
+  assert(/^# manibase$/m.test(llms), 'llms.txt ohne H1 "# manibase"');
+  const urls = [...llms.matchAll(/\]\((https:\/\/manibase\.de\/[^)]*)\)/g)].map((m) => m[1]);
+  assert(urls.length >= 10, 'llms.txt verlinkt nur ' + urls.length + ' Seiten');
+  const namen = new Set(SEITEN.map((s) => s.name));
+  for (const u of urls) {
+    const datei = u.replace('https://manibase.de/', '') || 'index.html';
+    assert(namen.has(datei), 'llms.txt verlinkt ' + u + ', die Datei gibt es nicht');
+    const seite = SEITEN.find((s) => s.name === datei);
+    assert(!istWeiterleitung(seite), 'llms.txt verlinkt die Weiterleitung ' + u);
+  }
+  // Preis und Handelsregister stehen auch im Schema und im Impressum. Wer sie dort
+  // aendert, muss sie hier mitziehen.
+  assert(llms.includes('3.900 €'), 'llms.txt: Klartag-Preis weicht ab');
+  assert(llms.includes('HRB 18632'), 'llms.txt: Handelsregisternummer fehlt');
+});
+
 if (failed) {
   console.error('\n' + failed + ' Test(s) fehlgeschlagen.');
   process.exit(1);

@@ -1,0 +1,36 @@
+# manibase
+
+> manibase UG (haftungsbeschränkt) aus Eibelstadt bei Würzburg führt künstliche Intelligenz strukturiert in Bauunternehmen, ausführenden Gewerken (SHK, Elektro, Lüftung, Dach, Ausbau) und Architektur-, Ingenieur- und Planungsbüros ein. Zielgröße sind Betriebe mit etwa 50 bis 500 Mitarbeitenden in Deutschland, Österreich und der Schweiz.
+
+Die Einführung ist modular. Verpflichtender Einstieg ist der Klartag: ein gemeinsamer Arbeitstag mit Geschäftsführung, IT und Fachanwendern, 3.900 € netto, bei einem Folgeprojekt vollständig anrechenbar. Danach folgen je nach Bedarf ein kontrollierter KI-Arbeitsplatz (eigene Firmen-KI auf Basis von OpenWebUI in einer privaten Cloud oder Microsoft 365 Copilot), Automatisierungen mit n8n und vorbereitete KI-Helfer. Regeln, Freigaben, Schulung und dokumentierte Übergabe gehören zu jeder Einführung. Alles außer Microsoft 365 läuft in der privaten Cloud des Kunden.
+
+Reifegrad der KI-Helfer, Stand September 2026: Bernd (Baudokumentation) ist im Einsatz, Willy (Wissensmanager) ist in Pilotierung, Anton (Angebotsassistenz) ist in Entwicklung und derzeit nicht buchbar.
+
+Geschäftsführer: Matthias Geisler und Nikolaus Schauersberger. Handelsregister: Amtsgericht Würzburg, HRB 18632. Anschrift: Würzburger Str. 1, 97246 Eibelstadt. Kontakt: kontakt@manibase.de, +49 15565 697065.
+
+Nicht zu verwechseln mit Manbase, MANBASE oder manibox.
+
+## Leistungen
+
+- [Klartag](https://manibase.de/klartag.html): Diagnose- und Entscheidungstag zu Anwendungsfällen, Daten, Schnittstellen, Zielarchitektur und Roadmap, 3.900 € netto
+- [Firmen-KI](https://manibase.de/firmen-ki.html): Einführung der eigenen KI-Umgebung mit Architektur, Regeln, Schulung und Übergabe
+- [Prozessautomation](https://manibase.de/prozessautomatisierung.html): wiederkehrende Abläufe mit n8n automatisieren, mit menschlicher Freigabe an definierten Stellen
+- [Individuelle KI-Helfer](https://manibase.de/ki-helfer.html): auf Arbeitsabläufe zugeschnittene Assistenten für Baudokumentation, Wissen und Angebote
+
+## Zielgruppen
+
+- [Bauunternehmen](https://manibase.de/baugewerbe.html): KI kontrolliert im Bauunternehmen einführen
+- [Gebäudetechnik und Ausbau](https://manibase.de/gebaeudetechnik-ausbau.html): KI für SHK, Elektro, Lüftung, Dach und Ausbau
+- [Planungsbüros](https://manibase.de/planungsbueros.html): KI für Architektur, Ingenieurwesen, TGA und Planung
+
+## Unternehmen
+
+- [Startseite](https://manibase.de/): Überblick über Arbeitssituationen, System, Module, KI-Helfer, Architekturwege und Team
+- [Für Ihre IT](https://manibase.de/fuer-ihre-it.html): Architekturwege, Rollen, Datenwege, Betrieb, Dokumentation und Exit
+- [Über uns](https://manibase.de/ueber-uns.html): die Gründer und ihre Qualifikation
+- [LinkedIn](https://www.linkedin.com/company/manibase/)
+
+## Optional
+
+- [Impressum](https://manibase.de/impressum.html)
+- [Datenschutz](https://manibase.de/datenschutz.html)
