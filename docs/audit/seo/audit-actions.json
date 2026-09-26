@@ -1,681 +1,649 @@
 {
-  "metadata": {
-    "audit_date": "2026-08-17",
-    "domain": "manibase.de",
-    "mode": "general",
-    "overall_score": 40.0,
-    "overall_max": 90,
-    "auditor_skill": "seo-geo-audit",
-    "companion_report": "docs/audit/seo/GEO-AUDIT-REPORT.md",
-    "notes": "Statische Website ohne Framework. Schema-Erkennung im Roh-HTML ist verlaesslich, da kein JS-Injektionspfad existiert. CWV-Werte aus Playwright-Laborlauf vom selben Tag; PageSpeed-Insights-API war kontingentbedingt nicht verfuegbar. S3 am 17.08.2026 auf dem Server umgesetzt und nachgemessen; die CWV-Note 6,0 ist damit ueberholt (neu etwa 8,5).",
-    "status": "S1 bis S7 umgesetzt am 17.08.2026, siehe implementation_log",
-    "indexable_pages": 10
+ "metadata": {
+  "audit_date": "2026-09-26",
+  "domain": "manibase.de",
+  "mode": "general",
+  "overall_score": 47.0,
+  "overall_max": 90,
+  "auditor_skill": "seo-geo-audit",
+  "report": "docs/audit/seo/2026-09-26-FOLGEAUDIT.md",
+  "baseline": "docs/audit/seo/audit-actions-2026-08-17.json",
+  "baseline_score": 40.0,
+  "notes": "Folgeaudit. CWV aus lokalem Lighthouse 12 (PSI-API Kontingent erschoepft), Laborwerte ohne CrUX. GSC/BWT seit 26.09.2026, noch keine Leistungsdaten. Suchpositionen ueber Websuche, Brave, Bing, nicht Google DE.",
+  "indexable_pages": 10
+ },
+ "scores": {
+  "technical_seo": {
+   "score": 8.8,
+   "max": 10
   },
-  "scores": {
-    "technical_seo": {
-      "score": 7.0,
-      "max": 10
-    },
-    "core_web_vitals": {
-      "score": 6.0,
-      "max": 10
-    },
-    "local_or_content": {
-      "score": 5.2,
-      "max": 20,
-      "type": "content_authority"
-    },
-    "eeat": {
-      "score": 4.5,
-      "max": 10
-    },
-    "entity_seo": {
-      "score": 2.7,
-      "max": 10
-    },
-    "geo": {
-      "score": 8.8,
-      "max": 20
-    },
-    "ux_conversion": {
-      "score": 5.8,
-      "max": 10
-    }
+  "core_web_vitals": {
+   "score": 8.5,
+   "max": 10
   },
-  "fixes_needed": {
-    "meta_tags": [
-      {
-        "url": "https://manibase.de/",
-        "issue": "title_too_long",
-        "current_value": "KI-Arbeitsplätze, Automatisierungen und Helfer für Bau, Handwerk und Planung · manibase",
-        "current_length": 87,
-        "suggested_value": "KI einführen in Bau, Handwerk und Planung · manibase",
-        "priority": "high"
-      },
-      {
-        "url": "https://manibase.de/",
-        "issue": "meta_description_too_long",
-        "current_value": "manibase führt eine passende KI-Arbeitsumgebung in Bauunternehmen, ausführenden Gewerken und Planungsbüros ein und ergänzt sie um Automatisierungen und vorbereitete Helfer für Baudokumentation, Angebote und Wissen. Regeln, Schulung und Übergabe gehören dazu.",
-        "current_length": 258,
-        "suggested_value": "manibase führt KI in Bauunternehmen, ausführenden Gewerken und Planungsbüros ein: Arbeitsplatz, Automatisierungen, Helfer. Einstieg ab einem Klartag.",
-        "priority": "high"
-      },
-      {
-        "url": "https://manibase.de/gebaeudetechnik-ausbau.html",
-        "issue": "meta_description_too_long",
-        "current_value": "SHK, Elektro, Lüftung, Dach und Ausbau: manibase führt in größeren Handwerks- und Gebäudetechnikbetrieben eine kontrollierte KI-Umgebung ein, vom Regiebericht über Herstellerunterlagen bis zum Nachtrag.",
-        "current_length": 202,
-        "suggested_value": "SHK, Elektro, Lüftung, Dach, Ausbau: manibase führt eine kontrollierte KI-Umgebung ein, vom Regiebericht bis zum Nachtrag.",
-        "priority": "medium"
-      },
-      {
-        "url": "https://manibase.de/ki-helfer.html",
-        "issue": "meta_description_too_long",
-        "current_value": "KI-Helfer werden auf Ihre Abläufe zugeschnitten: Werkzeuge und Promptvorlagen für Teams, freigegebene Dokumente durchsuchen, arbeitsreife Entwürfe vorbereiten. Individuell nur, wenn Standard nicht reicht.",
-        "current_length": 204,
-        "suggested_value": "KI-Helfer auf Ihre Abläufe zugeschnitten: Promptvorlagen für Teams, freigegebene Dokumente durchsuchen, Entwürfe vorbereiten.",
-        "priority": "medium"
-      },
-      {
-        "url": "https://manibase.de/firmen-ki.html",
-        "issue": "meta_description_too_long",
-        "current_value": "manibase setzt gemeinsam mit Ihrer Projektgruppe die priorisierten Anwendungsfälle produktiv um: passende Architektur, Regeln und Freigaben, Schulung aller Nutzer und dokumentierte Übergabe.",
-        "current_length": 190,
-        "suggested_value": "manibase setzt priorisierte Anwendungsfälle produktiv um: Architektur, Regeln und Freigaben, Schulung, dokumentierte Übergabe.",
-        "priority": "medium"
-      },
-      {
-        "url": "https://manibase.de/baugewerbe.html",
-        "issue": "meta_description_too_long",
-        "current_value": "Öffentliche KI-Dienste, einzelne Lizenzen und neue Werkzeuge laufen im Bauunternehmen oft nebeneinander. manibase schafft einen gemeinsamen Rahmen für Geschäftsführung, Fachanwender und IT.",
-        "current_length": 189,
-        "suggested_value": "Öffentliche KI-Dienste und Einzellizenzen laufen im Bauunternehmen nebeneinander. manibase schafft einen gemeinsamen Rahmen.",
-        "priority": "medium"
-      },
-      {
-        "url": "https://manibase.de/fuer-ihre-it.html",
-        "issue": "meta_description_too_long",
-        "current_value": "Zwei Architekturwege, Rollen, Daten, Schnittstellen, Betrieb, Dokumentation und Exit einer KI-Einführung mit manibase, ohne pauschale Rechts- oder Sicherheitsversprechen.",
-        "current_length": 170,
-        "suggested_value": "Architekturwege, Rollen, Daten, Schnittstellen, Betrieb, Dokumentation und Exit einer KI-Einführung mit manibase.",
-        "priority": "low"
-      },
-      {
-        "url": "https://manibase.de/klartag.html",
-        "issue": "meta_description_too_long",
-        "current_value": "Ein bezahlter Diagnose- und Entscheidungstag für Geschäftsführung, IT und Fachanwender: Anwendungsfälle, Daten, Schnittstellen, Zielarchitektur und Roadmap. 3.900 Euro netto.",
-        "current_length": 174,
-        "suggested_value": "Diagnose- und Entscheidungstag für Geschäftsführung, IT und Fachanwender: Anwendungsfälle, Zielarchitektur, Roadmap. 3.900 Euro netto.",
-        "priority": "low"
-      }
-    ],
-    "schema_markup": [
-      {
-        "url": "https://manibase.de/",
-        "missing_type": "Organization.sameAs (Wikidata)",
-        "note": "Erledigt am 17.08.2026: sameAs, founder, areaServed, legalName, identifier und knowsAbout sind eingetragen, sameAs enthaelt die LinkedIn-Unternehmensseite. Offen bleibt allein die Wikidata-Q-ID, die es noch nicht gibt.",
-        "properties_needed": [
-          "sameAs (Wikidata-Q-ID)",
-          "foundingDate"
-        ],
-        "suggested_sameas": [
-          "Wikidata-Q-ID (muss noch angelegt werden)"
-        ],
-        "priority": "medium",
-        "status": "teilweise erledigt"
-      },
-      {
-        "url": "https://manibase.de/klartag.html",
-        "missing_type": "Service+Offer",
-        "properties_needed": [
-          "name",
-          "provider",
-          "serviceType",
-          "areaServed",
-          "offers.price",
-          "offers.priceCurrency",
-          "offers.priceSpecification.valueAddedTaxIncluded"
-        ],
-        "note": "Klartag hat einen oeffentlichen Festpreis von 3900 EUR netto. Lehrbuchfall fuer Offer.",
-        "priority": "high"
-      },
-      {
-        "url": "https://manibase.de/",
-        "missing_type": "ProfessionalService",
-        "properties_needed": [
-          "name",
-          "address",
-          "telephone",
-          "areaServed",
-          "priceRange",
-          "openingHoursSpecification"
-        ],
-        "priority": "medium"
-      },
-      {
-        "url": "https://manibase.de/ueber-uns.html",
-        "missing_type": "Person",
-        "properties_needed": [
-          "name",
-          "jobTitle",
-          "worksFor",
-          "sameAs",
-          "image",
-          "description"
-        ],
-        "note": "Zwei Instanzen: Matthias Geisler, Nikolaus Schauersberger. Beide mit echtem Foto und Biografie auf der Seite.",
-        "priority": "high"
-      },
-      {
-        "url": "https://manibase.de/baugewerbe.html",
-        "missing_type": "FAQPage",
-        "properties_needed": [
-          "mainEntity[].name",
-          "mainEntity[].acceptedAnswer.text"
-        ],
-        "note": "Gilt gleichlautend fuer gebaeudetechnik-ausbau.html, planungsbueros.html, firmen-ki.html, prozessautomatisierung.html, ki-helfer.html, klartag.html. Voraussetzung: echter FAQ-Inhalt muss erst geschrieben werden.",
-        "priority": "high"
-      },
-      {
-        "url": "alle Unterseiten",
-        "missing_type": "BreadcrumbList",
-        "properties_needed": [
-          "itemListElement[].position",
-          "itemListElement[].name",
-          "itemListElement[].item"
-        ],
-        "priority": "medium"
-      },
-      {
-        "url": "https://manibase.de/ueber-uns.html",
-        "missing_type": "Person.hasCredential",
-        "properties_needed": [
-          "hasCredential.credentialCategory",
-          "hasCredential.name",
-          "hasCredential.recognizedBy"
-        ],
-        "note": "TUEV SUED Akademie, 'AI Strategy & Application Expert', beide Gruender. Steht als Fliesstext auf der Seite, ist aber nicht maschinenlesbar.",
-        "priority": "medium"
-      }
-    ],
-    "robots_txt": {
-      "needs_update": true,
-      "current_state": "404 nicht vorhanden",
-      "blocked_bots": [],
-      "warning": "Heute ist nichts blockiert, weil die Datei fehlt. Alle sieben getesteten Bots (Googlebot, Google-Extended, GPTBot, ChatGPT-User, ClaudeBot, PerplexityBot, Bingbot) erhalten HTTP 200. Eine neu angelegte robots.txt darf diesen Zustand nicht verschlechtern: KI-Bots muessen ausdruecklich erlaubt werden.",
-      "recommended_content": "User-agent: *\nAllow: /\n\nUser-agent: GPTBot\nAllow: /\n\nUser-agent: ChatGPT-User\nAllow: /\n\nUser-agent: OAI-SearchBot\nAllow: /\n\nUser-agent: ClaudeBot\nAllow: /\n\nUser-agent: anthropic-ai\nAllow: /\n\nUser-agent: PerplexityBot\nAllow: /\n\nUser-agent: Google-Extended\nAllow: /\n\nUser-agent: Bingbot\nAllow: /\n\nSitemap: https://manibase.de/sitemap.xml\n",
-      "priority": "high"
-    },
-    "redirects": [],
-    "content": [
-      {
-        "url": "https://manibase.de/planungsbueros.html",
-        "issue": "thin_content",
-        "current_words_net": 180,
-        "recommendation": "Auf 900 bis 1200 Woerter ausbauen. Frageueberschriften statt Claim-Ueberschriften, Antwort im ersten Absatz jeder Sektion. Vokabular: HOAI-Leistungsphasen, Ausschreibung, Planpruefung, BIM-Koordination, Revisionsunterlagen.",
-        "priority": "high"
-      },
-      {
-        "url": "https://manibase.de/baugewerbe.html",
-        "issue": "thin_content",
-        "current_words_net": 196,
-        "recommendation": "Auf 900 bis 1200 Woerter ausbauen. Wichtigste kommerzielle Zielseite fuer 'KI im Bauunternehmen einfuehren'.",
-        "priority": "high"
-      },
-      {
-        "url": "https://manibase.de/gebaeudetechnik-ausbau.html",
-        "issue": "thin_content",
-        "current_words_net": 231,
-        "recommendation": "Auf 900 bis 1200 Woerter ausbauen. Zielbegriff 'KI fuer Handwerksbetriebe DSGVO-konform'.",
-        "priority": "high"
-      },
-      {
-        "url": "https://manibase.de/prozessautomatisierung.html",
-        "issue": "thin_content",
-        "current_words_net": 236,
-        "recommendation": "Auf 900 bis 1200 Woerter ausbauen. n8n-Bezug als Longtail-Einstieg nutzen.",
-        "priority": "high"
-      },
-      {
-        "url": "alle Inhaltsseiten",
-        "issue": "no_faq",
-        "recommendation": "5 bis 7 echte Kundenfragen je Angebots- und Zielgruppenseite, in Kundensprache, mit FAQPage-Schema. Staerkster Einzelhebel fuer KI-Zitate.",
-        "priority": "high"
-      },
-      {
-        "url": "alle Inhaltsseiten",
-        "issue": "outdated",
-        "recommendation": "Kein einziges Datum und keine Jahreszahl im Fliesstext der gesamten Website. 'Stand: TT.MM.JJJJ' sichtbar plus dateModified im Schema ergaenzen. ChatGPT gewichtet Inhalte unter 30 Tagen etwa 3,2-fach.",
-        "priority": "medium"
-      },
-      {
-        "url": "alle Inhaltsseiten",
-        "issue": "no_citations",
-        "recommendation": "Null externe Belege auf der gesamten Website, null Zahlen mit Einheit auf index.html und fuer-ihre-it.html. Fremdquellen einbauen (Fraunhofer IAO, EU AI Act, Bauindustrie-Erhebungen). Verletzt die Proof-Regel aus CLAUDE.md nicht, weil es keine eigenen Kundenreferenzen sind. Princeton/KDD 2024: cite sources +40 Prozent, statistics +37 Prozent.",
-        "priority": "high"
-      },
-      {
-        "url": "alle Inhaltsseiten",
-        "issue": "no_answer_first",
-        "recommendation": "Von rund 180 Ueberschriften sind 3 als Frage formuliert. Ueberschriften der Sachabschnitte auf Frageform umstellen und die Antwort in den ersten Satz darunter setzen.",
-        "priority": "medium"
-      },
-      {
-        "url": "https://manibase.de/ueber-uns.html",
-        "issue": "missing_external_profile_links",
-        "recommendation": "Die Seite enthaelt null externe Links. LinkedIn-Profile beider Gruender verlinken. Matthias Geislers LinkedIn ist derzeit der einzige Treffer, den eine Suche nach 'manibase' liefert.",
-        "priority": "high"
-      }
-    ],
-    "technical": [
-      {
-        "issue": "missing_sitemap",
-        "details": "https://manibase.de/sitemap.xml liefert 404. Alle drei geprueften Wettbewerber haben eine.",
-        "fix": "site/sitemap.xml mit den 13 indexierbaren Seiten anlegen, aus robots.txt referenzieren, in der Search Console einreichen. noindex-Seiten (impressum, datenschutz, blog, infotermin, interessent, einfuehrungsprojekt, ki-klartag) nicht aufnehmen.",
-        "priority": "high"
-      },
-      {
-        "issue": "missing_robots_txt",
-        "details": "https://manibase.de/robots.txt liefert 404.",
-        "fix": "Siehe fixes_needed.robots_txt.recommended_content.",
-        "priority": "high"
-      },
-      {
-        "issue": "no_compression_css_js",
-        "details": "nginx komprimiert HTML, aber nicht text/css und nicht application/javascript. Gemessen mit Accept-Encoding gzip,br am 17.08.2026: site.css 116032 B, home.css 36090 B, site.js 23578 B, jeweils ohne content-encoding. site.css ist renderblockierend und faellt auf Mobil bei 2605 ms, der LCP bei 2704 ms.",
-        "fix": "gzip_types bzw. brotli_types in nginx um text/css und application/javascript erweitern. Alle drei Wettbewerber liefern brotli.",
-        "priority": "done",
-        "status": "erledigt 17.08.2026"
-      },
-      {
-        "issue": "oversized_images",
-        "details": "signet.png 132231 B bei 512x512, dargestellt mit 36x36 px. signet-negative.png 62 KB. Zusammen rund 190 KB auf jeder der 13 Seiten.",
-        "fix": "72x72-WebP erzeugen (rund 2 KB) und einsetzen. alt=\"\" ist korrekt und bleibt, das Signet ist dekorativ neben der Wortmarke.",
-        "priority": "high"
-      },
-      {
-        "issue": "missing_canonical",
-        "details": "Fehlt auf klartag.html, ueber-uns.html, fuer-ihre-it.html, datenschutz.html, impressum.html, infotermin.html, interessent.html.",
-        "fix": "link rel=canonical mit absoluter URL auf allen sieben Seiten ergaenzen.",
-        "priority": "high"
-      },
-      {
-        "issue": "missing_open_graph",
-        "details": "Nur index.html hat Open Graph (9 Tags plus 1 twitter). Die uebrigen 14 Seiten haben keine.",
-        "fix": "og:title, og:description, og:url, og:image, og:type, og:locale und twitter:card auf allen Unterseiten ergaenzen. og-manibase.jpg liegt bereits in assets/.",
-        "priority": "high"
-      },
-      {
-        "issue": "slow_lcp",
-        "details": "ki-helfer.html mobil LCP 4320 ms. Ursache: .helper-hero laedt hero-hands.jpg (2200x1467, 257 KB) per CSS background-image, wird erst nach dem CSS-Parsing entdeckt.",
-        "fix": "Auf ein echtes img-Element mit fetchpriority=high und srcset umstellen, wie klartag.html es bereits macht. WebP-Variante erzeugen.",
-        "priority": "medium"
-      },
-      {
-        "issue": "footer_headings_as_h2",
-        "details": "Die Footer-Spaltenkoepfe 'Zielgruppen', 'KI-Einfuehrung', 'Unternehmen' sind als h2 ausgezeichnet und stehen auf jeder Seite im Gliederungsbaum. Auf baugewerbe.html sind das 3 von 6 h2.",
-        "fix": "Im Footer auf div oder p mit der bestehenden .footer__h-Klasse umstellen, Optik unveraendert lassen.",
-        "priority": "medium"
-      },
-      {
-        "issue": "bare_404_page",
-        "details": "https://manibase.de/gibtsnicht-xyz liefert die nginx-Standardseite ohne Navigation und ohne Marke.",
-        "fix": "site/404.html im Seitendesign anlegen und im nginx-Vhost via error_page 404 einbinden.",
-        "priority": "low"
-      },
-      {
-        "issue": "no_analytics",
-        "details": "Weder GA4, gtag, GTM, dataLayer, Matomo, Plausible, Umami, Fathom, Clarity, Hotjar, Meta Pixel noch LinkedIn Insight gefunden. Der einzige Treffer auf 'consent' ist eine Formular-Checkbox. Der fuenfstufige Wizard ist der wichtigste Konversionspfad und wird nicht gemessen.",
-        "fix": "Selbstgehostetes Matomo ohne Cookies oder Plausible mit EU-Hosting. Beide ohne Einwilligungsbanner betreibbar und markenkonform. Ereignis je Wizard-Schritt setzen.",
-        "priority": "high"
-      },
-      {
-        "issue": "phone_not_in_header",
-        "details": "Telefonnummer nur in Footer und Impressum, nicht als tel:-Link im Seitenkopf.",
-        "fix": "tel:+4915565697065 im Header ergaenzen, auf Mobil sichtbar halten.",
-        "priority": "medium"
-      },
-      {
-        "issue": "noindex_on_impressum_datenschutz",
-        "details": "Beide Seiten stehen auf noindex. In DE verbreitet, hier aber nachteilig: Google nutzt genau diese Seiten zur Verifikation der Unternehmensentitaet (Adresse, HRB 18632, Geschaeftsfuehrung), und die Marke hat sonst keine externen Identitaetssignale.",
-        "fix": "noindex auf impressum.html entfernen, mindestens dort. Abwaegung liegt bei der Geschaeftsfuehrung.",
-        "priority": "low"
-      }
-    ]
+  "local_or_content": {
+   "score": 5.7,
+   "max": 20,
+   "type": "content_authority"
   },
-  "action_plan": {
-    "quick_wins": [
-      {
-        "action": "robots.txt anlegen, KI-Bots ausdruecklich erlauben, Sitemap referenzieren",
-        "effort_hours": 0.5,
-        "impact": "Indexierung",
-        "roi_estimate": "Voraussetzung fuer alles Weitere",
-        "status": "umgesetzt 17.08.2026",
-        "id": "S1"
-      },
-      {
-        "action": "sitemap.xml mit 13 Seiten anlegen und in der Search Console einreichen",
-        "effort_hours": 1,
-        "impact": "Indexierung",
-        "roi_estimate": "Indexierung in 1 bis 2 Wochen statt Monaten",
-        "status": "umgesetzt 17.08.2026",
-        "id": "S2"
-      },
-      {
-        "action": "gzip/brotli fuer text/css und application/javascript in nginx aktivieren",
-        "effort_hours": 0.5,
-        "impact": "Core Web Vitals",
-        "roi_estimate": "rund 105 KB weniger, mobiler LCP von 2,7 s auf voraussichtlich unter 1,5 s",
-        "status": "umgesetzt 17.08.2026 auf dem Produktivserver",
-        "id": "S3"
-      },
-      {
-        "action": "signet.png und signet-negative.png als 72x72-WebP",
-        "effort_hours": 0.5,
-        "impact": "Core Web Vitals",
-        "roi_estimate": "rund 190 KB weniger auf jeder Seite",
-        "status": "umgesetzt 17.08.2026",
-        "id": "S4"
-      },
-      {
-        "action": "Organization-Schema um sameAs, founder, foundingDate, areaServed erweitern",
-        "effort_hours": 1,
-        "impact": "Entity SEO",
-        "roi_estimate": "einziger Weg aus der Namenskollision mit Manbase/MANBASE",
-        "status": "umgesetzt 17.08.2026",
-        "id": "S5"
-      },
-      {
-        "action": "Canonical auf den sieben fehlenden Seiten ergaenzen",
-        "effort_hours": 0.5,
-        "impact": "Technik",
-        "roi_estimate": "Duplikatrisiko aus",
-        "status": "umgesetzt 17.08.2026",
-        "id": "S6"
-      },
-      {
-        "action": "Open Graph auf alle 14 Unterseiten",
-        "effort_hours": 1,
-        "impact": "Reichweite",
-        "roi_estimate": "geteilte Links bekommen Bild und Titel",
-        "status": "umgesetzt 17.08.2026",
-        "id": "S7"
-      },
-      {
-        "action": "Titel und Descriptions kuerzen",
-        "effort_hours": 1,
-        "impact": "CTR",
-        "roi_estimate": "+10 bis 20 Prozent Klickrate bei gleicher Position"
-      },
-      {
-        "action": "Telefonnummer als tel:-Link in den Seitenkopf",
-        "effort_hours": 1,
-        "impact": "Conversion",
-        "roi_estimate": "direkter Kanal fuer mobile Erstkontakte"
-      },
-      {
-        "action": "LinkedIn-Profile der Gruender verlinken, LinkedIn-Unternehmensseite anlegen, in sameAs aufnehmen",
-        "effort_hours": 1.5,
-        "impact": "E-E-A-T, Entity",
-        "roi_estimate": "verbindet die einzige rankende Fremdquelle mit der Domain"
-      },
-      {
-        "action": "Datenschutzfreundliche Analytik einrichten (Matomo cookiefrei oder Plausible EU)",
-        "effort_hours": 2,
-        "impact": "Messbarkeit",
-        "roi_estimate": "Trichterdaten der Qualifizierungsmaske, ohne Einwilligungsbanner"
-      },
-      {
-        "action": "Branded 404-Seite mit Navigation",
-        "effort_hours": 0.5,
-        "impact": "UX",
-        "roi_estimate": "geringer, aber billig"
-      }
-    ],
-    "medium_term": [
-      {
-        "action": "FAQ-Bereich mit FAQPage-Schema auf sieben Seiten, 5 bis 7 echte Fragen je Seite",
-        "effort_hours": 12,
-        "impact": "GEO, SERP",
-        "roi_estimate": "rund +40 Prozent KI-Sichtbarkeit, Chance auf Rich Results"
-      },
-      {
-        "action": "Die vier duennen Zielseiten auf 900 bis 1200 Woerter ausbauen, mit Frageueberschriften",
-        "effort_hours": 20,
-        "impact": "Rankings",
-        "roi_estimate": "macht die vier kommerziell wichtigsten Seiten erst rankingfaehig"
-      },
-      {
-        "action": "Fremdbelege einbauen (Fraunhofer IAO, EU AI Act, Bauindustrie-Erhebungen), verlinkt und datiert",
-        "effort_hours": 6,
-        "impact": "GEO, E-E-A-T",
-        "roi_estimate": "cite sources +40 Prozent, statistics +37 Prozent"
-      },
-      {
-        "action": "Vergleichsseite 'Microsoft 365 Copilot oder eigene KI-Umgebung' aus Blatt 04",
-        "effort_hours": 8,
-        "impact": "Rankings",
-        "roi_estimate": "hohe Kaufnaehe, niemand im Wettbewerbsfeld bedient das"
-      },
-      {
-        "action": "Seite 'Was kostet eine KI-Einfuehrung' mit dem echten Preis",
-        "effort_hours": 5,
-        "impact": "Rankings, Conversion",
-        "roi_estimate": "einer von zwei Anbietern im Feld mit oeffentlichem Preis"
-      },
-      {
-        "action": "Offer/Service-Schema fuer den Klartag, Person-Schema fuer beide Gruender, BreadcrumbList",
-        "effort_hours": 4,
-        "impact": "Entity, GEO",
-        "roi_estimate": "Preis und Personen werden maschinenlesbar"
-      },
-      {
-        "action": "'Stand: TT.MM.JJJJ' und dateModified auf allen Inhaltsseiten",
-        "effort_hours": 2,
-        "impact": "GEO",
-        "roi_estimate": "Frischesignal, ChatGPT gewichtet es rund 3,2-fach"
-      },
-      {
-        "action": "Wikidata-Eintrag fuer manibase UG mit Registerdaten und Domainbezug",
-        "effort_hours": 3,
-        "impact": "Entity SEO",
-        "roi_estimate": "Grundstein fuer ein Knowledge Panel"
-      },
-      {
-        "action": "Google-Unternehmensprofil fuer den Sitz Eibelstadt",
-        "effort_hours": 2,
-        "impact": "Entity, lokal",
-        "roi_estimate": "bedient 'KI-Beratung Wuerzburg'"
-      },
-      {
-        "action": "ki-helfer.html: Hintergrundbild auf img mit fetchpriority umstellen",
-        "effort_hours": 2,
-        "impact": "Core Web Vitals",
-        "roi_estimate": "LCP von 4,3 s auf unter 2,5 s"
-      }
-    ],
-    "long_term": [
-      {
-        "action": "Fachinhalte wieder aufbauen, zwei Beitraege im Monat entlang der Keyword-Luecke, mit Byline eines Gruenders",
-        "effort_hours": 8,
-        "impact": "Themenautoritaet, Frische, Linkgrundlage",
-        "roi_estimate": "je Beitrag, laufend"
-      },
-      {
-        "action": "Leitfaden 'KI-Richtlinie fuer Bau- und Handwerksbetriebe' als PDF gegen E-Mail-Adresse",
-        "effort_hours": 20,
-        "impact": "Linkmagnet, Leads",
-        "roi_estimate": "Perplexity bevorzugt oeffentliche PDFs als Zitatquelle"
-      },
-      {
-        "action": "Gezielter Linkaufbau: Handwerkskammer Unterfranken, Bauinnungen, THWS, Fachpresse",
-        "effort_hours": 30,
-        "impact": "Autoritaet",
-        "roi_estimate": "die derzeit groesste Einzelluecke; THWS-Draht besteht bereits ueber einen Vortrag"
-      },
-      {
-        "action": "Erste Kundenreferenz freigeben lassen, sobald ein Kunde zustimmt",
-        "effort_hours": 0,
-        "impact": "E-E-A-T, Conversion",
-        "roi_estimate": "loest die selbstauferlegte Proof-Luecke sauber auf"
-      },
-      {
-        "action": "URLs ohne .html mit 301-Weiterleitungen",
-        "effort_hours": 6,
-        "impact": "kosmetisch",
-        "roi_estimate": "nur bei ohnehin anstehender nginx-Arbeit"
-      }
-    ]
+  "eeat": {
+   "score": 4.7,
+   "max": 10
   },
-  "competitors": [
-    {
-      "domain": "derprozessmeister.de",
-      "estimated_score": 58,
-      "strength": "Textumfang 4500 bis 5500 Woerter, FAQ-Inhalt, Preisstaffel, quantifizierte Fallbeispiele, regionale Landingpages",
-      "weakness": "breite Positionierung ueber 80+ Branchen, generische Zahlen, kein JSON-LD im ausgelieferten HTML"
-    },
-    {
-      "domain": "innovation-ausbau.de",
-      "estimated_score": 45,
-      "strength": "Verbandsnaehe, Google-Cloud-Partnerschaft, etablierte Marke",
-      "weakness": "TTFB 1,0 s schlechtester Wert im Feld, Clubmodell statt konkreter Einfuehrungsleistung, kein Festpreiseinstieg"
-    },
-    {
-      "domain": "kozoa.de",
-      "estimated_score": 38,
-      "strength": "robots.txt, Sitemap, brotli, erscheint in Suchergebnissen",
-      "weakness": "kein Schema, kein Open Graph, kein Blog, keine FAQ, sehr duenn, Ein-Personen-Betrieb ohne Governance-Angebot",
-      "note": "direktester Wettbewerber, nahezu identische Positionierung, ebenfalls 2026 gegruendet"
-    }
-  ],
-  "keyword_gap": [
-    {
-      "keyword": "KI im Bauunternehmen einfuehren",
-      "intent": "kommerziell",
-      "target_page": "baugewerbe.html",
-      "effort": "mittel"
-    },
-    {
-      "keyword": "KI fuer Handwerksbetriebe DSGVO-konform",
-      "intent": "kommerziell",
-      "target_page": "gebaeudetechnik-ausbau.html",
-      "effort": "mittel"
-    },
-    {
-      "keyword": "eigene Firmen-KI statt ChatGPT",
-      "intent": "kommerziell",
-      "target_page": "firmen-ki.html",
-      "effort": "mittel"
-    },
-    {
-      "keyword": "Microsoft 365 Copilot vs eigene KI-Umgebung",
-      "intent": "Vergleich",
-      "target_page": "neu",
-      "effort": "hoch"
-    },
-    {
-      "keyword": "KI-Richtlinie Unternehmen Vorlage",
-      "intent": "informativ",
-      "target_page": "neu, PDF",
-      "effort": "hoch"
-    },
-    {
-      "keyword": "Bautagebuch automatisch erstellen KI",
-      "intent": "informativ",
-      "target_page": "neu, Bernd-Fallseite",
-      "effort": "mittel"
-    },
-    {
-      "keyword": "LV-Auswertung mit KI",
-      "intent": "informativ",
-      "target_page": "neu",
-      "effort": "mittel"
-    },
-    {
-      "keyword": "n8n fuer Handwerksbetriebe",
-      "intent": "informativ",
-      "target_page": "prozessautomatisierung.html",
-      "effort": "niedrig"
-    },
-    {
-      "keyword": "KI-Beratung Wuerzburg",
-      "intent": "lokal",
-      "target_page": "neu plus Google-Unternehmensprofil",
-      "effort": "niedrig"
-    },
-    {
-      "keyword": "Was kostet eine KI-Einfuehrung im Mittelstand",
-      "intent": "informativ",
-      "target_page": "neu",
-      "effort": "niedrig"
-    }
-  ],
-  "implementation_log": {
-    "datum": "2026-08-17",
-    "umgesetzt": [
-      {
-        "id": "S1",
-        "was": "site/robots.txt angelegt, 17 User-agent-Bloecke, alle KI-Bots ausdruecklich erlaubt, Sitemap referenziert",
-        "status": "fertig"
-      },
-      {
-        "id": "S2",
-        "was": "site/sitemap.xml angelegt, 10 indexierbare Seiten (nicht 13, nachgezaehlt)",
-        "status": "fertig",
-        "offen": "in der Search Console einreichen, sobald das Property existiert"
-      },
-      {
-        "id": "S3",
-        "was": "nginx-Kompression fuer text/css und application/javascript",
-        "status": "fertig, umgesetzt am 17.08.2026 auf 72.61.153.206",
-        "hinweis": "gzip_types im Vhost manibase.de, bewusst nicht global wegen der Nachbar-Vhosts librechat.manibase.de und librechat-admin.manibase.de. Backup: manibase.de.bak-20260817-190213.",
-        "ergebnis": "site.css 116032 auf 25943 B (-78%), renderblockierende Last der Startseite 193 auf 49 KB. Mobiler LCP: Startseite 2704 auf 1356 ms, klartag 2992 auf 1612, baugewerbe 2452 auf 1036, ki-helfer 4320 auf 2856. CLS unveraendert 0,000."
-      },
-      {
-        "id": "S4",
-        "was": "signet-72.webp, signet-negative-72.webp, favicon-32.png und favicon-96.png erzeugt, Referenzen in 14 Dateien umgestellt",
-        "status": "fertig",
-        "ersparnis": "Signets 192 KB auf 12 KB pro Seite, Favicon 132 KB auf rund 9 KB (32px Browser-Tab, 96px Google-Suche, beide mit sizes deklariert)"
-      },
-      {
-        "id": "S5",
-        "was": "Organization-Schema erweitert: ProfessionalService, @id, legalName, alternateName, sameAs (LinkedIn-Unternehmensseite), areaServed, knowsAbout, contactPoint, identifier (HRB 18632), logo als ImageObject, founder mit beiden Gruendern und deren Person-sameAs",
-        "status": "fertig",
-        "offen": "Wikidata-Eintrag existiert nicht und gehoert nach Anlage zusaetzlich in Organization.sameAs (Massnahme M8). foundingDate fehlt, Datum der Handelsregistereintragung nicht bekannt.",
-        "offen_organisatorisch": "Im LinkedIn-Firmenprofil das Feld Website auf https://manibase.de setzen. Ohne Rueckverweis ist die Verknuepfung nur einseitig."
-      },
-      {
-        "id": "S6",
-        "was": "Canonical auf 7 Seiten ergaenzt, jetzt genau eines auf allen 16 Seiten",
-        "status": "fertig"
-      },
-      {
-        "id": "S7",
-        "was": "Open Graph und twitter:card auf 13 Seiten ergaenzt",
-        "status": "fertig"
-      }
-    ],
-    "korrektur": "Der Bericht nannte zunaechst 13 indexierbare Seiten, uebernommen aus dem frueheren Audit. Nachgezaehlt sind es 10; die uebrigen tragen noindex.",
-    "linkedin": {
-      "urls": {
-        "organisation": "https://www.linkedin.com/company/manibase/",
-        "matthias_geisler": "https://www.linkedin.com/in/matthias-geisler/",
-        "nikolaus_schauersberger": "https://www.linkedin.com/in/nikolaus-schauersberger/"
-      },
-      "platziert": [
-        "Schema: Organization.sameAs (Firmenseite) und founder[].sameAs (beide Personenprofile)",
-        "Footer, Spalte Unternehmen, alle 10 Seiten: <a rel=me>LinkedIn</a> auf die Firmenseite. rel=me ist dort korrekt.",
-        "ueber-uns.html: Textlink je Gruender-Karte unter der Biografie, OHNE rel-Attribut. Die Personenzuordnung leistet Person.sameAs im JSON-LD."
-      ],
-      "bewusst_nicht_platziert": "Startseite Blatt 05, die Karten dort sind zu eng getaktet",
-      "offen_organisatorisch": "Im LinkedIn-Firmenprofil das Feld Website auf https://manibase.de setzen. Ohne Rueckverweis ist die Verknuepfung nur einseitig."
-    },
-    "korrektur_eeat": "Die erste Fassung fuehrte 'keine Zertifikate' als Luecke. Falsch: ueber-uns.html belegt fuer beide Gruender die TUEV-SUED-Qualifikation 'AI Strategy & Application Expert'. E-E-A-T 4,0 auf 4,5, Gesamtnote 39,5 auf 40,0.",
-    "review_fixes": {
-      "P1": "scratchpad/nav.py liegt weder im Repo noch auf der Maschine, der Generator liess sich nicht versionieren. Stattdessen CI-Gate: scripts/test-frontend.mjs prueft ueber alle Seiten Signets, Favicon, LinkedIn-Link, Canonical, Open Graph, Sitemap-Deckung, robots.txt, Organization-Schema und rel=me. Laeuft in verify.yml bei jedem Pull Request. Vorlagenzeilen dokumentiert in CLAUDE.md, Abschnitt Navigation.",
-      "P2": "rel=me von den beiden Gruenderlinks entfernt. Die Relation bezeichnet laut IANA eine Ressource ueber den Autor des Link-Kontexts. Am Footer-Link auf die Unternehmensseite bleibt rel=me, dort ist es korrekt.",
-      "P3": "favicon-96.png ergaenzt, beide Groessen mit sizes deklariert. Google empfiehlt ein Vielfaches von 48px.",
-      "P3_doku": "Bestandsbeschreibungen im Bericht auf den korrigierten Stand gebracht, Lesehinweis ergaenzt, PR-Beschreibung aktualisiert."
-    }
+  "entity_seo": {
+   "score": 3.5,
+   "max": 10
+  },
+  "geo": {
+   "score": 9.6,
+   "max": 20
+  },
+  "ux_conversion": {
+   "score": 6.2,
+   "max": 10
   }
+ },
+ "measurements": {
+  "lighthouse_mobile": {
+   "/": {
+    "perf": 97,
+    "lcp_s": 2.3,
+    "fcp_s": 2.0,
+    "cls": 0,
+    "tbt_ms": 0
+   },
+   "/gebaeudetechnik-ausbau.html": {
+    "perf": 99,
+    "lcp_s": 2.1,
+    "fcp_s": 1.5,
+    "cls": 0,
+    "tbt_ms": 0
+   },
+   "/klartag.html": {
+    "perf": 89,
+    "lcp_s": 3.5,
+    "fcp_s": 2.1,
+    "cls": 0,
+    "tbt_ms": 0
+   },
+   "/ki-helfer.html": {
+    "perf": 87,
+    "lcp_s": 3.8,
+    "fcp_s": 2.0,
+    "cls": 0,
+    "tbt_ms": 0
+   }
+  },
+  "lighthouse_desktop": {
+   "/": {
+    "perf": 100,
+    "lcp_s": 0.5,
+    "cls": 0
+   }
+  },
+  "main_words": {
+   "/": 1453,
+   "fuer-ihre-it.html": 598,
+   "klartag.html": 519,
+   "firmen-ki.html": 442,
+   "gebaeudetechnik-ausbau.html": 412,
+   "ueber-uns.html": 362,
+   "ki-helfer.html": 325,
+   "prozessautomatisierung.html": 228,
+   "baugewerbe.html": 188,
+   "planungsbueros.html": 170
+  },
+  "http_version": "1.1",
+  "compression": "gzip",
+  "llms_txt": 404,
+  "search_tests_found": 0,
+  "search_tests_total": 12
+ },
+ "fixes_needed": {
+  "meta_tags": [
+   {
+    "url": "https://manibase.de/",
+    "issue": "title_too_long",
+    "current_value": "KI-Arbeitsplätze, Automatisierungen und Helfer für Bau, Handwerk und Planung · manibase",
+    "suggested_value": "KI-Einführung für Bau, Handwerk und Planung · manibase",
+    "priority": "high",
+    "status": "umgesetzt im PR"
+   },
+   {
+    "url": "https://manibase.de/",
+    "issue": "meta_too_long",
+    "current_value": "(258 Zeichen)",
+    "suggested_value": "Bauunternehmen, ausführende Gewerke und Planungsbüros führen mit manibase KI kontrolliert ein. Einstieg: der Klartag für 3.900 € netto, voll anrechenbar.",
+    "priority": "high",
+    "status": "umgesetzt im PR"
+   },
+   {
+    "url": "https://manibase.de/gebaeudetechnik-ausbau.html",
+    "issue": "h1_no_keyword",
+    "current_value": "Sie kommen von draußen. Dann fängt das Büro an.",
+    "suggested_value": "Suchbegriff in Eyebrow oder Unterzeile der H1 aufnehmen (KI für SHK, Elektro, Dach und Ausbau), Leitsatz behalten",
+    "priority": "low"
+   },
+   {
+    "url": "https://manibase.de/klartag.html",
+    "issue": "h1_no_keyword",
+    "current_value": "Ein Tag, bevor Sie investieren.",
+    "suggested_value": "'KI-Klartag' als Suchanker in H1 oder direkt darunter; 'Klartag' allein ist durch Bo'az Klartag belegt",
+    "priority": "medium"
+   }
+  ],
+  "schema_markup": [
+   {
+    "url": "https://manibase.de/",
+    "missing_type": "Person",
+    "properties_needed": [
+     "sameAs korrigieren falls /in/matthias-geisler-238591182 richtig ist"
+    ],
+    "priority": "high",
+    "status": "kein Fehler, zurueckgenommen"
+   },
+   {
+    "url": "https://manibase.de/klartag.html",
+    "missing_type": "FAQPage",
+    "properties_needed": [
+     "mainEntity"
+    ],
+    "priority": "high"
+   },
+   {
+    "url": "https://manibase.de/klartag.html",
+    "missing_type": "Service",
+    "properties_needed": [
+     "name",
+     "provider",
+     "areaServed",
+     "offers(Offer: price 3900, priceCurrency EUR, valueAddedTaxIncluded false)"
+    ],
+    "priority": "high"
+   },
+   {
+    "url": "https://manibase.de/firmen-ki.html",
+    "missing_type": "FAQPage",
+    "properties_needed": [
+     "mainEntity"
+    ],
+    "priority": "medium"
+   },
+   {
+    "url": "https://manibase.de/baugewerbe.html",
+    "missing_type": "FAQPage",
+    "properties_needed": [
+     "mainEntity"
+    ],
+    "priority": "medium"
+   },
+   {
+    "url": "https://manibase.de/gebaeudetechnik-ausbau.html",
+    "missing_type": "FAQPage",
+    "properties_needed": [
+     "mainEntity"
+    ],
+    "priority": "medium"
+   },
+   {
+    "url": "https://manibase.de/planungsbueros.html",
+    "missing_type": "FAQPage",
+    "properties_needed": [
+     "mainEntity"
+    ],
+    "priority": "medium"
+   },
+   {
+    "url": "https://manibase.de/fuer-ihre-it.html",
+    "missing_type": "FAQPage",
+    "properties_needed": [
+     "mainEntity"
+    ],
+    "priority": "medium"
+   },
+   {
+    "url": "alle Unterseiten",
+    "missing_type": "BreadcrumbList",
+    "properties_needed": [
+     "itemListElement"
+    ],
+    "priority": "low"
+   },
+   {
+    "url": "https://manibase.de/ueber-uns.html",
+    "missing_type": "Person",
+    "properties_needed": [
+     "name",
+     "jobTitle",
+     "image",
+     "sameAs",
+     "hasCredential (TÜV SÜD AI Strategy & Application Expert)",
+     "worksFor @id"
+    ],
+    "priority": "medium"
+   },
+   {
+    "url": "https://manibase.de/",
+    "missing_type": "Organization",
+    "properties_needed": [
+     "sameAs: Wikidata nach Anlage, Google-Maps-URL nach GBP-Freigabe",
+     "foundingDate"
+    ],
+    "priority": "medium"
+   }
+  ],
+  "robots_txt": {
+   "needs_update": false,
+   "blocked_bots": [],
+   "recommended_additions": [],
+   "priority": "low"
+  },
+  "redirects": [
+   {
+    "from": "/ki-klartag.html",
+    "to": "/klartag.html",
+    "type": "301",
+    "reason": "meta_refresh_stub"
+   },
+   {
+    "from": "/einfuehrungsprojekt.html",
+    "to": "/firmen-ki.html",
+    "type": "301",
+    "reason": "meta_refresh_stub"
+   },
+   {
+    "from": "/blog/papierkram-am-chef.html",
+    "to": "/#arbeitssituationen",
+    "type": "301",
+    "reason": "meta_refresh_stub"
+   },
+   {
+    "from": "https://manibase.io/",
+    "to": "https://manibase.de/",
+    "type": "301",
+    "reason": "parked_domain_linked_from_linkedin"
+   }
+  ],
+  "content": [
+   {
+    "url": "https://manibase.de/baugewerbe.html",
+    "issue": "thin_content",
+    "recommendation": "188 auf 800-1100 Woerter nach Muster gebaeudetechnik-ausbau.html, Frage-H2, FAQ",
+    "priority": "high"
+   },
+   {
+    "url": "https://manibase.de/planungsbueros.html",
+    "issue": "thin_content",
+    "recommendation": "170 auf 800-1100 Woerter, Vokabular Architektur/TGA/HOAI-Leistungsphasen, FAQ",
+    "priority": "high"
+   },
+   {
+    "url": "https://manibase.de/prozessautomatisierung.html",
+    "issue": "thin_content",
+    "recommendation": "228 auf 800-1100 Woerter, n8n-Beispiele aus Bau und Handwerk, FAQ",
+    "priority": "medium"
+   },
+   {
+    "url": "alle Inhaltsseiten",
+    "issue": "no_sources",
+    "recommendation": "datierte Fremdbelege (EU AI Act Art. 4, BayIKa-Leitfaden 09/2026, Fraunhofer, Verbandserhebungen)",
+    "priority": "medium"
+   },
+   {
+    "url": "alle Inhaltsseiten",
+    "issue": "outdated",
+    "recommendation": "sichtbares 'Stand: TT.MM.JJJJ' plus dateModified",
+    "priority": "low"
+   },
+   {
+    "url": "neu",
+    "issue": "no_answer_first",
+    "recommendation": "Vergleichsseite Microsoft 365 Copilot oder eigene Firmen-KI; Kostenseite; KI-Richtlinie als PDF",
+    "priority": "medium"
+   },
+   {
+    "url": "https://manibase.de/llms.txt",
+    "issue": "missing",
+    "recommendation": "llms.txt mit Profil, Leistungen, Preis, Zielgruppen, Links",
+    "priority": "medium"
+   }
+  ],
+  "technical": [
+   {
+    "issue": "no_http2",
+    "details": "nginx verhandelt nur HTTP/1.1",
+    "fix": "http2 on; im 443-server-Block, nginx -t, reload",
+    "priority": "high"
+   },
+   {
+    "issue": "duplicate_cache_control",
+    "details": "expires plus add_header erzeugen zwei Cache-Control-Header; immutable auch auf nicht gehashten Bildern",
+    "fix": "expires entfernen; immutable und lange max-age nur fuer ?v=-Assets, Bilder ohne Hash ohne immutable",
+    "priority": "low"
+   },
+   {
+    "issue": "slow_lcp",
+    "details": "klartag.html 3,5 s: klartag-workshop-unsplash.jpg ohne srcset/WebP (200 KB zu gross)",
+    "fix": "WebP 700/1200 mit srcset und sizes",
+    "priority": "medium"
+   },
+   {
+    "issue": "slow_lcp",
+    "details": "ki-helfer.html 3,8 s: hero-hands.jpg als CSS-Hintergrund, spaet entdeckt, 131 KB durch WebP einsparbar",
+    "fix": "<img fetchpriority=high> in WebP oder preload",
+    "priority": "medium"
+   },
+   {
+    "issue": "no_brotli",
+    "details": "nur gzip, alle Wettbewerber liefern br",
+    "fix": "optional ngx_brotli oder vorkomprimierte .br-Dateien",
+    "priority": "low"
+   },
+   {
+    "issue": "unbranded_404",
+    "details": "nginx-Standardseite",
+    "fix": "404.html mit Navigation, error_page 404",
+    "priority": "low"
+   },
+   {
+    "issue": "asset_location_drops_security_headers",
+    "details": "add_header in der Asset-Location hebt die add_header des Server-Blocks auf, Assets ohne nosniff",
+    "fix": "nosniff in den Asset-Locations wiederholen, siehe nginx-http2-weiterleitungen.md",
+    "priority": "low"
+   }
+  ],
+  "entity": [
+   {
+    "issue": "linkedin_website_wrong",
+    "details": "LinkedIn-Unternehmensseite nennt manibase.io (geparkt)",
+    "fix": "Website-Feld auf https://manibase.de, Tippfehler 'Baugewebe' korrigieren",
+    "priority": "high",
+    "status": "Website-Feld erledigt, Tippfehler offen"
+   },
+   {
+    "issue": "linkedin_person_url_unverified",
+    "details": "Schema/ueber-uns: /in/matthias-geisler/, Suchmaschinen zeigen /in/matthias-geisler-238591182",
+    "fix": "URL pruefen und angleichen",
+    "priority": "high",
+    "status": "kein Fehler, zurueckgenommen"
+   },
+   {
+    "issue": "no_wikidata",
+    "fix": "Wikidata-Item anlegen",
+    "priority": "medium"
+   },
+   {
+    "issue": "no_citations",
+    "fix": "IHK-Firmenverzeichnis, Das Oertliche, Gelbe Seiten, 11880, Cylex mit identischem NAP",
+    "priority": "medium"
+   }
+  ]
+ },
+ "action_plan": {
+  "quick_wins": [
+   {
+    "id": "Q1",
+    "action": "LinkedIn-Website-Feld auf https://manibase.de, Tippfehler Baugewebe",
+    "effort_hours": 0.25,
+    "impact": "Entity",
+    "roi_estimate": "beidseitige sameAs-Verbindung, Voraussetzung fuer Markenrankings",
+    "status": "erledigt 26.09.2026, live geprueft; offen: Tippfehler Baugewebe im LinkedIn-Info-Text"
+   },
+   {
+    "id": "Q2",
+    "action": "manibase.io 301 auf manibase.de",
+    "effort_hours": 0.25,
+    "impact": "Entity",
+    "roi_estimate": "kein Traffic mehr auf Parkseite",
+    "status": "offen, Geschaeftsfuehrung"
+   },
+   {
+    "id": "Q3",
+    "action": "Matthias-LinkedIn-URL pruefen und in Schema und ueber-uns angleichen",
+    "effort_hours": 0.25,
+    "impact": "Entity",
+    "roi_estimate": "verhindert Fremdzuordnung",
+    "status": "kein Fehler: Geschaeftsfuehrung bestaetigt linkedin.com/in/matthias-geisler, entspricht Schema und ueber-uns"
+   },
+   {
+    "id": "Q4",
+    "action": "HTTP/2 aktivieren, Cache-Control bereinigen",
+    "effort_hours": 0.5,
+    "impact": "CWV",
+    "roi_estimate": "bis 0,8 s weniger mobil (Lighthouse-Schaetzung)",
+    "status": "vorbereitet in docs/deployment/nginx-http2-weiterleitungen.md, Server nicht geaendert"
+   },
+   {
+    "id": "Q5",
+    "action": "Title und Description der Startseite kuerzen",
+    "effort_hours": 0.3,
+    "impact": "CTR",
+    "roi_estimate": "+10 bis 20 % Klickrate bei gleicher Position",
+    "status": "umgesetzt im PR seo/quickwins-folgeaudit"
+   },
+   {
+    "id": "Q6",
+    "action": "llms.txt anlegen",
+    "effort_hours": 1,
+    "impact": "GEO",
+    "roi_estimate": "gering bis unklar, aber billig",
+    "status": "umgesetzt im PR seo/quickwins-folgeaudit"
+   },
+   {
+    "id": "Q7",
+    "action": "Stubs als 301 in nginx",
+    "effort_hours": 0.5,
+    "impact": "Technik",
+    "roi_estimate": "Signalvererbung alter Links",
+    "status": "vorbereitet in docs/deployment/nginx-http2-weiterleitungen.md, Server nicht geaendert"
+   },
+   {
+    "id": "Q8",
+    "action": "GSC Sitemap pruefen, 10 URLs zur Indexierung, IndexNow in BWT",
+    "effort_hours": 0.5,
+    "impact": "Indexierung",
+    "roi_estimate": "Indexierung in Tagen",
+    "status": "offen, Geschaeftsfuehrung"
+   },
+   {
+    "id": "Q9",
+    "action": "tel:-Link in Kontakt und Footer (Vorlage + CI-Test mitziehen)",
+    "effort_hours": 1,
+    "impact": "Conversion",
+    "roi_estimate": "direkter Mobilkanal",
+    "status": "umgesetzt im PR seo/quickwins-folgeaudit (Footer 10 Seiten, Buchung, Impressum, CI-Test)"
+   },
+   {
+    "id": "Q10",
+    "action": "Cookiefreie Analytik mit Ereignissen je Maskenschritt",
+    "effort_hours": 2,
+    "impact": "Messbarkeit",
+    "roi_estimate": "Trichterdaten ohne Banner",
+    "status": "offen, braucht Werkzeug- und Datenschutzentscheidung"
+   }
+  ],
+  "medium_term": [
+   {
+    "id": "M1",
+    "action": "FAQ + FAQPage auf 6 Seiten",
+    "effort_hours": 12
+   },
+   {
+    "id": "M2",
+    "action": "baugewerbe, planungsbueros, prozessautomatisierung auf 800-1100 Woerter",
+    "effort_hours": 15
+   },
+   {
+    "id": "M3",
+    "action": "Service/Offer Klartag, BreadcrumbList, Person, dateModified",
+    "effort_hours": 4
+   },
+   {
+    "id": "M4",
+    "action": "Bilder klartag und ki-helfer auf WebP/srcset/fetchpriority",
+    "effort_hours": 2
+   },
+   {
+    "id": "M5",
+    "action": "Datierte Fremdbelege einbauen",
+    "effort_hours": 6
+   },
+   {
+    "id": "M6",
+    "action": "Vergleichsseite M365 Copilot oder eigene Firmen-KI",
+    "effort_hours": 8
+   },
+   {
+    "id": "M7",
+    "action": "Kostenseite KI-Einfuehrung",
+    "effort_hours": 5
+   },
+   {
+    "id": "M8",
+    "action": "Wikidata-Eintrag",
+    "effort_hours": 3
+   },
+   {
+    "id": "M9",
+    "action": "GBP nach Freigabe: sameAs, Leistungen, Bewertungen",
+    "effort_hours": 2
+   },
+   {
+    "id": "M10",
+    "action": "Verzeichniseintraege mit identischem NAP",
+    "effort_hours": 3
+   }
+  ],
+  "long_term": [
+   {
+    "id": "L1",
+    "action": "Ratgeber mit 8-12 Artikeln, KI-Richtlinie als PDF",
+    "effort_hours": 40
+   },
+   {
+    "id": "L2",
+    "action": "Links und Erwaehnungen: HWK Unterfranken, IHK, THWS KI-Regionalzentrum, BayIKa, Fachpresse",
+    "effort_hours": null
+   },
+   {
+    "id": "L3",
+    "action": "Erste freigegebene Referenz mit Kennzahl",
+    "effort_hours": null
+   },
+   {
+    "id": "L4",
+    "action": "BAFA-Foerderfaehigkeit des Klartags pruefen",
+    "effort_hours": 4
+   }
+  ]
+ },
+ "competitors": [
+  {
+   "domain": "derprozessmeister.de",
+   "estimated_score": 62,
+   "change": "JSON-LD und llms.txt neu, 757 URLs",
+   "strength": "Masse, Branchenseiten, Preise, Bewertungen",
+   "weakness": "Generalist, Rating-Markup inkonsistent, 900 KB HTML"
+  },
+  {
+   "domain": "kaj-bau-digital.de",
+   "estimated_score": 50,
+   "new": true,
+   "strength": "FAQPage/Service/Offer-Schema, llms.txt, BAFA-Preisargument",
+   "weakness": "Ein-Personen-Betrieb, kein Architektur-/Governance-Angebot",
+   "note": "nur oberflaechlich gemessen"
+  },
+  {
+   "domain": "ki-bau-handwerk.de",
+   "estimated_score": 48,
+   "new": true,
+   "strength": "Gewerkeseiten (Elektro, SHK, Dach), FAQPage, llms.txt, rankt fuer Bau und SHK",
+   "weakness": "Seminarmodell, sitemap.xml 404",
+   "note": "nur oberflaechlich gemessen"
+  },
+  {
+   "domain": "innovation-ausbau.de",
+   "estimated_score": 45,
+   "change": "TTFB 1,0 auf 0,8 s",
+   "strength": "Verbandsnaehe, Partner, Events",
+   "weakness": "Clubmodell, duenn, kein og:image, keine FAQ"
+  },
+  {
+   "domain": "kozoa.de",
+   "estimated_score": 42,
+   "change": "JSON-LD, og:image, 6 Leistungsseiten neu",
+   "strength": "Bau-Anwendungsfaelle konkret",
+   "weakness": "sehr duenn, kein Canonical, Apex/www-Widerspruch"
+  }
+ ],
+ "keyword_gap": [
+  {
+   "keyword": "manibase / manibase KI",
+   "intent": "Marke",
+   "target_page": "/"
+  },
+  {
+   "keyword": "KI für Bauunternehmen einführen",
+   "intent": "kommerziell",
+   "target_page": "baugewerbe.html"
+  },
+  {
+   "keyword": "KI im Handwerk SHK Elektro",
+   "intent": "kommerziell",
+   "target_page": "gebaeudetechnik-ausbau.html"
+  },
+  {
+   "keyword": "KI für Architekturbüros / Planungsbüros",
+   "intent": "kommerziell",
+   "target_page": "planungsbueros.html"
+  },
+  {
+   "keyword": "Microsoft 365 Copilot oder eigene KI",
+   "intent": "Vergleich",
+   "target_page": "neu"
+  },
+  {
+   "keyword": "Was kostet eine KI-Einführung",
+   "intent": "informativ",
+   "target_page": "neu"
+  },
+  {
+   "keyword": "KI-Richtlinie Unternehmen Vorlage",
+   "intent": "informativ",
+   "target_page": "neu, PDF"
+  },
+  {
+   "keyword": "KI-Kompetenzpflicht AI Act Art. 4 Handwerk",
+   "intent": "informativ",
+   "target_page": "neu"
+  },
+  {
+   "keyword": "Bautagebuch mit KI / Regiebericht diktieren",
+   "intent": "informativ",
+   "target_page": "neu"
+  },
+  {
+   "keyword": "KI-Beratung Würzburg",
+   "intent": "lokal",
+   "target_page": "GBP + /"
+  }
+ ],
+ "side_findings": [
+  {
+   "issue": "csp_blocks_decareto",
+   "details": "Branch legal/decareto-privacy-widget laedt https://decareto.b-cdn.net/...; live-CSP script-src erlaubt nur self und zeeg. Nach Merge wuerde der Browser das Widget blockieren, Datenschutzseite waere leer.",
+   "fix": "decareto.b-cdn.net in script-src (ggf. connect-src/style-src) der nginx-CSP aufnehmen, bevor der Branch gemergt wird"
+  }
+ ],
+ "implementation_log": {
+  "datum": "2026-09-26",
+  "pr_branch": "seo/quickwins-folgeaudit",
+  "score_nach_umsetzung": {
+   "entity_seo": 4.2,
+   "technical_seo": 9.3,
+   "ux_conversion": 6.3,
+   "overall": 48.3,
+   "hinweis": "Entity live, Technik und UX sobald der PR deployt ist"
+  }
+ }
 }
