@@ -3,7 +3,7 @@
    Übernommen aus dem Brand-Kit "Claude Design/colors_and_type.css".
    Einzige Änderung: Fonts werden selbst gehostet (DSGVO), nicht via Google-CDN.
    ============================================================ */
-@import url('../fonts/_fontface.css');
+@import url('../fonts/_fontface.css?v=45879ebdd0');
 
 :root{
   /* ---- Marke · Indigo-Cobalt ---- */

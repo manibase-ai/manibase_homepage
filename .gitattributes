@@ -1,0 +1,5 @@
+# Alles, was Git als Text erkennt, liegt im Repo und im Checkout mit LF. Grund:
+# scripts/cache-bust.py hasht CSS/JS; ein CRLF-Checkout (Windows, autocrlf) soll
+# keine anderen Stempel ergeben als die CI. Das Skript gleicht Zeilenenden zwar
+# selbst an, die Regel hier haelt aber auch die uebrigen Dateien einheitlich.
+* text=auto eol=lf

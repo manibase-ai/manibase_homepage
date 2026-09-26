@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Setzt an jeden lokalen CSS- und JS-Verweis einen Inhalts-Hash als ?v=-Stempel.
 
-Warum: nginx liefert /styles/*.css und /scripts/*.js mit
+Warum: nginx liefert /styles/*.css, /scripts/*.js und /fonts/_fontface.css mit
 `Cache-Control: public, max-age=604800, immutable` aus. `immutable` heisst, dass der
 Browser innerhalb der Woche NICHT nachfragt, auch nicht beim Neuladen. Ohne neue URL
 sieht ein wiederkehrender Besucher deshalb neues HTML mit altem CSS. Passiert am
@@ -9,12 +9,15 @@ sieht ein wiederkehrender Besucher deshalb neues HTML mit altem CSS. Passiert am
 (Review-Fixes zu PR #11 mit unveraendertem Hand-Stempel).
 
 Der Hash haengt am Dateiinhalt, nicht am Commit: unveraenderte Dateien behalten ihre
-URL und bleiben im Cache.
+URL und bleiben im Cache. Zeilenenden werden vor dem Hashen auf LF gebracht, damit ein
+Checkout mit CRLF (Windows, autocrlf) dieselben Stempel ergibt wie die CI.
 
 Die Verweise werden aus den Seiten selbst gesammelt (href/src in site/**/*.html und
-site/**/*.php), es gibt also keine Liste, die veralten kann. Ein vorhandener Stempel
-wird ersetzt, egal ob Hash oder alter Hand-Stempel. Ein Verweis auf eine Datei, die es
-nicht gibt, bricht den Lauf ab.
+site/**/*.php), es gibt also keine Liste, die veralten kann. Ein @import in einer
+gestempelten CSS-Datei (tokens.css -> fonts/_fontface.css) wird ebenfalls gestempelt;
+weil der Stempel dann im Inhalt der importierenden Datei steht, wandert deren Hash mit.
+Ein vorhandener Stempel wird ersetzt, egal ob Hash oder alter Hand-Stempel. Ein Verweis
+auf eine Datei, die es nicht gibt, bricht den Lauf ab, bevor etwas geschrieben wird.
 
     python3 scripts/cache-bust.py site           Stempel setzen (vor dem Commit)
     python3 scripts/cache-bust.py --check site   nur pruefen, Exit 1 bei Abweichung (CI)
@@ -25,26 +28,81 @@ import pathlib
 import re
 import sys
 
-# href="..." oder src="...", auch innerhalb eines PHP-Strings. Externe URLs
-# (https://, //) scheitern am Ausschluss von ':' im Pfad bzw. am Pruefen unten.
-REF = re.compile(
+# href="..." oder src="...", auch innerhalb eines PHP-Strings.
+PAGE_REF = re.compile(
     r'''(?<![\w-])((?:href|src)=(["']))'''
     r'''([^"'?#\s]+\.(?:css|js))'''
     r'''(\?v=[^"'#\s]*)?'''
     r'''(?=\2)''')
 
+# @import url('...'), @import url(...) oder @import "..." in CSS.
+CSS_IMPORT = re.compile(
+    r'''(@import\s+(?:url\(\s*)?(["']?))'''
+    r'''([^"'?#\s)]+\.css)'''
+    r'''(\?v=[^"'#\s)]*)?'''
+    r'''(?=\2)''')
 
-def stamp(path: pathlib.Path, cache: dict) -> str:
-    if path not in cache:
-        cache[path] = hashlib.sha256(path.read_bytes()).hexdigest()[:10]
-    return cache[path]
+
+def read(path: pathlib.Path) -> str:
+    # newline='': Zeilenenden unveraendert lassen, sonst wird aus CRLF still LF.
+    with open(path, encoding='utf-8', newline='') as f:
+        return f.read()
 
 
-def resolve(root: pathlib.Path, page: pathlib.Path, url: str):
+def resolve(root: pathlib.Path, base: pathlib.Path, url: str):
     if url.startswith('//') or ':' in url:
         return None  # extern
-    target = root / url.lstrip('/') if url.startswith('/') else page.parent / url
+    target = root / url.lstrip('/') if url.startswith('/') else base.parent / url
     return target.resolve()
+
+
+class Stamper:
+    def __init__(self, root: pathlib.Path):
+        self.root = root
+        self.hashes = {}    # Asset -> Stempel
+        self.content = {}   # Datei -> Inhalt nach dem Stempeln
+        self.original = {}  # Datei -> Inhalt auf der Platte
+        self.errors, self.stale = [], []
+        self._busy = set()
+
+    def rewrite(self, path: pathlib.Path, pattern) -> str:
+        """Stempelt alle Verweise in `path`; der Inhalt wird nur gemerkt, nicht geschrieben."""
+        if path in self.content:
+            return self.content[path]
+        text = self.original[path] = read(path)
+        rel = path.relative_to(self.root)
+
+        def repl(m):
+            url, old = m.group(3), m.group(4) or ''
+            target = resolve(self.root, path, url)
+            if target is None:
+                return m.group(0)
+            if not target.is_file() or self.root not in target.parents:
+                self.errors.append(f'{rel}: {url} zeigt auf keine Datei unter {self.root.name}/')
+                return m.group(0)
+            new = f'?v={self.stamp(target)}'
+            if old != new:
+                self.stale.append(f'{rel}: {url}{old or " (ohne Stempel)"} -> {new}')
+            return f'{m.group(1)}{url}{new}'
+
+        self.content[path] = pattern.sub(repl, text)
+        return self.content[path]
+
+    def stamp(self, path: pathlib.Path) -> str:
+        if path in self.hashes:
+            return self.hashes[path]
+        if path in self._busy:
+            self.errors.append(f'{path.relative_to(self.root)}: @import-Zyklus')
+            return 'zyklus'
+        if path.suffix == '.css':
+            self._busy.add(path)
+            data = self.rewrite(path, CSS_IMPORT).encode('utf-8')
+            self._busy.discard(path)
+        else:
+            data = path.read_bytes()
+        data = data.replace(b'\r\n', b'\n')
+        self.hashes[path] = hashlib.sha256(data).hexdigest()[:10]
+        return self.hashes[path]
 
 
 def main() -> int:
@@ -63,52 +121,33 @@ def main() -> int:
         print(f'FEHLER: keine Seiten unter {root}', file=sys.stderr)
         return 1
 
-    hashes, errors, stale, writes = {}, [], [], []
+    s = Stamper(root)
     for page in pages:
-        rel_page = page.relative_to(root)
-        # newline='': Zeilenenden unveraendert lassen, sonst wird aus CRLF still LF.
-        with open(page, encoding='utf-8', newline='') as f:
-            text = f.read()
+        s.rewrite(page, PAGE_REF)
 
-        def repl(m):
-            url, old = m.group(3), m.group(4) or ''
-            target = resolve(root, page, url)
-            if target is None:
-                return m.group(0)
-            if not target.is_file() or root not in target.parents:
-                errors.append(f'{rel_page}: {url} zeigt auf keine Datei unter {root.name}/')
-                return m.group(0)
-            new = f'?v={stamp(target, hashes)}'
-            if old != new:
-                stale.append(f'{rel_page}: {url}{old or " (ohne Stempel)"} -> {new}')
-            return f'{m.group(1)}{url}{new}'
-
-        updated = REF.sub(repl, text)
-        if updated != text:
-            writes.append((page, updated))
-
-    for e in errors:
+    for e in s.errors:
         print(f'FEHLER: {e}', file=sys.stderr)
-    if errors:
+    if s.errors:
         return 1
 
     if args.check:
-        if stale:
-            print(f'cache-bust: {len(stale)} Verweise mit veraltetem Stempel:', file=sys.stderr)
-            for s in stale:
-                print(f'  {s}', file=sys.stderr)
+        if s.stale:
+            print(f'cache-bust: {len(s.stale)} Verweise mit veraltetem Stempel:', file=sys.stderr)
+            for line in s.stale:
+                print(f'  {line}', file=sys.stderr)
             print('Beheben mit: python3 scripts/cache-bust.py site', file=sys.stderr)
             return 1
-        print(f'cache-bust: alle Stempel aktuell ({len(hashes)} Dateien, {len(pages)} Seiten)')
+        print(f'cache-bust: alle Stempel aktuell ({len(s.hashes)} Dateien, {len(pages)} Seiten)')
         return 0
 
-    # Erst schreiben, wenn alle Seiten fehlerfrei durchgelaufen sind: kein halb
-    # gestempelter Stand, wenn ein Verweis ins Leere zeigt.
-    for page, updated in writes:
-        with open(page, 'w', encoding='utf-8', newline='') as f:
-            f.write(updated)
-    print(f'cache-bust: {len(stale)} Verweise neu gestempelt')
-    for path, h in sorted(hashes.items()):
+    # Erst schreiben, wenn alles fehlerfrei durchgelaufen ist: kein halb gestempelter
+    # Stand, wenn ein Verweis ins Leere zeigt.
+    for path, text in s.content.items():
+        if text != s.original[path]:
+            with open(path, 'w', encoding='utf-8', newline='') as f:
+                f.write(text)
+    print(f'cache-bust: {len(s.stale)} Verweise neu gestempelt')
+    for path, h in sorted(s.hashes.items()):
         print(f'  {path.relative_to(root)}?v={h}')
     return 0
 
