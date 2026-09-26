@@ -21,8 +21,8 @@
 <link rel="preload" href="fonts/Sora.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/HankenGrotesk.woff2" as="font" type="font/woff2" crossorigin>
 <script>document.documentElement.className+=' js';</script>
-<link rel="stylesheet" href="styles/tokens.css">
-<link rel="stylesheet" href="styles/site.css">
+<link rel="stylesheet" href="styles/tokens.css?v=0cbd860a29">
+<link rel="stylesheet" href="styles/site.css?v=b98075cd9c">
 </head>
 <body>
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
@@ -55,13 +55,13 @@
            unterbindet den nativen Submit via preventDefault. -->
       <form class="eventform" data-form="anmeldung" method="post" action="/api/event.php" novalidate>
         <div class="eventform__body">
-          <div class="eventform__hp" aria-hidden="true"><label>Website (bitte frei lassen)<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+          <div class="eventform__hp" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"><label>Website (bitte frei lassen)<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
 
           <fieldset class="wstep is-active">
             <legend class="wstep__q">Welcher Termin passt Ihnen?</legend>
             <div class="qgrid">
-              <label class="qcard"><input type="radio" name="termin" value="2026-07-29T19:30:00+02:00"><span class="qcard__t">Mittwoch, 29.07.</span><span class="qcard__d">19:30 Uhr, online per Teams</span></label>
-              <label class="qcard"><input type="radio" name="termin" value="2026-07-31T19:30:00+02:00"><span class="qcard__t">Freitag, 31.07.</span><span class="qcard__d">19:30 Uhr, online per Teams</span></label>
+              <label class="qcard"><input type="radio" name="termin" value="2026-07-29T19:30:00+02:00"><span class="qcard__t">Mittwoch, 29.07.</span><span class="qcard__d">19:30 Uhr, online per Zoom</span></label>
+              <label class="qcard"><input type="radio" name="termin" value="2026-07-31T19:30:00+02:00"><span class="qcard__t">Freitag, 31.07.</span><span class="qcard__d">19:30 Uhr, online per Zoom</span></label>
             </div>
           </fieldset>
 
@@ -106,6 +106,6 @@
   </div>
 </footer>
 
-<script src="scripts/site.js?v=20260817-nav5" defer></script>
+<script src="scripts/site.js?v=0c86e9b8df" defer></script>
 </body>
 </html>

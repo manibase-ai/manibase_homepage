@@ -21,8 +21,8 @@
 <link rel="preload" href="fonts/Sora.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/HankenGrotesk.woff2" as="font" type="font/woff2" crossorigin>
 <script>document.documentElement.className+=' js';</script>
-<link rel="stylesheet" href="styles/tokens.css">
-<link rel="stylesheet" href="styles/site.css">
+<link rel="stylesheet" href="styles/tokens.css?v=0cbd860a29">
+<link rel="stylesheet" href="styles/site.css?v=b98075cd9c">
 </head>
 <body>
 <a class="skip-link" href="#main">Zum Inhalt springen</a>
@@ -49,7 +49,7 @@
       <noscript><p class="eventform__err">Für die Eintragung bitte JavaScript aktivieren, oder schreiben Sie uns an <a href="mailto:kontakt@manibase.de">kontakt@manibase.de</a>.</p></noscript>
       <form class="eventform" data-form="interessent" method="post" action="/api/event.php" novalidate>
         <div class="eventform__body">
-          <div class="eventform__hp" aria-hidden="true"><label>Website (bitte frei lassen)<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+          <div class="eventform__hp" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"><label>Website (bitte frei lassen)<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
 
           <div class="field"><label for="ip-name">Name</label><input id="ip-name" name="name" type="text" autocomplete="name" maxlength="120" required></div>
           <div class="field"><label for="ip-firma">Unternehmen</label><input id="ip-firma" name="unternehmen" type="text" autocomplete="organization" maxlength="120" required></div>
@@ -93,6 +93,6 @@
   </div>
 </footer>
 
-<script src="scripts/site.js?v=20260817-nav5" defer></script>
+<script src="scripts/site.js?v=0c86e9b8df" defer></script>
 </body>
 </html>

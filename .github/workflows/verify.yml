@@ -40,6 +40,12 @@ jobs:
           npm i --no-save luxon
           node scripts/test-n8n-payloads.mjs
 
+      # nginx liefert CSS/JS eine Woche `immutable` aus. Ein vergessener ?v=-Stempel
+      # faellt im Diff nicht auf und beim Testen auch nicht (frischer Browser), sondern
+      # erst beim wiederkehrenden Besucher. Deshalb hier und nicht erst im Deploy.
+      - name: Cache-Stempel an CSS/JS aktuell
+        run: python3 scripts/cache-bust.py --check site
+
       - name: PHP-Syntax der Proxys
         run: |
           for f in site/api/*.php; do php -l "$f"; done
