@@ -231,6 +231,57 @@ test('Maske: Mehrfachauswahl verlangt weiterhin die Geschaeftsfuehrung', () => {
   assert(w.activeIndex() === before + 1, 'Mit Geschaeftsfuehrung wurde nicht weitergeschaltet');
 });
 
+/* --- Rechenbeispiel #hochrechnung und Klartag-Leistungsblatt ------------------
+ *
+ * Das Leistungsblatt verweist mit "weniger als zwei Arbeitstagen" auf die
+ * Maßkette in Blatt 01. Wer dort eine Annahme aendert (Fachkraefte, Stunden,
+ * Verrechnungssatz) oder den Preis anfasst, merkt nicht, dass der Satz unten auf
+ * der Seite still falsch wird. Review zu PR #17.
+ */
+const zahl = (t) => Number(t.replace(/\./g, '').replace(',', '.').match(/[\d.]+/)[0]);
+
+function massketten() {
+  const doc = new JSDOM(readFileSync(HTML_PATH, 'utf8')).window.document;
+  const ketten = [...doc.querySelectorAll('#hochrechnung .hp-mass__chain')].map((ol) =>
+    [...ol.querySelectorAll('li')].map((li) => ({
+      wert: zahl(li.querySelector('b').textContent),
+      text: li.textContent,
+      ergebnis: li.classList.contains('hp-mass__result'),
+    })));
+  return { doc, ketten };
+}
+
+test('Rechenbeispiel: jede Maßkette geht auf', () => {
+  const { ketten } = massketten();
+  assert(ketten.length === 2, 'Erwartet zwei Maßketten, gefunden: ' + ketten.length);
+  const [team, gf] = ketten;
+  const produkt = (k) => k.filter((s) => !s.ergebnis).reduce((a, s) => a * s.wert, 1);
+  const ergebnis = (k) => k.find((s) => s.ergebnis).wert;
+  assert(produkt(team) === ergebnis(team),
+    'Team: Produkt ' + produkt(team) + ' ≠ Ergebnis ' + ergebnis(team));
+  const teamStunden = team[0].wert * team[1].wert;
+  assert(team.at(-1).text.includes(teamStunden + ' Stunden'),
+    'Team: Stundenangabe im Ergebnis passt nicht zu ' + teamStunden + ' h');
+  // Geschaeftsfuehrung: Stunden x Wochen, umgerechnet auf Achtstundentage
+  assert(produkt(gf) / 8 === ergebnis(gf),
+    'Geschaeftsfuehrung: ' + produkt(gf) + ' h / 8 ≠ ' + ergebnis(gf) + ' Tage');
+});
+
+test('Klartag-Leistungsblatt: "weniger als zwei Arbeitstage" passt zum Rechenbeispiel', () => {
+  const { doc, ketten } = massketten();
+  const [team] = ketten;
+  const preis = zahl(doc.querySelector('.hp-ksheet__meta strong').textContent);
+  const satz = team[2].wert;
+  const teamStundenProTag = (team[0].wert * team[1].wert) / 5;
+  const tage = preis / satz / teamStundenProTag;
+  const zeile = [...doc.querySelectorAll('.hp-ksheet small')].map((s) => s.textContent).join(' ');
+  assert(/weniger als zwei Arbeitstagen/.test(zeile),
+    'Zeile im Leistungsblatt geaendert, Test mitziehen: ' + zeile);
+  assert(tage < 2,
+    preis + ' € / ' + satz + ' € = ' + preis / satz + ' h, das sind ' + tage.toFixed(2)
+    + ' Arbeitstage des Teams, nicht weniger als zwei');
+});
+
 /* --- SEO- und Asset-Gates ueber alle Seiten -------------------------------------
  *
  * Warum diese Tests hier stehen: Header und Footer werden nicht von Hand gepflegt,
@@ -376,57 +427,6 @@ test('ueber-uns: rel="me" nur fuer die eigene Unternehmensseite', () => {
   assert(meLinks.length === 1, 'Erwartet genau ein rel="me", gefunden: ' + meLinks.length);
   assert(meLinks[0].includes('linkedin.com/company/manibase/'),
     'Das rel="me" zeigt nicht auf die Unternehmensseite: ' + meLinks[0]);
-});
-
-/* --- Rechenbeispiel #hochrechnung und Klartag-Leistungsblatt ------------------
- *
- * Das Leistungsblatt verweist mit "weniger als zwei Arbeitstagen" auf die
- * Maßkette in Blatt 01. Wer dort eine Annahme aendert (Fachkraefte, Stunden,
- * Verrechnungssatz) oder den Preis anfasst, merkt nicht, dass der Satz unten auf
- * der Seite still falsch wird. Review zu PR #17.
- */
-const zahl = (t) => Number(t.replace(/\./g, '').replace(',', '.').match(/[\d.]+/)[0]);
-
-function massketten() {
-  const doc = new JSDOM(readFileSync(HTML_PATH, 'utf8')).window.document;
-  const ketten = [...doc.querySelectorAll('#hochrechnung .hp-mass__chain')].map((ol) =>
-    [...ol.querySelectorAll('li')].map((li) => ({
-      wert: zahl(li.querySelector('b').textContent),
-      text: li.textContent,
-      ergebnis: li.classList.contains('hp-mass__result'),
-    })));
-  return { doc, ketten };
-}
-
-test('Rechenbeispiel: jede Maßkette geht auf', () => {
-  const { ketten } = massketten();
-  assert(ketten.length === 2, 'Erwartet zwei Maßketten, gefunden: ' + ketten.length);
-  const [team, gf] = ketten;
-  const produkt = (k) => k.filter((s) => !s.ergebnis).reduce((a, s) => a * s.wert, 1);
-  const ergebnis = (k) => k.find((s) => s.ergebnis).wert;
-  assert(produkt(team) === ergebnis(team),
-    'Team: Produkt ' + produkt(team) + ' ≠ Ergebnis ' + ergebnis(team));
-  const teamStunden = team[0].wert * team[1].wert;
-  assert(team.at(-1).text.includes(teamStunden + ' Stunden'),
-    'Team: Stundenangabe im Ergebnis passt nicht zu ' + teamStunden + ' h');
-  // Geschaeftsfuehrung: Stunden x Wochen, umgerechnet auf Achtstundentage
-  assert(produkt(gf) / 8 === ergebnis(gf),
-    'Geschaeftsfuehrung: ' + produkt(gf) + ' h / 8 ≠ ' + ergebnis(gf) + ' Tage');
-});
-
-test('Klartag-Leistungsblatt: "weniger als zwei Arbeitstage" passt zum Rechenbeispiel', () => {
-  const { doc, ketten } = massketten();
-  const [team] = ketten;
-  const preis = zahl(doc.querySelector('.hp-ksheet__meta strong').textContent);
-  const satz = team[2].wert;
-  const teamStundenProTag = (team[0].wert * team[1].wert) / 5;
-  const tage = preis / satz / teamStundenProTag;
-  const zeile = [...doc.querySelectorAll('.hp-ksheet small')].map((s) => s.textContent).join(' ');
-  assert(/weniger als zwei Arbeitstagen/.test(zeile),
-    'Zeile im Leistungsblatt geaendert, Test mitziehen: ' + zeile);
-  assert(tage < 2,
-    preis + ' € / ' + satz + ' € = ' + preis / satz + ' h, das sind ' + tage.toFixed(2)
-    + ' Arbeitstage des Teams, nicht weniger als zwei');
 });
 
 if (failed) {
