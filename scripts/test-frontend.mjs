@@ -260,7 +260,7 @@ test('Rechenbeispiel: jede Maßkette geht auf', () => {
   assert(produkt(team) === ergebnis(team),
     'Team: Produkt ' + produkt(team) + ' ≠ Ergebnis ' + ergebnis(team));
   const teamStunden = team[0].wert * team[1].wert;
-  assert(team.at(-1).text.includes(teamStunden + ' Stunden'),
+  assert(team.at(-1).text.includes(teamStunden + '\u00a0Stunden'),
     'Team: Stundenangabe im Ergebnis passt nicht zu ' + teamStunden + ' h');
   // Geschaeftsfuehrung: Stunden x Wochen, umgerechnet auf Achtstundentage
   assert(produkt(gf) / 8 === ergebnis(gf),
