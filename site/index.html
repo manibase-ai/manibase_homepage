@@ -22,8 +22,8 @@
 <link rel="preload" href="fonts/HankenGrotesk.woff2" as="font" type="font/woff2" crossorigin>
 <script>document.documentElement.className+=' js';</script>
 <link rel="stylesheet" href="styles/tokens.css?v=0cbd860a29">
-<link rel="stylesheet" href="styles/site.css?v=b98075cd9c">
-<link rel="stylesheet" href="styles/home.css?v=aaaea05406">
+<link rel="stylesheet" href="styles/site.css?v=94d7908a24">
+<link rel="stylesheet" href="styles/home.css?v=702018da0f">
 <script src="scripts/site.js?v=0c86e9b8df" defer></script>
 <script src="scripts/kinetic-grid.js?v=6f6710ac68" defer></script>
 </head>
@@ -91,13 +91,13 @@
     <div class="container">
       <div class="hp-hero__copy">
         <p class="hp-kicker">Strukturierte KI-Einführung für Bauunternehmen, ausführende Gewerke und Planungsbüros</p>
-        <h1 id="hero-title">KI zwischen Plan, Baustelle und Büro effizient einsetzen.</h1>
-        <p class="hp-hero__lead">Erfahren Sie, wie Sie KI im Betrieb strukturiert und nachhaltig einführen, um Ihre internen Arbeitsprozesse messbar zu optimieren. Von der strategischen Planung bis zu Ihrem zugeschnittenen KI-Helfer im Alltag.</p>
+        <h1 id="hero-title">Mehr Zeit, am Unternehmen zu arbeiten. <span class="hp-hero__h1-sub">Weniger Zeit für Ablage und Rückfragen.</span></h1>
+        <p class="hp-hero__lead">Zwischen Plan, Baustelle und Büro übernimmt KI das Suchen, Sortieren, Protokollieren und Weitergeben. Ihr Team gibt frei, Ihre Daten bleiben in Ihrer Cloud, und kein Baustein geht ungeprüft in Betrieb.</p>
         <div class="btn-row hp-hero__actions">
           <a class="btn" href="#termin">Kontakt aufnehmen</a>
           <a class="btn btn--ghost-ink" href="#module">Module ansehen</a>
         </div>
-        <p class="hp-hero__microcopy">Erhalten Sie eine Ersteinschätzung, welche Lösung für Sie in Frage kommt.</p>
+        <p class="hp-hero__microcopy">30 Minuten, Geschäftsführung mit Geschäftsführung. Danach wissen Sie, ob sich ein Klartag für Sie lohnt, auch wenn die Antwort Nein heißt.</p>
       </div>
 
       <ul class="hp-legende" aria-label="Die Module im Überblick">
@@ -138,7 +138,7 @@
             <dl class="hp-chain">
               <div><dt>Ausgangslage</dt><dd>Eine Information wird für Planung oder Projektleitung gebraucht und muss durchsucht werden.</dd></div>
               <div><dt>KI setzt ein</dt><dd>Das Dokument wird gefunden, durchsucht und der passende Inhalt ausgegeben.</dd></div>
-              <div><dt>Ergebnis</dt><dd>Zeitersparnis. Informationen werden anhand der Quellen gegengeprüft.</dd></div>
+              <div><dt>Ergebnis</dt><dd>Die Projektleitung bekommt die Antwort mit Fundstelle und prüft sie dort nach. Die Rückfrage bei Ihnen entfällt.</dd></div>
             </dl>
           </div>
         </article>
@@ -162,7 +162,7 @@
             <dl class="hp-chain">
               <div><dt>Ausgangslage</dt><dd>Dokumentation über Stand, Fortschritt und nächste Schritte.</dd></div>
               <div><dt>KI setzt ein</dt><dd>Strukturiert die Daten nach Ihren Regeln und bereitet sie auf.</dd></div>
-              <div><dt>Ergebnis</dt><dd>Fertige Protokolle und Checklisten für die Mitarbeiter.</dd></div>
+              <div><dt>Ergebnis</dt><dd>Das Protokoll liegt am selben Tag vor. Wer den Stand braucht, liest ihn nach, statt anzurufen.</dd></div>
             </dl>
           </div>
         </article>
@@ -186,11 +186,50 @@
             <dl class="hp-chain">
               <div><dt>Ausgangslage</dt><dd>Neue Projektanfrage oder Idee muss geprüft werden.</dd></div>
               <div><dt>KI setzt ein</dt><dd>Nutzt verfügbare Daten und Schnittstellen und liefert eine Entscheidungshilfe für die Vorprüfung.</dd></div>
-              <div><dt>Ergebnis</dt><dd>Datengetriebene Entscheidungsgrundlage, in einem Bruchteil der Zeit.</dd></div>
+              <div><dt>Ergebnis</dt><dd>Sie entscheiden über die Anfrage auf einer Seite Vorprüfung, nicht nach einem Abend Lektüre.</dd></div>
             </dl>
           </div>
         </article>
       </div>
+
+      <!-- Hochrechnung als Maßkette: Annahmen sichtbar, keine Messwerte -->
+      <div class="hp-rechnung" id="hochrechnung" role="group" aria-labelledby="rechnung-title">
+        <header class="hp-rechnung__head">
+          <p class="hp-label">Rechenbeispiel</p>
+          <h3 id="rechnung-title">Hochgerechnet auf einen Betrieb mit 60&nbsp;Fachkräften.</h3>
+          <p>Annahmen, keine Messwerte. Ihre echten Werte erheben wir im <a href="#klartag">Klartag</a>.</p>
+        </header>
+
+        <div class="hp-mass">
+          <p class="hp-label hp-mass__name">Team</p>
+          <p class="sr-only">60 Fachkräfte mal 2 Stunden pro Woche mal 100 Euro Verrechnungssatz je Stunde ergibt 12.000 Euro pro Woche. Das sind 120 Stunden, rund drei Vollzeitstellen.</p>
+          <ol class="hp-mass__chain" aria-hidden="true">
+            <li><b>60</b><span>Fachkräfte</span></li>
+            <li><i>×</i><b>2&nbsp;h</b><span>pro Woche für Suchen, Nacharbeiten und Weitergeben</span></li>
+            <li><i>×</i><b>100&nbsp;€</b><span>Verrechnungssatz je Stunde</span></li>
+            <li class="hp-mass__result"><i>=</i><b>12.000&nbsp;€</b><span>pro Woche, das sind 120&nbsp;Stunden oder rund drei Vollzeitstellen</span></li>
+          </ol>
+        </div>
+
+        <div class="hp-mass">
+          <p class="hp-label hp-mass__name">Geschäftsführung</p>
+          <p class="sr-only">10 Stunden pro Woche mal 44 Arbeitswochen ergibt rund 55 Arbeitstage im Jahr.</p>
+          <ol class="hp-mass__chain" aria-hidden="true">
+            <li><b>10&nbsp;h</b><span>pro Woche für Rückfragen, Einsammeln und Weiterleiten</span></li>
+            <li><i>×</i><b>44</b><span>Arbeitswochen im Jahr</span></li>
+            <li class="hp-mass__result"><i>=</i><b>55&nbsp;Tage</b><span>im Jahr, die nicht in das Unternehmen fließen</span></li>
+          </ol>
+        </div>
+      </div>
+
+      <nav class="hp-wegweiser" aria-labelledby="wegweiser-title">
+        <p class="hp-label" id="wegweiser-title">So sieht es in Ihrem Betrieb aus</p>
+        <ul>
+          <li><a href="baugewerbe.html"><b>Bauunternehmen</b><span>Bautagesbericht, Mängelliste, Nachtrag. Alles läuft über die Bauleitung, und die Bauleitung läuft über Sie.</span><i aria-hidden="true">→</i></a></li>
+          <li><a href="gebaeudetechnik-ausbau.html"><b>Ausführende Gewerke</b><span>Regiezettel, Wartungsprotokoll, Aufmaß. Bis es im Büro ankommt, wird dreimal nachgefragt, meist bei Ihnen.</span><i aria-hidden="true">→</i></a></li>
+          <li><a href="planungsbueros.html"><b>Planungsbüros</b><span>Was stand im Protokoll vom März zur Fassade? Die Antwort kennt oft nur eine Person.</span><i aria-hidden="true">→</i></a></li>
+        </ul>
+      </nav>
     </div>
   </section>
 
@@ -228,7 +267,7 @@
   <section class="hp-modules" id="module" aria-labelledby="modules-title">
     <div class="container">
       <header class="hp-head hp-head--split">
-        <h2 id="modules-title">Ihre KI-Strategie für die Zukunft.</h2>
+        <h2 id="modules-title">Vom ersten Tag bis zum Helfer, der Ihrem Team das Protokoll abnimmt.</h2>
         <p>Technische Basis und Kernworkflows werden wiederverwendet. Daten, Rechte, Fachregeln, Ausgabeformate und Freigaben werden im Onboarding an den Kunden angepasst.</p>
       </header>
 
@@ -361,7 +400,7 @@
     <div class="container">
       <header class="hp-head hp-head--split">
         <h2 id="golive-title">KI kommt nicht ungeprüft ins Haus.</h2>
-        <p>Jeder Baustein durchläuft dieselben fünf Tore und geht live, sobald er sie besteht. Nicht nach Kalender, nicht erst am Ende eines starren Gesamtprojekts.</p>
+        <p>Sie entscheiden an jedem Tor, ob es weitergeht, und können jeden Baustein anhalten. Jeder Baustein durchläuft dieselben fünf Tore und geht live, sobald er sie besteht, nicht erst am Ende eines starren Gesamtprojekts.</p>
       </header>
 
       <ol class="hp-gates">
@@ -382,8 +421,9 @@
     <div class="container">
       <div class="hp-governance__grid">
         <div>
-          <h2 id="governance-title">KI-Einführung im Betrieb ist weit mehr als Technik.</h2>
+          <h2 id="governance-title">Wenn jemand fragt, wer hier KI mit Kundendaten nutzt, haben Sie die Antwort schriftlich.</h2>
           <p>Regeln, Befähigung und Übergabe gehören zum Scope. Sie werden nicht nachträglich angehängt.</p>
+          <p>Die EU-KI-Verordnung verlangt von Betrieben, die KI einsetzen, Maßnahmen zur KI-Kompetenz ihrer Mitarbeitenden (Art. 4). Die Schulung ist deshalb Teil jeder Einführung.</p>
           <p class="hp-gov-note">Keine Rechts- oder Compliance-Garantie: Die konkrete Ausgestaltung bestätigen der Kunde, sein Datenschutzbeauftragter und gegebenenfalls seine Rechtsberatung.</p>
         </div>
         <ul class="hp-gov-list">
@@ -417,6 +457,7 @@
           <h2 id="klartag-title">Erst entscheiden, was trägt. Dann gezielt einführen.</h2>
           <p>Der Klartag schafft eine verwendbare Entscheidungsgrundlage für Geschäftsführung, Fachseite und IT. Das Ergebnis kann eine Microsoft-Lösung, eine einzelne Automation, ein einzelner Helfer, ein Standardwerkzeug oder vorerst keine Umsetzung sein.</p>
           <p class="hp-klartag__risk"><strong>Die Roadmap bleibt nutzbar,</strong> auch wenn manibase die anschließende Umsetzung nicht übernimmt.</p>
+          <p>Beide Gründer sitzen bei jedem Klartag mit am Tisch. Deshalb sind es höchstens zehn Klartage im Monat.</p>
         </div>
         <aside class="hp-ksheet" aria-label="Lieferumfang des Klartags">
           <div class="hp-ksheet__meta"><span>1 gemeinsamer Arbeitstag</span><strong>3.900&nbsp;€ netto</strong></div>
@@ -430,6 +471,7 @@
             <li>kompaktes schriftliches Ergebnis</li>
           </ul>
           <p>Bei einem Folgeprojekt mit manibase vollständig anrechenbar.</p>
+          <small>Im <a href="#hochrechnung">Rechenbeispiel aus Blatt 01</a> entspricht der Preis weniger als zwei Arbeitstagen der Zeit, die das Team mit Suchen und Weitergeben verbringt.</small>
         </aside>
       </div>
     </div>
@@ -525,9 +567,9 @@
            data-kinetic-guard=".hp-final__action p, .hp-final__action small" data-kinetic-schutz="0.22">
     <div class="container">
       <div class="hp-final__grid">
-        <h2 id="final-title">Welche Bausteine passen zu Ihrem Betrieb?</h2>
+        <h2 id="final-title">Was landet heute auf Ihrem Tisch, das dort nicht hingehört?</h2>
         <div class="hp-final__action">
-          <p>Im ersten Gespräch klären wir Ausgangslage, Nutzerkreis, Systeme und das dringendste Arbeitsfeld. Danach erhalten Sie eine ehrliche Einordnung, ob ein Klartag sinnvoll ist.</p>
+          <p>Klären wir es in 30 Minuten: Ausgangslage, Nutzerkreis, Systeme und das dringendste Arbeitsfeld. Danach erhalten Sie eine ehrliche Einordnung, ob ein Klartag sinnvoll ist.</p>
           <small>Erstgespräch und Klartag sind getrennte Schritte. Ihre IT oder Ihr IT-Dienstleister ist ausdrücklich willkommen.</small>
         </div>
       </div>
@@ -540,6 +582,7 @@
       <div class="booking__head">
         <h2 class="h1" id="booking-h">Kontakt aufnehmen.</h2>
         <p class="lead">Beantworten Sie einige kurze Fragen. Danach wählen Sie einen Termin für das etwa 30-minütige Erstgespräch mit der Geschäftsführung.</p>
+        <p class="booking__direct">Lieber direkt? <a href="mailto:kontakt@manibase.de">kontakt@manibase.de</a> oder <a href="tel:+4915565697065">+49&nbsp;15565&nbsp;697065</a></p>
       </div>
       <form class="wizard" id="qualify" novalidate aria-describedby="wiz-progress">
         <p class="wizard__progress" id="wiz-progress" aria-live="polite"><span class="wizard__bar"><span class="wizard__bar-fill"></span></span><span class="wizard__count">Schritt <b>1</b> von 5</span></p>
@@ -581,7 +624,7 @@
             <label class="qcard"><input type="checkbox" name="teilnehmer" value="it"><span class="qcard__t">Interne IT oder IT-Dienstleister</span></label>
             <label class="qcard"><input type="checkbox" name="teilnehmer" value="fachbereich"><span class="qcard__t">Fachverantwortliche</span></label>
           </div>
-          <p class="wstep__hint wstep__hint--block">Die Beteiligung der Geschäftsführung ist für das Erstgespräch erforderlich.</p>
+          <p class="wstep__hint wstep__hint--block">Sie sprechen direkt mit uns beiden, Geschäftsführung mit Geschäftsführung. Deshalb ist die Geschäftsführung beim Erstgespräch dabei.</p>
         </fieldset>
         <fieldset class="wstep wstep--contact" data-step="5">
           <legend class="wstep__q">Wohin dürfen wir die Bestätigung schicken?</legend>

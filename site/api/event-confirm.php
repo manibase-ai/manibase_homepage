@@ -23,7 +23,7 @@ function page(int $code, string $title, string $body): void {
        . '<title>' . htmlspecialchars($title) . ' · manibase</title>'
        . '<link rel="icon" type="image/png" href="/assets/signet.png">'
        . '<link rel="stylesheet" href="/styles/tokens.css?v=0cbd860a29">'
-       . '<link rel="stylesheet" href="/styles/site.css?v=b98075cd9c"></head><body>'
+       . '<link rel="stylesheet" href="/styles/site.css?v=94d7908a24"></head><body>'
        . '<main id="main" class="confirm"><div class="container confirm__inner">'
        . '<span class="wordmark" aria-hidden="true"><span class="mani">mani</span>'
        . '<span class="base">base</span><span class="dot"></span></span>'
