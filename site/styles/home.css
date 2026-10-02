@@ -184,7 +184,7 @@
 
 /* Hochrechnung als Maßkette (Emotions-Check, 02.10.2026).
    Faktoren hängen an einer durchlaufenden Maßlinie, Rechenzeichen sitzen
-   auf der Linie zwischen den Endstrichen, das Ergebnis steht im Rahmen. */
+   auf der Linie zwischen zwei Endstrichen, das Ergebnis steht im Rahmen. */
 .hp-rechnung{
   margin-top:clamp(52px,6.5vw,88px);padding:clamp(28px,3.6vw,48px);
   border:1.5px solid var(--hp-ink);background:#fff;
@@ -211,9 +211,16 @@
 .hp-mass__chain li:last-child::after{content:"";position:absolute;top:-8px;right:0;width:1px;height:15px;background:var(--hp-line-strong);}
 .hp-mass__chain i{
   position:absolute;top:-.8em;left:0;transform:translateX(-50%);
-  padding:0 7px;background:#fff;
+  padding:0 12px;background:#fff;
   color:var(--hp-blue);font-family:var(--font-mono);font-style:normal;font-size:1.05rem;font-weight:700;line-height:1.5;
 }
+/* Das Rechenzeichen deckt den Endstrich der Station ab; links und rechts davon
+   steht deshalb je ein eigener Endstrich, das Zeichen sitzt dazwischen. */
+.hp-mass__chain i::before,.hp-mass__chain i::after{
+  content:"";position:absolute;top:50%;width:1px;height:15px;margin-top:-7.5px;background:var(--hp-line-strong);
+}
+.hp-mass__chain i::before{left:0;}
+.hp-mass__chain i::after{right:0;}
 .hp-mass__chain b{
   display:block;color:var(--hp-ink);white-space:nowrap;
   font-family:var(--font-mono);font-size:clamp(1.4rem,2.3vw,2.1rem);font-weight:700;line-height:1.1;
@@ -456,7 +463,10 @@
   display:grid;grid-template-columns:minmax(0,.85fr) minmax(440px,1.05fr);
   gap:clamp(44px,7vw,110px);align-items:start;
 }
-.hp-governance__grid>div>p:last-child{max-width:44ch;color:#DDE2F8;font-size:clamp(1.05rem,1.4vw,1.25rem);line-height:1.55;}
+/* Eigene Klassen statt p:last-child: seit dem Hinweis unter dem Lead traf der
+   Positionsselektor die Einschraenkung und liess den Lead ungestaltet. */
+.hp-governance__lead{max-width:44ch;color:#DDE2F8;font-size:clamp(1.05rem,1.4vw,1.25rem);line-height:1.55;}
+.hp-governance__text{max-width:46ch;margin-top:14px;color:#C3CDF2;font-size:.95rem;line-height:1.6;}
 /* Sechs Karten statt sechs Listenzeilen: die Punkte sind der Inhalt des Bandes,
    nicht eine Fussnote dazu. */
 .hp-gov-list{
@@ -798,7 +808,10 @@
   .hp-mass__chain li:last-child{padding-bottom:0;}
   .hp-mass__chain li::before{top:0;left:-7px;width:15px;height:1px;}
   .hp-mass__chain li:last-child::after{display:none;}
-  .hp-mass__chain i{top:-.95em;left:0;padding:2px 0;transform:translateX(-50%);}
+  .hp-mass__chain i{top:calc(-.75em - 6px);left:0;padding:6px 0;transform:translateX(-50%);}
+  .hp-mass__chain i::before,.hp-mass__chain i::after{left:50%;width:15px;height:1px;margin:0 0 0 -7.5px;}
+  .hp-mass__chain i::before{top:0;}
+  .hp-mass__chain i::after{top:auto;bottom:0;}
   .hp-mass__result b{margin-left:0;}
   .hp-ksheet{margin-right:10px;padding:26px 22px;box-shadow:10px 10px 0 var(--hp-ink);}
   .hp-ksheet__meta{display:grid;gap:6px;}
