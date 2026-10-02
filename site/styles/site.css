@@ -406,8 +406,6 @@ section[id]{scroll-margin-top:84px;}
 .booking{background:var(--color-surface-sunken);border-top:1px solid var(--color-border);padding-block:var(--section-y);}
 .booking__head{max-width:60ch;margin-bottom:clamp(24px,3vw,36px);}
 .booking__head .lead{margin-top:var(--space-3);}
-.booking__direct{margin-top:var(--space-3);color:var(--color-text-secondary);}
-.booking__direct a{font-weight:600;}
 .cal{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:clamp(12px,1.6vw,18px);box-shadow:var(--shadow-md);}
 /* Injiziertes Buchungs-Widget (Zeeg) + dessen iframe tool-neutral einpassen. */
 .zeeg-inline-widget,#cal-target,#cal-target iframe{min-width:0;width:100%;border-radius:var(--radius-lg);overflow:hidden;}
@@ -1775,6 +1773,8 @@ button,a,summary,input,label{touch-action:manipulation;}
   gap:clamp(36px,7vw,96px);align-items:start;
 }
 .booking--qualify .booking__head{position:sticky;top:calc(var(--header-h) + 30px);margin:0;}
+.booking__direct{margin:18px 0 0;padding-top:16px;border-top:1px solid var(--color-border);font-size:.92rem;}
+.booking__direct a{font-weight:var(--fw-semibold);white-space:nowrap;}
 .booking--qualify .wizard,.booking--qualify .cal{grid-column:2;max-width:none;width:100%;}
 .wizard{padding:clamp(22px,3vw,34px);background:var(--phase2-paper);}
 .qcard{min-height:70px;padding:15px 17px;}

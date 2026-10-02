@@ -1,6 +1,6 @@
 # manibase
 
-> manibase UG (haftungsbeschränkt) aus Eibelstadt bei Würzburg führt künstliche Intelligenz strukturiert in Bauunternehmen, ausführenden Gewerken (SHK, Elektro, Lüftung, Dach, Ausbau) und Architektur-, Ingenieur- und Planungsbüros ein. Zielgröße sind Betriebe mit etwa 50 bis 500 Mitarbeitenden in Deutschland, Österreich und der Schweiz.
+> manibase UG (haftungsbeschränkt) aus Eibelstadt bei Würzburg führt künstliche Intelligenz strukturiert in Bauunternehmen, ausführenden Gewerken (SHK, Elektro, Lüftung, Dach, Ausbau) und Architektur-, Ingenieur- und Planungsbüros ein. Tätig in Deutschland, Österreich und der Schweiz.
 
 Die Einführung ist modular. Verpflichtender Einstieg ist der Klartag: ein gemeinsamer Arbeitstag mit Geschäftsführung, IT und Fachanwendern, 3.900 € netto, bei einem Folgeprojekt vollständig anrechenbar. Danach folgen je nach Bedarf ein kontrollierter KI-Arbeitsplatz (eigene Firmen-KI auf Basis von OpenWebUI in einer privaten Cloud oder Microsoft 365 Copilot), Automatisierungen mit n8n und vorbereitete KI-Helfer. Regeln, Freigaben, Schulung und dokumentierte Übergabe gehören zu jeder Einführung. Alles außer Microsoft 365 läuft in der privaten Cloud des Kunden.
 

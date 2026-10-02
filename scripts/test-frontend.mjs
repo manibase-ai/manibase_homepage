@@ -413,6 +413,8 @@ test('llms.txt verweist nur auf vorhandene Seiten', () => {
   // aendert, muss sie hier mitziehen.
   assert(llms.includes('3.900 €'), 'llms.txt: Klartag-Preis weicht ab');
   assert(llms.includes('HRB 18632'), 'llms.txt: Handelsregisternummer fehlt');
+  // Betriebsgroesse wird bewusst nicht oeffentlich genannt (Geschaeftsfuehrung, 02.10.2026).
+  assert(!/\d+\s*(bis|–|-)\s*\d+\s*Mitarbeitende/.test(llms), 'llms.txt nennt eine Betriebsgroesse');
 });
 
 if (failed) {
