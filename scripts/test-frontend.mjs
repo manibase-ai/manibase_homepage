@@ -470,6 +470,36 @@ test('Trichter: ohne Beacon und fetch laesst sich die Maske abschicken', () => {
   assert(w.form.hidden, 'Maske ohne Beacon nicht abschickbar');
 });
 
+test('Trichter: Kalender meldet ok oder fehler', () => {
+  const lauf = (vorbereiten) => {
+    const w = bootTrichter({ vorbereiten });
+    bisKontakt(w);
+    kontaktAusfuellen(w);
+    absenden(w);
+    return w;
+  };
+  const kalender = (w) => w.ereignisse().filter((e) => e.e === 'kalender').map(kurz).join(' ');
+
+  const ok = lauf((win) => { win.Zeeg = { initInlineWidget() {} }; });
+  assert(kalender(ok) === 'kalender:ok', 'Zeeg vorhanden: ' + kalender(ok));
+
+  const wirft = lauf((win) => { win.Zeeg = { initInlineWidget() { throw new Error('kaputt'); } }; });
+  assert(kalender(wirft) === 'kalender:fehler', 'initInlineWidget wirft: ' + kalender(wirft));
+
+  const halb = lauf((win) => { win.Zeeg = {}; });
+  assert(kalender(halb) === 'kalender:fehler', 'Zeeg ohne initInlineWidget: ' + kalender(halb));
+
+  const geladen = lauf();
+  const skript = geladen.window.document.querySelector('script[src*="zeeg"]');
+  assert(skript, 'Zeeg-Skript wurde nicht angehaengt');
+  skript.dispatchEvent(new geladen.window.Event('load'));
+  assert(kalender(geladen) === 'kalender:fehler', 'Skript geladen ohne Zeeg: ' + kalender(geladen));
+
+  const blockiert = lauf();
+  blockiert.window.document.querySelector('script[src*="zeeg"]').dispatchEvent(new blockiert.window.Event('error'));
+  assert(kalender(blockiert) === 'kalender:fehler', 'Skript blockiert: ' + kalender(blockiert));
+});
+
 /* --- Rechenbeispiel #hochrechnung und Klartag-Leistungsblatt ------------------
  *
  * Das Leistungsblatt verweist mit "weniger als zwei Arbeitstagen" auf die

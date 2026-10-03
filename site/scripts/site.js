@@ -579,8 +579,9 @@
     target.setAttribute('data-loaded', '1');
 
     var answerId = box.getAttribute('data-cal-answer');
+    // true, wenn das Widget gestartet wurde; false, wenn Zeeg fehlt (Trichter: kalender).
     function init() {
-      if (!(window.Zeeg && window.Zeeg.initInlineWidget)) { return; }
+      if (!(window.Zeeg && window.Zeeg.initInlineWidget)) { return false; }
       var opts = { url: url, parentElement: target };
       if (booking && booking.prefill) {
         opts.prefill = booking.prefill;
@@ -589,11 +590,17 @@
           opts.prefill.answers[answerId] = booking.summary;
         }
       }
-      window.Zeeg.initInlineWidget(opts);
+      // Wirft das Widget, bleibt der Absende-Pfad heil und der Trichter sieht den Fehler.
+      try { window.Zeeg.initInlineWidget(opts); } catch (e) { return false; }
+      return true;
     }
-    if (window.Zeeg) { init(); return; }
+    function melden(ok) { trichter('kalender', null, ok ? 'ok' : 'fehler'); }
+    if (window.Zeeg) { melden(init()); return; }
     var s = document.createElement('script');
-    s.src = src; s.async = true; s.onload = init;
+    s.src = src; s.async = true;
+    s.onload = function () { melden(init()); };
+    // Werbeblocker oder Netzfehler: ohne diese Meldung bliebe der leere Kalender unsichtbar.
+    s.onerror = function () { melden(false); };
     document.body.appendChild(s);
   }
 })();
