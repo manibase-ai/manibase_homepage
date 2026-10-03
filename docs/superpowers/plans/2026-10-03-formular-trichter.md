@@ -1222,7 +1222,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 ---
 
-### Task 8: Cache-Stempel und Gesamtprüfung
+### Task 8: Gesamtprüfung
 
 **Files:**
 - Modify: alle HTML-Dateien, die `site.js` einbinden (nur `?v=`)
@@ -1230,7 +1230,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - [ ] **Step 1: Stempel setzen**
 
 Run: `python3 scripts/cache-bust.py site`
-Expected: Ausgabe nennt die geänderten Seiten; `git diff --stat` zeigt 12 HTML-Dateien mit je einer Zeile.
+Expected: keine Änderung mehr (Tasks 3 bis 5 haben schon gestempelt); `git status --short` ist leer.
 
 - [ ] **Step 2: Alle Prüfungen wie in der CI**
 
@@ -1248,11 +1248,10 @@ Expected: `--check` ohne Abweichung (Exit 0), alle Tests `ok`. Falls `php` lokal
 Run: `git diff --numstat origin/main...HEAD | awk -F'\t' '$1=="-" {print "BINÄR: "$3}'`
 Expected: keine Ausgabe.
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 4: Commit nur falls Step 1 doch etwas geändert hat**
 
 ```bash
-git add site
-git commit -m "Cache-Stempel nach Aenderung an site.js
+git status --short site && git add site && git commit -m "Cache-Stempel nachgezogen
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
