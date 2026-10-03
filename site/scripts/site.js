@@ -311,7 +311,12 @@
     var KEY = 'manibase-trichter';
     var aus = false;
     var p = null;
-    try { p = new URL(window.location.href).searchParams.get('trichter'); } catch (e) { p = null; }
+    // Direkt auf location.search gearbeitet: URLSearchParams wuerde uebrige
+    // Parameter umschreiben ("a%20b" zu "a+b", "flag" zu "flag=").
+    try {
+      var treffer = /(?:^|[?&])trichter=([^&#]*)/.exec(window.location.search);
+      if (treffer) { p = decodeURIComponent(treffer[1]); }
+    } catch (e) { p = null; }
     if (p === 'aus') { aus = true; }
     try {
       if (p === 'aus') { window.localStorage.setItem(KEY, 'aus'); }
@@ -321,9 +326,12 @@
     if (p !== null) {
       // Parameter aus der Adresse nehmen, damit der Link nicht weitergegeben wird.
       try {
-        var u = new URL(window.location.href);
-        u.searchParams.delete('trichter');
-        window.history.replaceState(window.history.state, '', u.pathname + u.search + u.hash);
+        var teile = window.location.search.replace(/^\?/, '').split('&').filter(function (t) {
+          return t !== 'trichter' && t.indexOf('trichter=') !== 0;
+        });
+        var rest = teile.join('&');
+        window.history.replaceState(window.history.state, '',
+          window.location.pathname + (rest ? '?' + rest : '') + window.location.hash);
       } catch (e) { /* Adresse bleibt stehen, die Messung ist davon unberuehrt */ }
     }
     var nav = window.navigator || {};

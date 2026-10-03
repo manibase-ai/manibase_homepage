@@ -23,10 +23,25 @@ const EREIGNISSE = new Set(['gesehen', 'begonnen', 'schritt', 'fehler', 'abgesch
 const GRUENDE = new Set(['auswahl', 'mehrfach', 'gf', 'name', 'email', 'firma', 'einwilligung']);
 const KENNUNG = /^[a-z0-9]{10}$/;
 const DATUM = /^\d{4}-\d{2}-\d{2}$/;
-// en-CA formatiert als JJJJ-MM-TT; die Zeitzone macht aus der Serverzeit den deutschen Kalendertag.
-const TAG = new Intl.DateTimeFormat('en-CA', {
+// Die Zeitzone macht aus der Serverzeit den deutschen Kalendertag; die Teile werden
+// selbst zu JJJJ-MM-TT zusammengesetzt, damit nichts am Ausgabeformat einer Sprache haengt.
+const TAG_TEILE = new Intl.DateTimeFormat('en-US', {
   timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit',
 });
+const TAG = {
+  format(zeit) {
+    const t = Object.fromEntries(TAG_TEILE.formatToParts(zeit).map((p) => [p.type, p.value]));
+    return t.year + '-' + t.month + '-' + t.day;
+  },
+};
+
+/** true, wenn JJJJ-MM-TT ein wirklich vorhandener Kalendertag ist (kein 31. Februar). */
+function kalendertag(text) {
+  if (!DATUM.test(text)) return false;
+  const [j, m, t] = text.split('-').map(Number);
+  const d = new Date(Date.UTC(j, m - 1, t));
+  return d.getUTCFullYear() === j && d.getUTCMonth() === m - 1 && d.getUTCDate() === t;
+}
 
 function ganzzahl(wert, min, max) {
   if (!/^\d+$/.test(String(wert))) return null;
@@ -151,7 +166,7 @@ export function argumente(argv) {
     const a = argv[i];
     if (a === '--von' || a === '--bis') {
       const wert = argv[++i];
-      if (!DATUM.test(wert || '')) throw new Error(a + ' braucht ein Datum JJJJ-MM-TT');
+      if (!kalendertag(wert || '')) throw new Error(a + ' braucht ein gueltiges Datum JJJJ-MM-TT');
       opt[a.slice(2)] = wert;
     } else if (a === '--mit-bots') {
       opt.mitBots = true;
@@ -161,6 +176,7 @@ export function argumente(argv) {
       opt.dateien.push(a);
     }
   }
+  if (opt.von && opt.bis && opt.von > opt.bis) throw new Error('--von liegt nach --bis');
   if (!opt.dateien.length) opt.dateien.push('-');
   return opt;
 }

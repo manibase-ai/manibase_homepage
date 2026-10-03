@@ -266,9 +266,9 @@ function bootTrichter(extra = {}) {
     return { pfad: url.pathname, ...Object.fromEntries(url.searchParams) };
   });
   // Meldet dem Observer, der das Element beobachtet, "ist sichtbar".
-  w.sichtbar = (el) => {
+  w.sichtbar = (el, quote = 1) => {
     for (const b of beobachter) {
-      if (b.ziele.includes(el)) b.cb([{ isIntersecting: true, intersectionRatio: 1, target: el }], b);
+      if (b.ziele.includes(el)) b.cb([{ isIntersecting: true, intersectionRatio: quote, target: el }], b);
     }
   };
   return w;
@@ -332,6 +332,13 @@ test('Trichter: ?trichter=aus schaltet ab und verschwindet aus der Adresse', () 
   assert(an.window.localStorage.getItem('manibase-trichter') === null, 'Opt-out nicht entfernt');
 });
 
+test('Trichter: Opt-out schreibt die uebrigen Parameter nicht um', () => {
+  const w = bootTrichter({ url: 'https://manibase.de/?q=a%20b&flag&trichter=aus#termin' });
+  assert(w.window.location.href === 'https://manibase.de/?q=a%20b&flag#termin', 'Adresse danach: ' + w.window.location.href);
+  bisKontakt(w);
+  assert(w.gesendet.length === 0, 'Trotz Opt-out gesendet');
+});
+
 test('Trichter: ?trichter=aus wirkt auch bei gesperrtem Browser-Speicher', () => {
   const w = bootTrichter({
     url: 'https://manibase.de/?trichter=aus',
@@ -351,6 +358,18 @@ test('Trichter: wirft der Beacon, laeuft die Maske weiter', () => {
   });
   bisKontakt(w);
   assert(w.activeIndex() === 4, 'Maske blieb stehen bei Schritt ' + (w.activeIndex() + 1));
+  kontaktAusfuellen(w);
+  absenden(w);
+  assert(w.form.hidden, 'Maske mit werfendem Beacon nicht abschickbar');
+});
+
+test('Trichter: gesehen erst bei voller Sichtbarkeit', () => {
+  const w = bootTrichter();
+  const fortschritt = w.form.querySelector('.wizard__progress');
+  w.sichtbar(fortschritt, 0.5);
+  assert(w.gesendet.length === 0, 'Halb sichtbar gemeldet: ' + w.gesendet.join(' '));
+  w.sichtbar(fortschritt);
+  assert(w.ereignisse().map(kurz).join(' ') === 'gesehen', 'Voll sichtbar: ' + w.ereignisse().map(kurz).join(' '));
 });
 
 test('Trichter: gesendet werden nur v, s, e, n, r, nie Formularwerte', () => {
@@ -494,6 +513,12 @@ test('Trichter: Kalender meldet ok oder fehler', () => {
   assert(skript, 'Zeeg-Skript wurde nicht angehaengt');
   skript.dispatchEvent(new geladen.window.Event('load'));
   assert(kalender(geladen) === 'kalender:fehler', 'Skript geladen ohne Zeeg: ' + kalender(geladen));
+
+  // Zeeg erscheint erst nach dem Absenden und meldet sich ueber den Ladeweg.
+  const spaet = lauf();
+  spaet.window.Zeeg = { initInlineWidget() {} };
+  spaet.window.document.querySelector('script[src*="zeeg"]').dispatchEvent(new spaet.window.Event('load'));
+  assert(kalender(spaet) === 'kalender:ok', 'Skript geladen mit Zeeg: ' + kalender(spaet));
 
   const blockiert = lauf();
   blockiert.window.document.querySelector('script[src*="zeeg"]').dispatchEvent(new blockiert.window.Event('error'));

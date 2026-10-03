@@ -4,9 +4,10 @@
  */
 import { gzipSync } from 'node:zlib';
 import { spawnSync } from 'node:child_process';
-import { writeFileSync, mkdtempSync } from 'node:fs';
+import { writeFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { zeileLesen, auswerten, formatieren, dateiLesen, argumente } from './trichter-auswertung.mjs';
 
 let failed = 0;
@@ -24,6 +25,7 @@ function assert(cond, msg) {
 }
 
 // Eine Logzeile, wie nginx sie schreibt (Werte, die nicht passen, stehen als "-").
+const CLI = fileURLToPath(new URL('./trichter-auswertung.mjs', import.meta.url));
 const z = (felder = {}) => JSON.stringify({
   t: '2026-10-10T10:00:00+00:00', v: '1', s: 'abcdefghij', e: 'gesehen', n: '-', r: '-', b: '0', ...felder,
 });
@@ -110,9 +112,13 @@ test('dateiLesen: liest Klartext und gzip', () => {
   const text = z() + '\n' + z({ e: 'begonnen' }) + '\n';
   writeFileSync(join(ordner, 'a.log'), text);
   writeFileSync(join(ordner, 'b.log.gz'), gzipSync(text));
-  for (const name of ['a.log', 'b.log.gz']) {
-    const zeilen = dateiLesen(join(ordner, name)).filter(Boolean);
-    assert(zeilen.length === 2 && zeileLesen(zeilen[1]).e === 'begonnen', name + ': ' + JSON.stringify(zeilen));
+  try {
+    for (const name of ['a.log', 'b.log.gz']) {
+      const zeilen = dateiLesen(join(ordner, name)).filter(Boolean);
+      assert(zeilen.length === 2 && zeileLesen(zeilen[1]).e === 'begonnen', name + ': ' + JSON.stringify(zeilen));
+    }
+  } finally {
+    rmSync(ordner, { recursive: true, force: true });
   }
 });
 
@@ -134,12 +140,25 @@ test('argumente: Datum geprueft, Vorgabe ist stdin', () => {
   assert(geworfen === 3, 'Ungueltige Argumente akzeptiert');
 });
 
+test('argumente: Kalenderdaten gibt es wirklich, von liegt nicht nach bis', () => {
+  const wirft = (args) => { try { argumente(args); return false; } catch { return true; } };
+  assert(wirft(['--von', '2026-02-31']), '31. Februar akzeptiert');
+  assert(wirft(['--bis', '2026-13-01']), 'Monat 13 akzeptiert');
+  assert(wirft(['--von', '2026-00-10']), 'Monat 0 akzeptiert');
+  assert(wirft(['--von', '2026-10-11', '--bis', '2026-10-10']), 'von nach bis akzeptiert');
+  assert(!wirft(['--von', '2028-02-29']), 'Schalttag abgelehnt');
+  assert(!wirft(['--von', '2026-10-10', '--bis', '2026-10-10']), 'von gleich bis abgelehnt');
+  assert(!wirft(['--bis', '2026-10-10', '--von', '2026-10-01']), 'Reihenfolge der Optionen darf egal sein');
+});
+
 test('CLI: liest stdin, Exit 2 bei falschem Datum', () => {
-  const lauf = (args, input) => spawnSync(process.execPath, ['scripts/trichter-auswertung.mjs', ...args], { input, encoding: 'utf8' });
+  const lauf = (args, input) => spawnSync(process.execPath, [CLI, ...args], { input, encoding: 'utf8' });
   const ok = lauf(['-'], z() + '\n');
   assert(ok.status === 0 && /gesehen\s+1\b/.test(ok.stdout), 'stdin: ' + ok.status + ' ' + ok.stdout + ok.stderr);
   const falsch = lauf(['--von', '1.10.2026'], '');
   assert(falsch.status === 2, 'Exit-Code bei falschem Datum: ' + falsch.status);
+  const umgekehrt = lauf(['--von', '2026-10-11', '--bis', '2026-10-10'], '');
+  assert(umgekehrt.status === 2, 'Exit-Code bei von nach bis: ' + umgekehrt.status);
 });
 
 if (failed) {
