@@ -1194,7 +1194,7 @@ map $http_user_agent $trichter_bot {
 # zuordnen. Die Zeitverschiebungen sind ganze Stunden, der Berliner Kalendertag
 # bleibt damit exakt.
 map $time_iso8601 $trichter_t {
-    "~^(?<stunde>[0-9-]{10}T[0-9]{2}):[0-9]{2}:[0-9]{2}(?<zone>.*)$" "$stunde:00:00$zone";
+    "~^(?<trichter_stunde>[0-9-]{10}T[0-9]{2}):[0-9]{2}:[0-9]{2}(?<trichter_zone>.*)$" "$trichter_stunde:00:00$trichter_zone";
     default "-";
 }
 
