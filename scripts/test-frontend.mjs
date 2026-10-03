@@ -737,6 +737,17 @@ test('llms.txt verweist nur auf vorhandene Seiten', () => {
   assert(!/\d+\s*(bis|–|-)\s*\d+\s*Mitarbeitende/.test(llms), 'llms.txt nennt eine Betriebsgroesse');
 });
 
+test('Datenschutz: Zaehlung der Formularschritte und Log-Frist sind beschrieben', () => {
+  const html = readFileSync('site/datenschutz.html', 'utf8');
+  for (const teil of ['Zählung der Formularschritte', 'Global Privacy Control', 'Do Not Track',
+    'spätestens 13 Monaten', 'index.html?trichter=aus', 'in der Regel nach 15 Tagen', 'Stand: 3. Oktober 2026',
+    'Gespeichert werden der Zeitpunkt', 'automatisierten Programm', 'Art. 21 DSGVO']) {
+    assert(html.includes(teil), 'Fehlt in datenschutz.html: ' + teil);
+  }
+  assert(!html.includes('nicht auf Ihrem Gerät gespeichert'), 'Behauptung "nicht auf Ihrem Gerät gespeichert" steht im Text');
+  assert(!/kein(en)? Zugriff auf (Ihr |das )?Endgerät/i.test(html), 'Behauptung "kein Zugriff auf das Endgerät" steht im Text');
+});
+
 if (failed) {
   console.error('\n' + failed + ' Test(s) fehlgeschlagen.');
   process.exit(1);
