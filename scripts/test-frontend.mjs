@@ -139,14 +139,17 @@ test('Navigation: .nav__toggle ist ohne Media-Query versteckt', () => {
 
 /* --- Qualifizierungs-Maske im DOM ------------------------------------------- */
 
-function bootWizard() {
+function bootWizard(opts = {}) {
   const dom = new JSDOM(readFileSync(HTML_PATH, 'utf8'), {
-    url: 'https://manibase.de/',
+    url: opts.url || 'https://manibase.de/',
     runScripts: 'outside-only',
   });
   // jsdom kennt matchMedia nicht; site.js fragt damit prefers-reduced-motion ab.
   // "matches:false" = normale Animationen, also der Alltagsfall im Browser.
   dom.window.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
+  // Optionaler Hook fuer Stubs, die site.js schon beim Laden sehen muss
+  // (Beacon, IntersectionObserver, Browser-Signale, localStorage, Zeeg).
+  if (opts.vorbereiten) opts.vorbereiten(dom.window);
   // site.js laeuft als IIFE beim Laden; jsdom holt externe Skripte hier nicht
   // selbst, deshalb wird die Datei nach dem Parsen im Fensterkontext ausgefuehrt.
   dom.window.eval(readFileSync(JS_PATH, 'utf8'));
@@ -229,6 +232,125 @@ test('Maske: Mehrfachauswahl verlangt weiterhin die Geschaeftsfuehrung', () => {
   gf.dispatchEvent(new w.window.Event('change', { bubbles: true }));
   click(w.window, w.next);
   assert(w.activeIndex() === before + 1, 'Mit Geschaeftsfuehrung wurde nicht weitergeschaltet');
+});
+
+/* --- Formular-Trichter ---------------------------------------------------------
+ *
+ * Die Maske meldet per Beacon an /t, wie weit Besucher kommen (Spec
+ * docs/superpowers/specs/2026-10-03-formular-trichter-design.md). jsdom kennt
+ * weder sendBeacon noch fetch, IntersectionObserver oder scrollIntoView; die
+ * Stubs setzt bootTrichter vor dem Laden von site.js.
+ */
+
+function bootTrichter(extra = {}) {
+  const gesendet = [];
+  const beobachter = [];
+  const vorbereiten = (w) => {
+    Object.defineProperty(w.navigator, 'sendBeacon', {
+      configurable: true,
+      value: (u) => { gesendet.push(String(u)); return true; },
+    });
+    w.Element.prototype.scrollIntoView = function () {};
+    w.IntersectionObserver = class {
+      constructor(cb) { this.cb = cb; this.ziele = []; beobachter.push(this); }
+      observe(el) { this.ziele.push(el); }
+      unobserve(el) { this.ziele = this.ziele.filter((z) => z !== el); }
+      disconnect() { this.ziele = []; }
+    };
+    if (extra.vorbereiten) extra.vorbereiten(w);
+  };
+  const w = bootWizard({ url: extra.url, vorbereiten });
+  w.gesendet = gesendet;
+  w.ereignisse = () => gesendet.map((u) => {
+    const url = new URL(u, 'https://manibase.de/');
+    return { pfad: url.pathname, ...Object.fromEntries(url.searchParams) };
+  });
+  // Meldet dem Observer, der das Element beobachtet, "ist sichtbar".
+  w.sichtbar = (el) => {
+    for (const b of beobachter) {
+      if (b.ziele.includes(el)) b.cb([{ isIntersecting: true, intersectionRatio: 1, target: el }], b);
+    }
+  };
+  return w;
+}
+
+const kurz = (ev) => [ev.e, ev.n, ev.r].filter(Boolean).join(':');
+
+function waehlen(w, input) {
+  input.checked = true;
+  input.dispatchEvent(new w.window.Event('change', { bubbles: true }));
+}
+
+// Schritte 1 bis 4 gueltig ausfuellen, endet auf dem Kontakt-Schritt.
+function bisKontakt(w) {
+  for (const step of w.steps.filter((s) => s.querySelector('input[type="radio"]'))) {
+    waehlen(w, step.querySelector('input[type="radio"]'));
+    click(w.window, w.next);
+  }
+  waehlen(w, w.form.querySelector('input[name="teilnehmer"][value="gf"]'));
+  click(w.window, w.next);
+}
+
+function kontaktAusfuellen(w) {
+  w.form.querySelector('[name="name"]').value = 'Erika Mustermann';
+  w.form.querySelector('[name="email"]').value = 'erika@example.org';
+  w.form.querySelector('[name="firma"]').value = 'Musterbau GmbH';
+  w.form.querySelector('[name="consent"]').checked = true;
+}
+
+function absenden(w) {
+  w.form.dispatchEvent(new w.window.Event('submit', { bubbles: true, cancelable: true }));
+}
+
+test('Trichter: GPC, Do Not Track und Opt-out unterdruecken jede Meldung', () => {
+  const faelle = {
+    'navigator.globalPrivacyControl': (w) => Object.defineProperty(w.navigator, 'globalPrivacyControl', { configurable: true, value: true }),
+    'navigator.doNotTrack': (w) => Object.defineProperty(w.navigator, 'doNotTrack', { configurable: true, value: '1' }),
+    'window.doNotTrack': (w) => { w.doNotTrack = '1'; },
+    'localStorage': (w) => w.localStorage.setItem('manibase-trichter', 'aus'),
+  };
+  for (const [name, vorbereiten] of Object.entries(faelle)) {
+    const w = bootTrichter({ vorbereiten });
+    w.sichtbar(w.form.querySelector('.wizard__progress'));
+    bisKontakt(w);
+    assert(w.gesendet.length === 0, name + ': trotzdem gesendet: ' + w.gesendet.join(' '));
+  }
+});
+
+test('Trichter: ?trichter=aus schaltet ab und verschwindet aus der Adresse', () => {
+  const w = bootTrichter({ url: 'https://manibase.de/?x=1&trichter=aus#termin' });
+  assert(w.window.location.href === 'https://manibase.de/?x=1#termin', 'Adresse danach: ' + w.window.location.href);
+  assert(w.window.localStorage.getItem('manibase-trichter') === 'aus', 'Opt-out nicht gespeichert');
+  bisKontakt(w);
+  assert(w.gesendet.length === 0, 'Trotz Opt-out gesendet');
+
+  const an = bootTrichter({
+    url: 'https://manibase.de/?trichter=an',
+    vorbereiten: (win) => win.localStorage.setItem('manibase-trichter', 'aus'),
+  });
+  assert(an.window.location.href === 'https://manibase.de/', 'Adresse danach: ' + an.window.location.href);
+  assert(an.window.localStorage.getItem('manibase-trichter') === null, 'Opt-out nicht entfernt');
+});
+
+test('Trichter: ?trichter=aus wirkt auch bei gesperrtem Browser-Speicher', () => {
+  const w = bootTrichter({
+    url: 'https://manibase.de/?trichter=aus',
+    vorbereiten: (win) => Object.defineProperty(win, 'localStorage', {
+      configurable: true, get() { throw new Error('gesperrt'); },
+    }),
+  });
+  bisKontakt(w);
+  assert(w.gesendet.length === 0, 'Trotz ?trichter=aus gesendet: ' + w.gesendet.join(' '));
+});
+
+test('Trichter: wirft der Beacon, laeuft die Maske weiter', () => {
+  const w = bootTrichter({
+    vorbereiten: (win) => Object.defineProperty(win.navigator, 'sendBeacon', {
+      configurable: true, value: () => { throw new Error('blockiert'); },
+    }),
+  });
+  bisKontakt(w);
+  assert(w.activeIndex() === 4, 'Maske blieb stehen bei Schritt ' + (w.activeIndex() + 1));
 });
 
 /* --- Rechenbeispiel #hochrechnung und Klartag-Leistungsblatt ------------------

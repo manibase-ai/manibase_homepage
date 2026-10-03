@@ -2,6 +2,7 @@
    1) Scroll-Reveal (mit reduced-motion-Fallback)
    2) Hero: wechselnde Begriffe
    3) Newsletter-Anmeldung (POST an /api/newsletter.php -> Odoo, Double-Opt-In)
+   4a) Formular-Trichter: zaehlt Schritte der Maske ohne Cookies (Beacon an /t)
    4) Qualifizierungs-Maske + Kalender erst nach Einwilligung laden (DSGVO)
 */
 (function () {
@@ -299,6 +300,63 @@
       });
     });
   }
+
+  /* 4a) Formular-Trichter ----------------------------------------------------
+     Zaehlt, wie weit Besucher in der Qualifizierungs-Maske kommen. Schema v1,
+     Spec: docs/superpowers/specs/2026-10-03-formular-trichter-design.md.
+     Gesendet werden nur v, s, e, n, r an /t; nginx antwortet 204 und loggt ohne
+     IP. Keine Cookies, die Kennung s lebt nur im Speicher dieses Seitenaufrufs.
+     Aus bei Global Privacy Control, Do Not Track oder ?trichter=aus (Team). */
+  var trichter = (function () {
+    var KEY = 'manibase-trichter';
+    var aus = false;
+    var p = null;
+    try { p = new URL(window.location.href).searchParams.get('trichter'); } catch (e) { p = null; }
+    if (p === 'aus') { aus = true; }
+    try {
+      if (p === 'aus') { window.localStorage.setItem(KEY, 'aus'); }
+      if (p === 'an') { window.localStorage.removeItem(KEY); }
+      if (window.localStorage.getItem(KEY) === 'aus') { aus = true; }
+    } catch (e) { /* Speicher gesperrt: das Opt-out gilt dann nur fuer diesen Aufruf */ }
+    if (p !== null) {
+      // Parameter aus der Adresse nehmen, damit der Link nicht weitergegeben wird.
+      try {
+        var u = new URL(window.location.href);
+        u.searchParams.delete('trichter');
+        window.history.replaceState(window.history.state, '', u.pathname + u.search + u.hash);
+      } catch (e) { /* Adresse bleibt stehen, die Messung ist davon unberuehrt */ }
+    }
+    var nav = window.navigator || {};
+    if (nav.globalPrivacyControl === true || nav.doNotTrack === '1' || window.doNotTrack === '1') { aus = true; }
+    var c = window.crypto;
+    if (!c || typeof c.getRandomValues !== 'function') { aus = true; }
+
+    var sid = '';
+    if (!aus) {
+      var zeichen = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      var zufall = new Uint8Array(10);
+      c.getRandomValues(zufall);
+      for (var i = 0; i < zufall.length; i++) { sid += zeichen.charAt(zufall[i] % zeichen.length); }
+    }
+    var gemeldet = Object.create(null);
+
+    return function (e, n, r) {
+      if (aus) { return; }
+      var key = e + '|' + (n || '') + '|' + (r || '');
+      if (gemeldet[key]) { return; }
+      gemeldet[key] = true;
+      var url = '/t?v=1&s=' + sid + '&e=' + e + (n ? '&n=' + n : '') + (r ? '&r=' + r : '');
+      // Die Messung darf die Maske nie stoeren: jeder Fehler beim Senden wird
+      // bewusst verschluckt, ohne Beacon und fetch wird still nichts gesendet.
+      try {
+        if (typeof nav.sendBeacon === 'function') {
+          nav.sendBeacon(url);
+        } else if (typeof window.fetch === 'function') {
+          window.fetch(url, { method: 'POST', keepalive: true, credentials: 'omit' }).catch(function () {});
+        }
+      } catch (err) { /* siehe oben */ }
+    };
+  })();
 
   /* 4) Qualifizierungs-Maske ----------------------------------------------- */
   var wiz = document.getElementById('qualify');
