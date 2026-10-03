@@ -50,6 +50,11 @@ jobs:
         run: |
           for f in site/api/*.php; do php -l "$f"; done
 
+      # Auswertung des Formular-Trichters (docs/superpowers/specs/2026-10-03-formular-trichter-design.md):
+      # Stufenlogik, Zeitzone ueber die Zeitumstellung, gzip, ungueltige Zeilen.
+      - name: Formular-Trichter (Auswertung)
+        run: node scripts/test-trichter.mjs
+
       # Nav-Umschaltpunkt und Pflichtfragen der Qualifizierungs-Maske. Beide Fehler
       # waren im Diff unsichtbar und fielen erst im Browser auf (Review zu PR #11).
       - name: Frontend-Regressionstests (Navigation, Qualifizierungs-Maske)
