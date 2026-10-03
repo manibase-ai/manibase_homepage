@@ -72,6 +72,7 @@ site/
   blog/papierkram-am-chef.html  Archiviert, leitet auf ../index.html#arbeitssituationen weiter.
   impressum.html        § 5 DDG (Daten gesetzt, HRB 18632)
   datenschutz.html      DSGVO, 10 Abschnitte: 5=Anfrage-/Buchungsformular, 6=Zeeg, 7=Newsletter (Double-Opt-In).
+  llms.txt              Kurzprofil für Sprachmodelle (26.09.2026). Preis, HRB und Links werden in test-frontend.mjs gegen die Seiten geprüft; wer Preis oder Seiten ändert, zieht sie hier mit.
   styles/tokens.css     Marken-Tokens (@import ../fonts/_fontface.css)
   styles/site.css       Basis-Layout und geteilte Komponenten (+ `[hidden]{display:none!important}`, .wizard/.qcard/.field/.cal, .blog/.postcard/.post)
   styles/seiten.css     Bausteine der Unterseiten, 15.08.2026 aus Phase 3 zurückgeholt: `page-hero(--split)`, `photo-figure`/`photo-credit`, `section--ink` mit `data-split`, `founders-teaser`/`person-card`, `helper-hero` mit `helper-rotator`, `helper-showcase`/`cockpit-frame`. Eingebunden auf klartag, fuer-ihre-it, ueber-uns und ki-helfer.
@@ -156,7 +157,7 @@ Markup, CSS und JS liegen an genau einer Stelle: `.nav__*` in `styles/site.css`,
 
 Header und Footer werden nicht von Hand gepflegt. Vorlage und Generator: `scratchpad/nav.py` (Schema im Repo nicht versioniert) ersetzt in jeder Seite den Block `<header class="site-header …>…</header>` und `<footer class="site-footer…>…</footer>` und setzt `aria-current="page"` passend zur Datei.
 
-> ⚠️ **Der Generator liegt nicht im Repo, seine Vorlage kann also veralten.** Am 17.08.2026 sind vier Dinge in die generierten Blöcke gewandert, die ein Lauf mit alter Vorlage stillschweigend zurücknehmen würde:
+> ⚠️ **Der Generator liegt nicht im Repo, seine Vorlage kann also veralten.** Am 17.08.2026 sind vier Dinge in die generierten Blöcke gewandert, am 26.09.2026 ein fünftes, die ein Lauf mit alter Vorlage stillschweigend zurücknehmen würde:
 >
 > | in der Vorlage | Grund |
 > |---|---|
@@ -164,8 +165,9 @@ Header und Footer werden nicht von Hand gepflegt. Vorlage und Generator: `scratc
 > | `assets/signet-negative-72.webp` statt `assets/signet-negative.png` | dito, zusammen 192 KB auf jedem Seitenaufruf |
 > | `favicon-32.png` und `favicon-96.png` statt `signet.png` als `rel="icon"` | dieselbe 132-KB-Datei diente als Favicon; 96px, weil Google für die Suche ein Vielfaches von 48 empfiehlt |
 > | `<a href="https://www.linkedin.com/company/manibase/" rel="me">LinkedIn</a>` in der Spalte „Unternehmen" | Entitätssignal gegen die Namensverwechslung mit „Manbase" |
+> | `· <a href="tel:+4915565697065">+49 15565 697065</a>` am Ende der Adresszeile in `footer__bottom` | direkter Anrufweg auf dem Handy, Quick Win Q9 aus dem Folgeaudit vom 26.09.2026 |
 >
-> **Absicherung:** `scripts/test-frontend.mjs` prüft alle vier Punkte über sämtliche Seiten und läuft in `verify.yml` bei jedem Pull Request. Ein Generatorlauf mit alter Vorlage sieht im Diff harmlos aus, macht die CI aber rot. Wer die Vorlage bewusst ändert, zieht die Tests mit.
+> **Absicherung:** `scripts/test-frontend.mjs` prüft alle fünf Punkte über sämtliche Seiten und läuft in `verify.yml` bei jedem Pull Request. Ein Generatorlauf mit alter Vorlage sieht im Diff harmlos aus, macht die CI aber rot. Wer die Vorlage bewusst ändert, zieht die Tests mit.
 
 ## Beim Relaunch entfernt
 Altes Helfer-Karussell und die vier alten Helden (Anton/Emma/Doreen/Wiktor), „Kennen Sie das?"-Pains, Wertband, Newsletter-Band auf der Startseite, die drei Mockup-Dateien samt CSS (`index-mockup*.html`, `styles/home-mockup*.css`), das sechsmonatige Einführungsprojekt und der Anker `#anwendungen`. Alte Verweise darauf zeigen jetzt auf `#arbeitssituationen`, `#module` oder `#helfer`.
