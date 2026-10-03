@@ -1771,6 +1771,8 @@ button,a,summary,input,label{touch-action:manipulation;}
   gap:clamp(36px,7vw,96px);align-items:start;
 }
 .booking--qualify .booking__head{position:sticky;top:calc(var(--header-h) + 30px);margin:0;}
+.booking__direct{margin:18px 0 0;padding-top:16px;border-top:1px solid var(--color-border);font-size:.92rem;}
+.booking__direct a{font-weight:var(--fw-semibold);white-space:nowrap;}
 .booking--qualify .wizard,.booking--qualify .cal{grid-column:2;max-width:none;width:100%;}
 .wizard{padding:clamp(22px,3vw,34px);background:var(--phase2-paper);}
 .qcard{min-height:70px;padding:15px 17px;}
