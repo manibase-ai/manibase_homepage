@@ -49,6 +49,8 @@ tail -1 /var/log/manibase/trichter.log                                # keine ne
 curl -s -o /dev/null -X POST -A 'Googlebot/2.1' 'https://manibase.de/t?v=1&s=abnahme002&e=gesehen'
 tail -1 /var/log/manibase/trichter.log                                # "b":"1"
 for i in $(seq 35); do curl -s -o /dev/null -w '%{http_code} ' -X POST "$U"; done; echo   # mindestens ein 503
+grep -c abnahme001 /var/log/manibase/trichter.log                     # nur die durchgelassenen Aufrufe (kein Eintrag je 503)
+grep -c abnahme /var/log/nginx/error.log                              # 0 (limit_req_log_level info)
 sleep 40                                                              # Rate-Limit-Eimer wieder fuellen
 curl -s -D - -o /dev/null -X POST "$U" | grep -i strict-transport     # Security-Header kommen an
 curl -sI https://manibase.de/ | grep -i connect-src                   # 'self' erlaubt
@@ -82,8 +84,12 @@ Jede Person im Team ruft einmal je Browser `https://manibase.de/?trichter=aus` a
 `access.log` enthält IP-Adressen seit dem 13.07.2026. logrotate rotiert beim allerersten Lauf noch nicht, danach täglich; die Altdaten sind damit etwa am 19.10.2026 gelöscht. Sofort löschen **nur auf Anweisung der Geschäftsführung** (nicht umkehrbar):
 
 ```bash
-logrotate -f /etc/logrotate.d/nginx && rm -f /var/log/nginx/access.log.1 /var/log/nginx/error.log.1
+ls -la /var/log/nginx/      # vorher ansehen: nur access.log* und error.log* (alle Vhosts teilen sich diese Dateien)
+logrotate -f /etc/logrotate.d/nginx && rm -f /var/log/nginx/access.log.[0-9]* /var/log/nginx/error.log.[0-9]*
+ls -la /var/log/nginx/      # danach: nur die frischen access.log und error.log
 ```
+
+Nach der ersten echten Rotation liegen die Altdaten nicht mehr nur in `.1`, sondern auch in `.2.gz` und folgenden; deshalb das Muster.
 
 ## Rückbau
 
