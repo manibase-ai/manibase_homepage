@@ -53,7 +53,7 @@ Expected: nur `ok   …`-Zeilen, Exit 0.
 **Files:**
 - Create: `scripts/test-trichter.mjs`
 - Create: `scripts/trichter-auswertung.mjs`
-- Modify: `.github/workflows/verify.yml` (nach dem Schritt „Frontend-Regressionstests“)
+- Modify: `.github/workflows/verify.yml` (vor dem Schritt „Frontend-Regressionstests“)
 
 - [ ] **Step 1: Tests schreiben**
 
@@ -65,6 +65,7 @@ Expected: nur `ok   …`-Zeilen, Exit 0.
  * Aufruf: node scripts/test-trichter.mjs   (keine Abhaengigkeiten)
  */
 import { gzipSync } from 'node:zlib';
+import { spawnSync } from 'node:child_process';
 import { writeFileSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -193,6 +194,14 @@ test('argumente: Datum geprueft, Vorgabe ist stdin', () => {
     try { argumente(falsch); } catch { geworfen++; }
   }
   assert(geworfen === 3, 'Ungueltige Argumente akzeptiert');
+});
+
+test('CLI: liest stdin, Exit 2 bei falschem Datum', () => {
+  const lauf = (args, input) => spawnSync(process.execPath, ['scripts/trichter-auswertung.mjs', ...args], { input, encoding: 'utf8' });
+  const ok = lauf(['-'], z() + '\n');
+  assert(ok.status === 0 && /gesehen\s+1\b/.test(ok.stdout), 'stdin: ' + ok.status + ' ' + ok.stdout + ok.stderr);
+  const falsch = lauf(['--von', '1.10.2026'], '');
+  assert(falsch.status === 2, 'Exit-Code bei falschem Datum: ' + falsch.status);
 });
 
 if (failed) {
@@ -393,7 +402,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
 - [ ] **Step 4: Tests grün**
 
 Run: `node scripts/test-trichter.mjs`
-Expected: 11 Zeilen `ok   …`, Exit 0.
+Expected: 12 Zeilen `ok   …`, Exit 0.
 
 - [ ] **Step 5: CLI von Hand prüfen**
 
@@ -405,14 +414,14 @@ Expected: `--von braucht ein Datum JJJJ-MM-TT`, dann `2`.
 
 - [ ] **Step 6: CI-Schritt ergänzen**
 
-In `.github/workflows/verify.yml` ans Ende der `steps` (nach „Frontend-Regressionstests …“) anhängen:
+In `.github/workflows/verify.yml` **vor** dem Schritt „Frontend-Regressionstests (Navigation, Qualifizierungs-Maske)“ einfügen (der Test braucht kein jsdom und soll auch laufen, wenn die Frontend-Tests scheitern):
 
 ```yaml
-
       # Auswertung des Formular-Trichters (docs/superpowers/specs/2026-10-03-formular-trichter-design.md):
       # Stufenlogik, Zeitzone ueber die Zeitumstellung, gzip, ungueltige Zeilen.
       - name: Formular-Trichter (Auswertung)
         run: node scripts/test-trichter.mjs
+
 ```
 
 - [ ] **Step 7: Commit**
@@ -569,6 +578,17 @@ test('Trichter: ?trichter=aus schaltet ab und verschwindet aus der Adresse', () 
   assert(an.window.localStorage.getItem('manibase-trichter') === null, 'Opt-out nicht entfernt');
 });
 
+test('Trichter: ?trichter=aus wirkt auch bei gesperrtem Browser-Speicher', () => {
+  const w = bootTrichter({
+    url: 'https://manibase.de/?trichter=aus',
+    vorbereiten: (win) => Object.defineProperty(win, 'localStorage', {
+      configurable: true, get() { throw new Error('gesperrt'); },
+    }),
+  });
+  bisKontakt(w);
+  assert(w.gesendet.length === 0, 'Trotz ?trichter=aus gesendet: ' + w.gesendet.join(' '));
+});
+
 test('Trichter: wirft der Beacon, laeuft die Maske weiter', () => {
   const w = bootTrichter({
     vorbereiten: (win) => Object.defineProperty(win.navigator, 'sendBeacon', {
@@ -694,8 +714,10 @@ Ans Ende des Trichter-Blocks in `scripts/test-frontend.mjs` anhängen:
 test('Trichter: gesendet werden nur v, s, e, n, r, nie Formularwerte', () => {
   const w = bootTrichter();
   bisKontakt(w);
+  kontaktAusfuellen(w);
+  absenden(w);
   const evs = w.ereignisse();
-  assert(evs.length >= 4, 'Zu wenige Ereignisse: ' + evs.length);
+  assert(evs.length >= 5, 'Zu wenige Ereignisse: ' + evs.length);
   const erlaubt = new Set(['pfad', 'v', 's', 'e', 'n', 'r']);
   for (const ev of evs) {
     assert(ev.pfad === '/t', 'Falscher Pfad: ' + ev.pfad);
@@ -704,6 +726,10 @@ test('Trichter: gesendet werden nur v, s, e, n, r, nie Formularwerte', () => {
     assert(/^[a-z0-9]{10}$/.test(ev.s), 'Kennung ungueltig: ' + ev.s);
   }
   assert(new Set(evs.map((e) => e.s)).size === 1, 'Kennung wechselt innerhalb eines Seitenaufrufs');
+  const roh = w.gesendet.join(' ');
+  for (const wert of ['@', 'Erika', 'Mustermann', 'example', 'Musterbau']) {
+    assert(!roh.includes(wert), 'Formularwert im Beacon: ' + wert);
+  }
   const zweiter = bootTrichter();
   bisKontakt(zweiter);
   assert(zweiter.ereignisse()[0].s !== evs[0].s, 'Zwei Seitenaufrufe teilen sich eine Kennung');
@@ -964,6 +990,9 @@ test('Trichter: Kalender meldet ok oder fehler', () => {
   const ok = lauf((win) => { win.Zeeg = { initInlineWidget() {} }; });
   assert(kalender(ok) === 'kalender:ok', 'Zeeg vorhanden: ' + kalender(ok));
 
+  const wirft = lauf((win) => { win.Zeeg = { initInlineWidget() { throw new Error('kaputt'); } }; });
+  assert(kalender(wirft) === 'kalender:fehler', 'initInlineWidget wirft: ' + kalender(wirft));
+
   const halb = lauf((win) => { win.Zeeg = {}; });
   assert(kalender(halb) === 'kalender:fehler', 'Zeeg ohne initInlineWidget: ' + kalender(halb));
 
@@ -1001,7 +1030,8 @@ Den Teil ab `    var answerId = box.getAttribute('data-cal-answer');` bis zum En
           opts.prefill.answers[answerId] = booking.summary;
         }
       }
-      window.Zeeg.initInlineWidget(opts);
+      // Wirft das Widget, bleibt der Absende-Pfad heil und der Trichter sieht den Fehler.
+      try { window.Zeeg.initInlineWidget(opts); } catch (e) { return false; }
       return true;
     }
     function melden(ok) { trichter('kalender', null, ok ? 'ok' : 'fehler'); }
@@ -1047,9 +1077,10 @@ test('Datenschutz: Zaehlung der Formularschritte und Log-Frist sind beschrieben'
   const html = readFileSync('site/datenschutz.html', 'utf8');
   for (const teil of ['Zählung der Formularschritte', 'Global Privacy Control', 'Do Not Track',
     'spätestens 13 Monaten', 'index.html?trichter=aus', 'in der Regel nach 15 Tagen', 'Stand: 3. Oktober 2026',
-    'Gespeichert werden der Zeitpunkt', 'automatisierten Programm']) {
+    'Gespeichert werden der Zeitpunkt', 'automatisierten Programm', 'Art. 21 DSGVO']) {
     assert(html.includes(teil), 'Fehlt in datenschutz.html: ' + teil);
   }
+  assert(!html.includes('nicht auf Ihrem Gerät gespeichert'), 'Behauptung "nicht auf Ihrem Gerät gespeichert" steht im Text');
   assert(!/kein(en)? Zugriff auf (Ihr |das )?Endgerät/i.test(html), 'Behauptung "kein Zugriff auf das Endgerät" steht im Text');
 });
 ```
@@ -1061,7 +1092,7 @@ Expected: `FAIL Datenschutz: …`.
 
 - [ ] **Step 3: Abschnitt 3 ergänzen**
 
-Am Ende des Absatzes in Abschnitt 3 nach `… nach Art. 28 DSGVO.` (vor `</p>`) einfügen:
+Am Ende des Absatzes in Abschnitt 3, also nach `(AVV) nach Art. 28 DSGVO.` und vor dem `</p>` (der kürzere Anker `nach Art. 28 DSGVO.</p>` kommt auch in Abschnitt 7 vor), einfügen:
 
 ```
  Die Server-Logdaten werden täglich rotiert und in der Regel nach 15 Tagen gelöscht.
@@ -1072,7 +1103,7 @@ Am Ende des Absatzes in Abschnitt 3 nach `… nach Art. 28 DSGVO.` (vor `</p>`) 
 Nach dem bestehenden `<p>` in Abschnitt 5 (endet mit `(Durchführung vorvertraglicher Maßnahmen).</p>`) einfügen:
 
 ```html
-    <p><strong>Zählung der Formularschritte.</strong> Damit wir erkennen, an welcher Stelle das Formular schwer verständlich ist, meldet Ihr Browser an unseren eigenen Server, sobald das Formular vollständig im sichtbaren Bereich erscheint, und beim Ausfüllen, welcher Schritt erreicht wurde, ob ein Hinweis auf eine fehlende Angabe erschien, ob das Formular abgeschickt wurde und ob der Terminkalender geladen werden konnte. Ihre Eingaben im Formular sind nicht Teil dieser Meldung. Gespeichert werden der Zeitpunkt, das gemeldete Ereignis, eine zufällige Kennung, die für jeden Seitenaufruf neu erzeugt und nicht auf Ihrem Gerät gespeichert wird, sowie ein Vermerk, ob die Anfrage laut Browserkennung von einem automatisierten Programm (etwa einer Suchmaschine) stammt. Ihre IP-Adresse und die Browserkennung selbst speichern wir für diese Zählung nicht. Es werden keine Cookies gesetzt. Rechtsgrundlage ist unser berechtigtes Interesse an einem verständlichen Formular (Art. 6 Abs. 1 lit. f DSGVO). Die Aufzeichnungen löschen wir nach spätestens 13 Monaten. Hat Ihr Browser das Signal „Global Privacy Control“ oder „Do Not Track“ eingeschaltet, findet keine Zählung statt. Sie können die Zählung für diesen Browser außerdem abschalten: <a href="index.html?trichter=aus">Zählung abschalten</a>. Dazu legen wir im Speicher Ihres Browsers einen Vermerk ab, den Sie über <a href="index.html?trichter=an">Zählung wieder zulassen</a> oder durch Löschen der Websitedaten entfernen.</p>
+    <p><strong>Zählung der Formularschritte.</strong> Damit wir erkennen, an welcher Stelle das Formular schwer verständlich ist, meldet Ihr Browser an unseren eigenen Server, sobald der Anfang des Formulars sichtbar wird, und beim Ausfüllen, welcher Schritt erreicht wurde, ob ein Hinweis auf eine fehlende Angabe erschien, ob das Formular abgeschickt wurde und ob der Terminkalender geladen werden konnte. Ihre Eingaben im Formular sind nicht Teil dieser Meldung. Gespeichert werden der Zeitpunkt (auf die volle Stunde gekürzt), das gemeldete Ereignis, eine zufällige Kennung, die nur während dieses Seitenaufrufs im Arbeitsspeicher Ihres Browsers vorliegt und danach verworfen wird, sowie ein Vermerk, ob die Anfrage laut Browserkennung von einem automatisierten Programm (etwa einer Suchmaschine) stammt. Ihre IP-Adresse und die Browserkennung selbst speichern wir für diese Zählung nicht; die IP-Adresse wird nur kurz im Arbeitsspeicher unseres Servers verarbeitet, um missbräuchlich viele Meldungen abzuweisen. Es werden keine Cookies gesetzt. Rechtsgrundlage ist unser berechtigtes Interesse an einem verständlichen Formular (Art. 6 Abs. 1 lit. f DSGVO). Die Aufzeichnungen löschen wir nach spätestens 13 Monaten. Hat Ihr Browser das Signal „Global Privacy Control“ oder „Do Not Track“ eingeschaltet, findet keine Zählung statt. Sie können dieser Verarbeitung jederzeit widersprechen (Art. 21 DSGVO), am einfachsten über den Link <a href="index.html?trichter=aus">Zählung abschalten</a>: Er öffnet unsere Startseite und schaltet die Zählung für diesen Browser ab, eine Bestätigung erscheint dabei nicht. Dazu legen wir im Speicher Ihres Browsers einen Vermerk ab, den Sie über <a href="index.html?trichter=an">Zählung wieder zulassen</a> oder durch Löschen der Websitedaten entfernen.</p>
 ```
 
 - [ ] **Step 5: Abschnitt 11 und Stand**
@@ -1096,7 +1127,7 @@ ersetzen durch:
 Run: `node scripts/test-frontend.mjs`
 Expected: alle `ok`.
 
-Run: `git diff site/datenschutz.html | grep '^+' | grep -c '[—–]'`
+Run: `git diff -U0 site/datenschutz.html | grep '^+' | python3 -c "import sys;print(sum(c in '\u2013\u2014' for c in sys.stdin.read()))"`
 Expected: `0`.
 
 - [ ] **Step 7: Commit**
@@ -1125,7 +1156,8 @@ Nur Dateien im Repo anlegen. **Nichts auf dem Server ausführen**, das macht die
 #
 # Die Website meldet per Beacon an /t, wie weit Besucher in der
 # Qualifizierungs-Maske kommen. nginx antwortet 204 und schreibt eine JSON-Zeile
-# OHNE IP-Adresse, Referrer oder User-Agent nach /var/log/manibase/trichter.log.
+# OHNE IP-Adresse, Referrer oder User-Agent nach /var/log/manibase/trichter.log
+# (pseudonym, nicht anonym: Zufallskennung je Seitenaufruf, Zeit auf die Stunde).
 # Auswertung: scripts/trichter-auswertung.mjs (laeuft lokal, nicht auf dem Server).
 #
 # Alle Regexe in map-Bloecken stehen in Anfuehrungszeichen: { } und ; brechen
@@ -1157,8 +1189,17 @@ map $http_user_agent $trichter_bot {
     default 0;
 }
 
+# Zeitstempel auf die volle Stunde kappen: sekundengenau liesse sich eine
+# Sitzung ueber die Uhrzeit dem access.log (mit IP) oder einer Zeeg-Buchung
+# zuordnen. Die Zeitverschiebungen sind ganze Stunden, der Berliner Kalendertag
+# bleibt damit exakt.
+map $time_iso8601 $trichter_t {
+    "~^(?<stunde>[0-9-]{10}T[0-9]{2}):[0-9]{2}:[0-9]{2}(?<zone>.*)$" "$stunde:00:00$zone";
+    default "-";
+}
+
 log_format manibase_trichter escape=json
-    '{"t":"$time_iso8601","v":"$trichter_v","s":"$trichter_s","e":"$trichter_e",'
+    '{"t":"$trichter_t","v":"$trichter_v","s":"$trichter_s","e":"$trichter_e",'
     '"n":"$trichter_n","r":"$trichter_r","b":"$trichter_bot"}';
 
 # ---- Teil 2: im HTTPS-server{}-Block von manibase.de ---------------------------
@@ -1189,8 +1230,10 @@ log_format manibase_trichter escape=json
 ```
 # /etc/logrotate.d/manibase-trichter  (Spec docs/superpowers/specs/2026-10-03-formular-trichter-design.md)
 #
-# Anonymes Trichter-Log: monatlich, hoechstens 13 Monate (12 Generationen plus
-# laufende Datei). Bewusst OHNE notifempty: ein leerer Monat muss trotzdem
+# Pseudonymes Trichter-Log (keine IP, Zeitstempel auf die Stunde gekappt):
+# monatlich, 11 Generationen plus laufende Datei = hoechstens rund 12 Monate,
+# damit die Zusage "spaetestens 13 Monate" auch mit Timer-Verzoegerung haelt.
+# Bewusst OHNE notifempty: ein leerer Monat muss trotzdem
 # rotieren, sonst rueckt nichts nach und die aelteste Generation bleibt laenger
 # liegen. maxage hilft dagegen nicht, logrotate prueft es nur beim Rotieren.
 # Verzeichnis /var/log/manibase muss root:adm 0755 sein: die nginx-Worker laufen
@@ -1198,7 +1241,7 @@ log_format manibase_trichter escape=json
 # sie in .1 weiter und die Zeilen gingen bei der naechsten Komprimierung verloren.
 /var/log/manibase/trichter.log {
 	monthly
-	rotate 12
+	rotate 11
 	maxsize 50M
 	missingok
 	compress
@@ -1251,9 +1294,11 @@ Expected: keine Ausgabe.
 - [ ] **Step 4: Commit nur falls Step 1 doch etwas geändert hat**
 
 ```bash
-[ -n "$(git status --short site)" ] && git add site && git commit -m "Cache-Stempel nachgezogen
+if [ -n "$(git status --short site)" ]; then
+  git add site && git commit -m "Cache-Stempel nachgezogen
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+fi
 ```
 
 ---
@@ -1262,11 +1307,13 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 - Server: `apt install logrotate`, `/var/log/manibase`, conf.d-Datei, beide Locations, logrotate-Regel, Abnahme laut Spec §7 Punkt 10.
 - `docs/deployment/trichter-und-logrotate.md` mit dem tatsächlich ausgeführten Stand (inklusive Hinweis fürs Team: der Abschalt-Link gibt keine Rückmeldung) und der `CLAUDE.md`-Abschnitt; beide gehören in den PR und in dessen Checkliste.
+- Vor dem Einfügen der Locations `grep -n limit_req` im Vhost: ein `limit_req` auf Server-Ebene würde in `@trichter` vererbt.
+- `CLAUDE.md`: Datenschutz hat 11 Abschnitte, nicht 10.
 - Härtungsdurchgang (Direktive E2): localStorage, Fristzusagen, stille Fallbacks, Nebenläufigkeit (zwei Tabs).
 - PR.
 
-**Bewusste Abweichung von der Spec:** E12 nennt `Intl.DateTimeFormat('de-DE')`; der Plan nimmt `en-CA`, weil es direkt `JJJJ-MM-TT` liefert. Gleiche Zeitzone, der Test über die Zeitumstellung deckt es ab.
-
 ## Offene Review-Punkte
+
+Runde 2 (D): alle Findings übernommen. W3 mit der Mindestlösung (Linktext sagt, dass die Startseite öffnet und keine Bestätigung erscheint) statt `site.js` auf `datenschutz.html` einzubinden: die Seite lädt `site.js` bisher nicht, und eine Statuszeile wäre neues UI ohne Auftrag. K12: der Plan schreibt `[|]` statt `\|` in der Regex, gleichwertig und ohne Escape-Fragen.
 
 Runde 1 (D): alle Findings übernommen. K2 so gelöst: Tests, die Ereignisse brauchen, stehen in Task 4; jeder Commit mit `site.js` stempelt sofort.
