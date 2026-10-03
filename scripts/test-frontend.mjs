@@ -353,6 +353,123 @@ test('Trichter: wirft der Beacon, laeuft die Maske weiter', () => {
   assert(w.activeIndex() === 4, 'Maske blieb stehen bei Schritt ' + (w.activeIndex() + 1));
 });
 
+test('Trichter: gesendet werden nur v, s, e, n, r, nie Formularwerte', () => {
+  const w = bootTrichter();
+  bisKontakt(w);
+  kontaktAusfuellen(w);
+  absenden(w);
+  const evs = w.ereignisse();
+  assert(evs.length >= 5, 'Zu wenige Ereignisse: ' + evs.length);
+  const erlaubt = new Set(['pfad', 'v', 's', 'e', 'n', 'r']);
+  for (const ev of evs) {
+    assert(ev.pfad === '/t', 'Falscher Pfad: ' + ev.pfad);
+    for (const k of Object.keys(ev)) assert(erlaubt.has(k), 'Unerlaubter Parameter: ' + k);
+    assert(ev.v === '1', 'Schema-Version fehlt: ' + JSON.stringify(ev));
+    assert(/^[a-z0-9]{10}$/.test(ev.s), 'Kennung ungueltig: ' + ev.s);
+  }
+  assert(new Set(evs.map((e) => e.s)).size === 1, 'Kennung wechselt innerhalb eines Seitenaufrufs');
+  const roh = w.gesendet.join(' ');
+  for (const wert of ['@', 'Erika', 'Mustermann', 'example', 'Musterbau']) {
+    assert(!roh.includes(wert), 'Formularwert im Beacon: ' + wert);
+  }
+  const zweiter = bootTrichter();
+  bisKontakt(zweiter);
+  assert(zweiter.ereignisse()[0].s !== evs[0].s, 'Zwei Seitenaufrufe teilen sich eine Kennung');
+});
+
+test('Trichter: nach ?trichter=an wird wieder gemessen', () => {
+  const an = bootTrichter({
+    url: 'https://manibase.de/?trichter=an',
+    vorbereiten: (win) => win.localStorage.setItem('manibase-trichter', 'aus'),
+  });
+  bisKontakt(an);
+  assert(an.gesendet.length > 0, 'Nach ?trichter=an wird nicht gemessen');
+});
+
+test('Trichter: ohne Beacon meldet fetch per POST ohne Cookies', () => {
+  const aufrufe = [];
+  const w = bootTrichter({
+    vorbereiten: (win) => {
+      Object.defineProperty(win.navigator, 'sendBeacon', { configurable: true, value: undefined });
+      win.fetch = (url, opts) => { aufrufe.push({ url: String(url), opts }); return Promise.resolve(); };
+    },
+  });
+  bisKontakt(w);
+  assert(aufrufe.length >= 4, 'fetch nicht genutzt: ' + aufrufe.length);
+  for (const a of aufrufe) {
+    assert(a.url.startsWith('/t?v=1&'), 'Falsche Adresse: ' + a.url);
+    assert(a.opts && a.opts.method === 'POST' && a.opts.keepalive === true && a.opts.credentials === 'omit',
+      'Falsche fetch-Optionen: ' + JSON.stringify(a.opts));
+  }
+});
+
+test('Trichter: Durchlauf meldet jede Stufe genau einmal', () => {
+  const w = bootTrichter();
+  const fortschritt = w.form.querySelector('.wizard__progress');
+  w.sichtbar(fortschritt);
+  w.sichtbar(fortschritt);
+  bisKontakt(w);
+  // Zurueck und wieder vor: Schritt 5 darf nicht doppelt gemeldet werden.
+  click(w.window, w.form.querySelector('.wizard__back'));
+  click(w.window, w.next);
+  kontaktAusfuellen(w);
+  absenden(w);
+  const ist = w.ereignisse().map(kurz).join(' ');
+  const soll = 'gesehen begonnen schritt:2 schritt:3 schritt:4 schritt:5 abgeschickt';
+  assert(ist === soll, 'Ereignisse: ' + ist + '\n       erwartet: ' + soll);
+});
+
+test('Trichter: Pruefmeldungen tragen Schritt und Grund', () => {
+  const w = bootTrichter();
+  click(w.window, w.next); // Schritt 1 ohne Auswahl
+  click(w.window, w.next); // zweites Mal: keine zweite Meldung
+  for (const step of w.steps.filter((s) => s.querySelector('input[type="radio"]'))) {
+    waehlen(w, step.querySelector('input[type="radio"]'));
+    click(w.window, w.next);
+  }
+  click(w.window, w.next); // Schritt 4 ohne Auswahl
+  waehlen(w, w.form.querySelector('input[name="teilnehmer"][value="it"]'));
+  click(w.window, w.next); // Schritt 4 ohne Geschaeftsfuehrung
+  waehlen(w, w.form.querySelector('input[name="teilnehmer"][value="gf"]'));
+  click(w.window, w.next);
+  absenden(w); // Schritt 5 leer
+  w.form.querySelector('[name="name"]').value = 'Erika Mustermann';
+  absenden(w); // ohne E-Mail
+  w.form.querySelector('[name="email"]').value = 'erika@example.org';
+  absenden(w); // ohne Unternehmen
+  w.form.querySelector('[name="firma"]').value = 'Musterbau GmbH';
+  absenden(w); // ohne Einwilligung
+  const ist = w.ereignisse().filter((e) => e.e === 'fehler').map(kurz).join(' ');
+  const soll = 'fehler:1:auswahl fehler:4:mehrfach fehler:4:gf fehler:5:name fehler:5:email fehler:5:firma fehler:5:einwilligung';
+  assert(ist === soll, 'Pruefmeldungen: ' + ist + '\n       erwartet: ' + soll);
+});
+
+test('Maske: Enter vor dem letzten Schritt schaltet weiter statt Kontaktfehler', () => {
+  const w = bootWizard();
+  absenden(w); // Enter ohne Auswahl
+  assert(w.activeIndex() === 0, 'Schritt 1 uebersprungen');
+  assert(w.err.textContent === 'Bitte wählen Sie eine Antwort aus.', 'Falsche Meldung: ' + w.err.textContent);
+  waehlen(w, w.steps[0].querySelector('input[type="radio"]'));
+  absenden(w); // Enter mit Auswahl
+  assert(w.activeIndex() === 1, 'Enter mit Auswahl schaltet nicht weiter');
+  assert(w.err.hidden, 'Fehlermeldung trotz gueltiger Auswahl');
+});
+
+test('Trichter: ohne Beacon und fetch laesst sich die Maske abschicken', () => {
+  // fetch ausdruecklich entfernen: bekaeme jsdom eines Tages fetch, ginge sonst aus
+  // der CI ein echter Request an manibase.de.
+  const w = bootWizard({
+    vorbereiten: (win) => {
+      win.Element.prototype.scrollIntoView = function () {};
+      win.fetch = undefined;
+    },
+  });
+  bisKontakt(w);
+  kontaktAusfuellen(w);
+  absenden(w);
+  assert(w.form.hidden, 'Maske ohne Beacon nicht abschickbar');
+});
+
 /* --- Rechenbeispiel #hochrechnung und Klartag-Leistungsblatt ------------------
  *
  * Das Leistungsblatt verweist mit "weniger als zwei Arbeitstagen" auf die
