@@ -505,7 +505,7 @@ function bootTrichter(extra = {}) {
   // Meldet dem Observer, der das Element beobachtet, "ist sichtbar".
   w.sichtbar = (el) => {
     for (const b of beobachter) {
-      if (b.ziele.includes(el)) b.cb([{ isIntersecting: true, target: el }], b);
+      if (b.ziele.includes(el)) b.cb([{ isIntersecting: true, intersectionRatio: 1, target: el }], b);
     }
   };
   return w;
@@ -539,24 +539,6 @@ function absenden(w) {
   w.form.dispatchEvent(new w.window.Event('submit', { bubbles: true, cancelable: true }));
 }
 
-test('Trichter: gesendet werden nur v, s, e, n, r, nie Formularwerte', () => {
-  const w = bootTrichter();
-  bisKontakt(w);
-  const evs = w.ereignisse();
-  assert(evs.length >= 4, 'Zu wenige Ereignisse: ' + evs.length);
-  const erlaubt = new Set(['pfad', 'v', 's', 'e', 'n', 'r']);
-  for (const ev of evs) {
-    assert(ev.pfad === '/t', 'Falscher Pfad: ' + ev.pfad);
-    for (const k of Object.keys(ev)) assert(erlaubt.has(k), 'Unerlaubter Parameter: ' + k);
-    assert(ev.v === '1', 'Schema-Version fehlt: ' + JSON.stringify(ev));
-    assert(/^[a-z0-9]{10}$/.test(ev.s), 'Kennung ungueltig: ' + ev.s);
-  }
-  assert(new Set(evs.map((e) => e.s)).size === 1, 'Kennung wechselt innerhalb eines Seitenaufrufs');
-  const zweiter = bootTrichter();
-  bisKontakt(zweiter);
-  assert(zweiter.ereignisse()[0].s !== evs[0].s, 'Zwei Seitenaufrufe teilen sich eine Kennung');
-});
-
 test('Trichter: GPC, Do Not Track und Opt-out unterdruecken jede Meldung', () => {
   const faelle = {
     'navigator.globalPrivacyControl': (w) => Object.defineProperty(w.navigator, 'globalPrivacyControl', { configurable: true, value: true }),
@@ -585,8 +567,6 @@ test('Trichter: ?trichter=aus schaltet ab und verschwindet aus der Adresse', () 
   });
   assert(an.window.location.href === 'https://manibase.de/', 'Adresse danach: ' + an.window.location.href);
   assert(an.window.localStorage.getItem('manibase-trichter') === null, 'Opt-out nicht entfernt');
-  bisKontakt(an);
-  assert(an.gesendet.length > 0, 'Nach ?trichter=an wird nicht gemessen');
 });
 
 test('Trichter: wirft der Beacon, laeuft die Maske weiter', () => {
@@ -600,12 +580,12 @@ test('Trichter: wirft der Beacon, laeuft die Maske weiter', () => {
 });
 ```
 
-Hinweis: Ereignisse (`begonnen`, `schritt`) baut erst Task 4 ein. Bis dahin scheitern deshalb erwartungsgemäß der Whitelist-Test („Zu wenige Ereignisse“) und im `?trichter=aus`-Test die letzte Prüfung „Nach ?trichter=an wird nicht gemessen“. Alles davor muss nach Step 4 grün sein: GPC/DNT (noch trivial), Adresse und Speicher bei `?trichter=aus`/`an`, Beacon-Fehler.
+Hinweis: Ereignisse (`begonnen`, `schritt`) baut erst Task 4 ein; die Tests, die gesendete Ereignisse brauchen, kommen deshalb erst dort dazu. Die GPC/DNT-Prüfung ist bis Task 4 trivial grün und wird dort scharf.
 
 - [ ] **Step 3: Tests laufen lassen, sie müssen scheitern**
 
 Run: `node scripts/test-frontend.mjs`
-Expected: `FAIL Trichter: ?trichter=aus …` (Adresse unverändert), `FAIL Trichter: gesendet werden nur …` (keine Ereignisse); alle älteren Tests `ok`.
+Expected: `FAIL Trichter: ?trichter=aus …` mit „Adresse danach: …?x=1&trichter=aus#termin“; alle älteren Tests `ok`.
 
 - [ ] **Step 4: Meldefunktion einbauen**
 
@@ -671,15 +651,28 @@ In `site/scripts/site.js` direkt **vor** der Zeile `  /* 4) Qualifizierungs-Mask
 
 ```
 
-- [ ] **Step 5: Tests laufen lassen**
+- [ ] **Step 5: Kopfkommentar von `site.js` ergänzen**
+
+Im Kopfkommentar die Zeile
+```
+   4) Qualifizierungs-Maske + Kalender erst nach Einwilligung laden (DSGVO)
+```
+ersetzen durch
+```
+   4a) Formular-Trichter: zaehlt Schritte der Maske ohne Cookies (Beacon an /t)
+   4) Qualifizierungs-Maske + Kalender erst nach Einwilligung laden (DSGVO)
+```
+
+- [ ] **Step 6: Tests laufen lassen**
 
 Run: `node scripts/test-frontend.mjs`
-Expected: `ok` für GPC/DNT, Beacon-Fehler und alle älteren Tests. Bis Task 4 bleiben genau zwei `FAIL`: „gesendet werden nur …“ (Zu wenige Ereignisse) und „?trichter=aus …“ mit der Meldung „Nach ?trichter=an wird nicht gemessen“. Jede andere Meldung ist ein echter Fehler.
+Expected: alle Zeilen `ok`, Exit 0.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
-git add site/scripts/site.js scripts/test-frontend.mjs
+python3 scripts/cache-bust.py site
+git add site scripts/test-frontend.mjs
 git commit -m "Trichter: Meldefunktion mit Opt-out (GPC, DNT, ?trichter=aus)
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
@@ -698,6 +691,50 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 Ans Ende des Trichter-Blocks in `scripts/test-frontend.mjs` anhängen:
 
 ```js
+test('Trichter: gesendet werden nur v, s, e, n, r, nie Formularwerte', () => {
+  const w = bootTrichter();
+  bisKontakt(w);
+  const evs = w.ereignisse();
+  assert(evs.length >= 4, 'Zu wenige Ereignisse: ' + evs.length);
+  const erlaubt = new Set(['pfad', 'v', 's', 'e', 'n', 'r']);
+  for (const ev of evs) {
+    assert(ev.pfad === '/t', 'Falscher Pfad: ' + ev.pfad);
+    for (const k of Object.keys(ev)) assert(erlaubt.has(k), 'Unerlaubter Parameter: ' + k);
+    assert(ev.v === '1', 'Schema-Version fehlt: ' + JSON.stringify(ev));
+    assert(/^[a-z0-9]{10}$/.test(ev.s), 'Kennung ungueltig: ' + ev.s);
+  }
+  assert(new Set(evs.map((e) => e.s)).size === 1, 'Kennung wechselt innerhalb eines Seitenaufrufs');
+  const zweiter = bootTrichter();
+  bisKontakt(zweiter);
+  assert(zweiter.ereignisse()[0].s !== evs[0].s, 'Zwei Seitenaufrufe teilen sich eine Kennung');
+});
+
+test('Trichter: nach ?trichter=an wird wieder gemessen', () => {
+  const an = bootTrichter({
+    url: 'https://manibase.de/?trichter=an',
+    vorbereiten: (win) => win.localStorage.setItem('manibase-trichter', 'aus'),
+  });
+  bisKontakt(an);
+  assert(an.gesendet.length > 0, 'Nach ?trichter=an wird nicht gemessen');
+});
+
+test('Trichter: ohne Beacon meldet fetch per POST ohne Cookies', () => {
+  const aufrufe = [];
+  const w = bootTrichter({
+    vorbereiten: (win) => {
+      Object.defineProperty(win.navigator, 'sendBeacon', { configurable: true, value: undefined });
+      win.fetch = (url, opts) => { aufrufe.push({ url: String(url), opts }); return Promise.resolve(); };
+    },
+  });
+  bisKontakt(w);
+  assert(aufrufe.length >= 4, 'fetch nicht genutzt: ' + aufrufe.length);
+  for (const a of aufrufe) {
+    assert(a.url.startsWith('/t?v=1&'), 'Falsche Adresse: ' + a.url);
+    assert(a.opts && a.opts.method === 'POST' && a.opts.keepalive === true && a.opts.credentials === 'omit',
+      'Falsche fetch-Optionen: ' + JSON.stringify(a.opts));
+  }
+});
+
 test('Trichter: Durchlauf meldet jede Stufe genau einmal', () => {
   const w = bootTrichter();
   const fortschritt = w.form.querySelector('.wizard__progress');
@@ -751,7 +788,14 @@ test('Maske: Enter vor dem letzten Schritt schaltet weiter statt Kontaktfehler',
 });
 
 test('Trichter: ohne Beacon und fetch laesst sich die Maske abschicken', () => {
-  const w = bootWizard({ vorbereiten: (win) => { win.Element.prototype.scrollIntoView = function () {}; } });
+  // fetch ausdruecklich entfernen: bekaeme jsdom eines Tages fetch, ginge sonst aus
+  // der CI ein echter Request an manibase.de.
+  const w = bootWizard({
+    vorbereiten: (win) => {
+      win.Element.prototype.scrollIntoView = function () {};
+      win.fetch = undefined;
+    },
+  });
   bisKontakt(w);
   kontaktAusfuellen(w);
   absenden(w);
@@ -762,7 +806,7 @@ test('Trichter: ohne Beacon und fetch laesst sich die Maske abschicken', () => {
 - [ ] **Step 2: Tests laufen lassen, sie müssen scheitern**
 
 Run: `node scripts/test-frontend.mjs`
-Expected: `FAIL` für „Durchlauf …“, „Pruefmeldungen …“, „Enter vor dem letzten Schritt …“ (Meldung lautet „Bitte geben Sie Ihren Namen an.“) und „gesendet werden nur …“.
+Expected: `FAIL` für „gesendet werden nur …“ (Zu wenige Ereignisse), „nach ?trichter=an …“, „ohne Beacon meldet fetch …“, „Durchlauf …“, „Pruefmeldungen …“ und „Enter vor dem letzten Schritt …“ (Meldung lautet „Bitte geben Sie Ihren Namen an.“). „ohne Beacon und fetch …“ ist schon grün (jsdom hat kein fetch); der Test sichert den Zustand ab.
 
 - [ ] **Step 3: `showErr` um den Grund erweitern**
 
@@ -866,14 +910,17 @@ In `initWizard` die letzte Zeile `    render(false);` ersetzen durch:
 
     // Trichter: "gesehen", sobald die Fortschrittszeile ganz im Bild ist. Die
     // Maske selbst ist auf dem Handy hoeher als der Bildschirm und erreichte eine
-    // Sichtbarkeitsschwelle nie, deshalb die kleine Zeile darueber.
+    // Sichtbarkeitsschwelle nie, deshalb die kleine Zeile darueber. 0.99 statt 1:
+    // bei Zoom und Subpixel-Lagen erreicht die Quote 1 oft nie. Die Quote wird
+    // selbst geprueft, weil der erste Callback nach observe() immer kommt und
+    // isIntersecting die Schwelle nicht beachtet.
     var progress = form.querySelector('.wizard__progress');
     if (progress && 'IntersectionObserver' in window) {
       var sichtbar = new IntersectionObserver(function (entries) {
         entries.forEach(function (en) {
-          if (en.isIntersecting) { trichter('gesehen'); sichtbar.disconnect(); }
+          if (en.isIntersecting && en.intersectionRatio >= 0.99) { trichter('gesehen'); sichtbar.disconnect(); }
         });
-      }, { threshold: 1 });
+      }, { threshold: 0.99 });
       sichtbar.observe(progress);
     }
 ```
@@ -886,7 +933,8 @@ Expected: alle Zeilen `ok`, Exit 0.
 - [ ] **Step 10: Commit**
 
 ```bash
-git add site/scripts/site.js scripts/test-frontend.mjs
+python3 scripts/cache-bust.py site
+git add site scripts/test-frontend.mjs
 git commit -m "Trichter: Ereignisse der Maske; Enter in Schritt 1 bis 4 schaltet weiter
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
@@ -975,7 +1023,8 @@ Expected: alle `ok`.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add site/scripts/site.js scripts/test-frontend.mjs
+python3 scripts/cache-bust.py site
+git add site scripts/test-frontend.mjs
 git commit -m "Trichter: Kalender meldet ok oder fehler, auch bei blockiertem Zeeg-Skript
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
@@ -997,7 +1046,8 @@ Copy-Regeln aus `CLAUDE.md`: Sie-Ansprache, **keine Gedankenstriche (—, –) i
 test('Datenschutz: Zaehlung der Formularschritte und Log-Frist sind beschrieben', () => {
   const html = readFileSync('site/datenschutz.html', 'utf8');
   for (const teil of ['Zählung der Formularschritte', 'Global Privacy Control', 'Do Not Track',
-    'spätestens 13 Monaten', 'index.html?trichter=aus', 'in der Regel nach 15 Tagen', 'Stand: 3. Oktober 2026']) {
+    'spätestens 13 Monaten', 'index.html?trichter=aus', 'in der Regel nach 15 Tagen', 'Stand: 3. Oktober 2026',
+    'Gespeichert werden der Zeitpunkt', 'automatisierten Programm']) {
     assert(html.includes(teil), 'Fehlt in datenschutz.html: ' + teil);
   }
   assert(!/kein(en)? Zugriff auf (Ihr |das )?Endgerät/i.test(html), 'Behauptung "kein Zugriff auf das Endgerät" steht im Text');
@@ -1022,7 +1072,7 @@ Am Ende des Absatzes in Abschnitt 3 nach `… nach Art. 28 DSGVO.` (vor `</p>`) 
 Nach dem bestehenden `<p>` in Abschnitt 5 (endet mit `(Durchführung vorvertraglicher Maßnahmen).</p>`) einfügen:
 
 ```html
-    <p><strong>Zählung der Formularschritte.</strong> Damit wir erkennen, an welcher Stelle das Formular schwer verständlich ist, meldet Ihr Browser beim Ausfüllen an unseren eigenen Server, welcher Schritt erreicht wurde, ob ein Hinweis auf eine fehlende Angabe erschien, ob das Formular abgeschickt wurde und ob der Terminkalender geladen werden konnte. Übertragen werden nur diese Angaben und eine zufällige Kennung, die für jeden Seitenaufruf neu erzeugt und nicht auf Ihrem Gerät gespeichert wird. Ihre Eingaben im Formular sind nicht Teil dieser Meldung. Es werden keine Cookies gesetzt. In den Aufzeichnungen dieser Zählung speichern wir weder Ihre IP-Adresse noch Angaben zu Ihrem Browser. Rechtsgrundlage ist unser berechtigtes Interesse an einem verständlichen Formular (Art. 6 Abs. 1 lit. f DSGVO). Die Aufzeichnungen löschen wir nach spätestens 13 Monaten. Hat Ihr Browser das Signal „Global Privacy Control“ oder „Do Not Track“ eingeschaltet, findet keine Zählung statt. Sie können die Zählung außerdem über den Link <a href="index.html?trichter=aus">Zählung abschalten</a> für diesen Browser abschalten; dazu legen wir im Speicher Ihres Browsers einen entsprechenden Vermerk ab, den Sie über <a href="index.html?trichter=an">Zählung wieder zulassen</a> oder durch Löschen der Websitedaten entfernen.</p>
+    <p><strong>Zählung der Formularschritte.</strong> Damit wir erkennen, an welcher Stelle das Formular schwer verständlich ist, meldet Ihr Browser an unseren eigenen Server, sobald das Formular vollständig im sichtbaren Bereich erscheint, und beim Ausfüllen, welcher Schritt erreicht wurde, ob ein Hinweis auf eine fehlende Angabe erschien, ob das Formular abgeschickt wurde und ob der Terminkalender geladen werden konnte. Ihre Eingaben im Formular sind nicht Teil dieser Meldung. Gespeichert werden der Zeitpunkt, das gemeldete Ereignis, eine zufällige Kennung, die für jeden Seitenaufruf neu erzeugt und nicht auf Ihrem Gerät gespeichert wird, sowie ein Vermerk, ob die Anfrage laut Browserkennung von einem automatisierten Programm (etwa einer Suchmaschine) stammt. Ihre IP-Adresse und die Browserkennung selbst speichern wir für diese Zählung nicht. Es werden keine Cookies gesetzt. Rechtsgrundlage ist unser berechtigtes Interesse an einem verständlichen Formular (Art. 6 Abs. 1 lit. f DSGVO). Die Aufzeichnungen löschen wir nach spätestens 13 Monaten. Hat Ihr Browser das Signal „Global Privacy Control“ oder „Do Not Track“ eingeschaltet, findet keine Zählung statt. Sie können die Zählung für diesen Browser außerdem abschalten: <a href="index.html?trichter=aus">Zählung abschalten</a>. Dazu legen wir im Speicher Ihres Browsers einen Vermerk ab, den Sie über <a href="index.html?trichter=an">Zählung wieder zulassen</a> oder durch Löschen der Websitedaten entfernen.</p>
 ```
 
 - [ ] **Step 5: Abschnitt 11 und Stand**
@@ -1140,17 +1190,17 @@ log_format manibase_trichter escape=json
 # /etc/logrotate.d/manibase-trichter  (Spec docs/superpowers/specs/2026-10-03-formular-trichter-design.md)
 #
 # Anonymes Trichter-Log: monatlich, hoechstens 13 Monate (12 Generationen plus
-# laufende Datei; maxage sichert das auch bei leeren Monaten ab).
+# laufende Datei). Bewusst OHNE notifempty: ein leerer Monat muss trotzdem
+# rotieren, sonst rueckt nichts nach und die aelteste Generation bleibt laenger
+# liegen. maxage hilft dagegen nicht, logrotate prueft es nur beim Rotieren.
 # Verzeichnis /var/log/manibase muss root:adm 0755 sein: die nginx-Worker laufen
 # als www-data und oeffnen die Datei bei USR1 selbst neu. Ohne x-Recht schrieben
 # sie in .1 weiter und die Zeilen gingen bei der naechsten Komprimierung verloren.
 /var/log/manibase/trichter.log {
 	monthly
 	rotate 12
-	maxage 400
 	maxsize 50M
 	missingok
-	notifempty
 	compress
 	delaycompress
 	create 0640 www-data adm
@@ -1212,9 +1262,12 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ## Nicht Teil dieses Plans (Hauptsitzung)
 
 - Server: `apt install logrotate`, `/var/log/manibase`, conf.d-Datei, beide Locations, logrotate-Regel, Abnahme laut Spec §7 Punkt 10.
-- `docs/deployment/trichter-und-logrotate.md` mit dem tatsächlich ausgeführten Stand, `CLAUDE.md`-Abschnitt.
+- `docs/deployment/trichter-und-logrotate.md` mit dem tatsächlich ausgeführten Stand (inklusive Hinweis fürs Team: der Abschalt-Link gibt keine Rückmeldung) und der `CLAUDE.md`-Abschnitt; beide gehören in den PR und in dessen Checkliste.
+- Härtungsdurchgang (Direktive E2): localStorage, Fristzusagen, stille Fallbacks, Nebenläufigkeit (zwei Tabs).
 - PR.
+
+**Bewusste Abweichung von der Spec:** E12 nennt `Intl.DateTimeFormat('de-DE')`; der Plan nimmt `en-CA`, weil es direkt `JJJJ-MM-TT` liefert. Gleiche Zeitzone, der Test über die Zeitumstellung deckt es ab.
 
 ## Offene Review-Punkte
 
-(werden nach Phase D ergänzt)
+Runde 1 (D): alle Findings übernommen. K2 so gelöst: Tests, die Ereignisse brauchen, stehen in Task 4; jeder Commit mit `site.js` stempelt sofort.
