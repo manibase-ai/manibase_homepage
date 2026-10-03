@@ -1251,7 +1251,7 @@ Expected: keine Ausgabe.
 - [ ] **Step 4: Commit nur falls Step 1 doch etwas geändert hat**
 
 ```bash
-git status --short site && git add site && git commit -m "Cache-Stempel nachgezogen
+[ -n "$(git status --short site)" ] && git add site && git commit -m "Cache-Stempel nachgezogen
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
