@@ -139,14 +139,17 @@ test('Navigation: .nav__toggle ist ohne Media-Query versteckt', () => {
 
 /* --- Qualifizierungs-Maske im DOM ------------------------------------------- */
 
-function bootWizard() {
+function bootWizard(opts = {}) {
   const dom = new JSDOM(readFileSync(HTML_PATH, 'utf8'), {
-    url: 'https://manibase.de/',
+    url: opts.url || 'https://manibase.de/',
     runScripts: 'outside-only',
   });
   // jsdom kennt matchMedia nicht; site.js fragt damit prefers-reduced-motion ab.
   // "matches:false" = normale Animationen, also der Alltagsfall im Browser.
   dom.window.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
+  // Optionaler Hook fuer Stubs, die site.js schon beim Laden sehen muss
+  // (Beacon, IntersectionObserver, Browser-Signale, localStorage, Zeeg).
+  if (opts.vorbereiten) opts.vorbereiten(dom.window);
   // site.js laeuft als IIFE beim Laden; jsdom holt externe Skripte hier nicht
   // selbst, deshalb wird die Datei nach dem Parsen im Fensterkontext ausgefuehrt.
   dom.window.eval(readFileSync(JS_PATH, 'utf8'));
@@ -229,6 +232,297 @@ test('Maske: Mehrfachauswahl verlangt weiterhin die Geschaeftsfuehrung', () => {
   gf.dispatchEvent(new w.window.Event('change', { bubbles: true }));
   click(w.window, w.next);
   assert(w.activeIndex() === before + 1, 'Mit Geschaeftsfuehrung wurde nicht weitergeschaltet');
+});
+
+/* --- Formular-Trichter ---------------------------------------------------------
+ *
+ * Die Maske meldet per Beacon an /t, wie weit Besucher kommen (Spec
+ * docs/superpowers/specs/2026-10-03-formular-trichter-design.md). jsdom kennt
+ * weder sendBeacon noch fetch, IntersectionObserver oder scrollIntoView; die
+ * Stubs setzt bootTrichter vor dem Laden von site.js.
+ */
+
+function bootTrichter(extra = {}) {
+  const gesendet = [];
+  const beobachter = [];
+  const vorbereiten = (w) => {
+    Object.defineProperty(w.navigator, 'sendBeacon', {
+      configurable: true,
+      value: (u) => { gesendet.push(String(u)); return true; },
+    });
+    w.Element.prototype.scrollIntoView = function () {};
+    w.IntersectionObserver = class {
+      constructor(cb) { this.cb = cb; this.ziele = []; beobachter.push(this); }
+      observe(el) { this.ziele.push(el); }
+      unobserve(el) { this.ziele = this.ziele.filter((z) => z !== el); }
+      disconnect() { this.ziele = []; }
+    };
+    if (extra.vorbereiten) extra.vorbereiten(w);
+  };
+  const w = bootWizard({ url: extra.url, vorbereiten });
+  w.gesendet = gesendet;
+  w.ereignisse = () => gesendet.map((u) => {
+    const url = new URL(u, 'https://manibase.de/');
+    return { pfad: url.pathname, ...Object.fromEntries(url.searchParams) };
+  });
+  // Meldet dem Observer, der das Element beobachtet, "ist sichtbar".
+  w.sichtbar = (el, quote = 1) => {
+    for (const b of beobachter) {
+      if (b.ziele.includes(el)) b.cb([{ isIntersecting: true, intersectionRatio: quote, target: el }], b);
+    }
+  };
+  return w;
+}
+
+const kurz = (ev) => [ev.e, ev.n, ev.r].filter(Boolean).join(':');
+
+function waehlen(w, input) {
+  input.checked = true;
+  input.dispatchEvent(new w.window.Event('change', { bubbles: true }));
+}
+
+// Schritte 1 bis 4 gueltig ausfuellen, endet auf dem Kontakt-Schritt.
+function bisKontakt(w) {
+  for (const step of w.steps.filter((s) => s.querySelector('input[type="radio"]'))) {
+    waehlen(w, step.querySelector('input[type="radio"]'));
+    click(w.window, w.next);
+  }
+  waehlen(w, w.form.querySelector('input[name="teilnehmer"][value="gf"]'));
+  click(w.window, w.next);
+}
+
+function kontaktAusfuellen(w) {
+  w.form.querySelector('[name="name"]').value = 'Erika Mustermann';
+  w.form.querySelector('[name="email"]').value = 'erika@example.org';
+  w.form.querySelector('[name="firma"]').value = 'Musterbau GmbH';
+  w.form.querySelector('[name="consent"]').checked = true;
+}
+
+function absenden(w) {
+  w.form.dispatchEvent(new w.window.Event('submit', { bubbles: true, cancelable: true }));
+}
+
+test('Trichter: GPC, Do Not Track und Opt-out unterdruecken jede Meldung', () => {
+  const faelle = {
+    'navigator.globalPrivacyControl': (w) => Object.defineProperty(w.navigator, 'globalPrivacyControl', { configurable: true, value: true }),
+    'navigator.doNotTrack': (w) => Object.defineProperty(w.navigator, 'doNotTrack', { configurable: true, value: '1' }),
+    'window.doNotTrack': (w) => { w.doNotTrack = '1'; },
+    'localStorage': (w) => w.localStorage.setItem('manibase-trichter', 'aus'),
+  };
+  for (const [name, vorbereiten] of Object.entries(faelle)) {
+    const w = bootTrichter({ vorbereiten });
+    w.sichtbar(w.form.querySelector('.wizard__progress'));
+    bisKontakt(w);
+    assert(w.gesendet.length === 0, name + ': trotzdem gesendet: ' + w.gesendet.join(' '));
+  }
+});
+
+test('Trichter: ?trichter=aus schaltet ab und verschwindet aus der Adresse', () => {
+  const w = bootTrichter({ url: 'https://manibase.de/?x=1&trichter=aus#termin' });
+  assert(w.window.location.href === 'https://manibase.de/?x=1#termin', 'Adresse danach: ' + w.window.location.href);
+  assert(w.window.localStorage.getItem('manibase-trichter') === 'aus', 'Opt-out nicht gespeichert');
+  bisKontakt(w);
+  assert(w.gesendet.length === 0, 'Trotz Opt-out gesendet');
+
+  const an = bootTrichter({
+    url: 'https://manibase.de/?trichter=an',
+    vorbereiten: (win) => win.localStorage.setItem('manibase-trichter', 'aus'),
+  });
+  assert(an.window.location.href === 'https://manibase.de/', 'Adresse danach: ' + an.window.location.href);
+  assert(an.window.localStorage.getItem('manibase-trichter') === null, 'Opt-out nicht entfernt');
+});
+
+test('Trichter: Opt-out schreibt die uebrigen Parameter nicht um', () => {
+  const w = bootTrichter({ url: 'https://manibase.de/?q=a%20b&flag&trichter=aus#termin' });
+  assert(w.window.location.href === 'https://manibase.de/?q=a%20b&flag#termin', 'Adresse danach: ' + w.window.location.href);
+  bisKontakt(w);
+  assert(w.gesendet.length === 0, 'Trotz Opt-out gesendet');
+});
+
+test('Trichter: ?trichter=aus wirkt auch bei gesperrtem Browser-Speicher', () => {
+  const w = bootTrichter({
+    url: 'https://manibase.de/?trichter=aus',
+    vorbereiten: (win) => Object.defineProperty(win, 'localStorage', {
+      configurable: true, get() { throw new Error('gesperrt'); },
+    }),
+  });
+  bisKontakt(w);
+  assert(w.gesendet.length === 0, 'Trotz ?trichter=aus gesendet: ' + w.gesendet.join(' '));
+});
+
+test('Trichter: wirft der Beacon, laeuft die Maske weiter', () => {
+  const w = bootTrichter({
+    vorbereiten: (win) => Object.defineProperty(win.navigator, 'sendBeacon', {
+      configurable: true, value: () => { throw new Error('blockiert'); },
+    }),
+  });
+  bisKontakt(w);
+  assert(w.activeIndex() === 4, 'Maske blieb stehen bei Schritt ' + (w.activeIndex() + 1));
+  kontaktAusfuellen(w);
+  absenden(w);
+  assert(w.form.hidden, 'Maske mit werfendem Beacon nicht abschickbar');
+});
+
+test('Trichter: gesehen erst bei voller Sichtbarkeit', () => {
+  const w = bootTrichter();
+  const fortschritt = w.form.querySelector('.wizard__progress');
+  w.sichtbar(fortschritt, 0.5);
+  assert(w.gesendet.length === 0, 'Halb sichtbar gemeldet: ' + w.gesendet.join(' '));
+  w.sichtbar(fortschritt);
+  assert(w.ereignisse().map(kurz).join(' ') === 'gesehen', 'Voll sichtbar: ' + w.ereignisse().map(kurz).join(' '));
+});
+
+test('Trichter: gesendet werden nur v, s, e, n, r, nie Formularwerte', () => {
+  const w = bootTrichter();
+  bisKontakt(w);
+  kontaktAusfuellen(w);
+  absenden(w);
+  const evs = w.ereignisse();
+  assert(evs.length >= 5, 'Zu wenige Ereignisse: ' + evs.length);
+  const erlaubt = new Set(['pfad', 'v', 's', 'e', 'n', 'r']);
+  for (const ev of evs) {
+    assert(ev.pfad === '/t', 'Falscher Pfad: ' + ev.pfad);
+    for (const k of Object.keys(ev)) assert(erlaubt.has(k), 'Unerlaubter Parameter: ' + k);
+    assert(ev.v === '1', 'Schema-Version fehlt: ' + JSON.stringify(ev));
+    assert(/^[a-z0-9]{10}$/.test(ev.s), 'Kennung ungueltig: ' + ev.s);
+  }
+  assert(new Set(evs.map((e) => e.s)).size === 1, 'Kennung wechselt innerhalb eines Seitenaufrufs');
+  const roh = w.gesendet.join(' ');
+  for (const wert of ['@', 'Erika', 'Mustermann', 'example', 'Musterbau']) {
+    assert(!roh.includes(wert), 'Formularwert im Beacon: ' + wert);
+  }
+  const zweiter = bootTrichter();
+  bisKontakt(zweiter);
+  assert(zweiter.ereignisse()[0].s !== evs[0].s, 'Zwei Seitenaufrufe teilen sich eine Kennung');
+});
+
+test('Trichter: nach ?trichter=an wird wieder gemessen', () => {
+  const an = bootTrichter({
+    url: 'https://manibase.de/?trichter=an',
+    vorbereiten: (win) => win.localStorage.setItem('manibase-trichter', 'aus'),
+  });
+  bisKontakt(an);
+  assert(an.gesendet.length > 0, 'Nach ?trichter=an wird nicht gemessen');
+});
+
+test('Trichter: ohne Beacon meldet fetch per POST ohne Cookies', () => {
+  const aufrufe = [];
+  const w = bootTrichter({
+    vorbereiten: (win) => {
+      Object.defineProperty(win.navigator, 'sendBeacon', { configurable: true, value: undefined });
+      win.fetch = (url, opts) => { aufrufe.push({ url: String(url), opts }); return Promise.resolve(); };
+    },
+  });
+  bisKontakt(w);
+  assert(aufrufe.length >= 4, 'fetch nicht genutzt: ' + aufrufe.length);
+  for (const a of aufrufe) {
+    assert(a.url.startsWith('/t?v=1&'), 'Falsche Adresse: ' + a.url);
+    assert(a.opts && a.opts.method === 'POST' && a.opts.keepalive === true && a.opts.credentials === 'omit',
+      'Falsche fetch-Optionen: ' + JSON.stringify(a.opts));
+  }
+});
+
+test('Trichter: Durchlauf meldet jede Stufe genau einmal', () => {
+  const w = bootTrichter();
+  const fortschritt = w.form.querySelector('.wizard__progress');
+  w.sichtbar(fortschritt);
+  w.sichtbar(fortschritt);
+  bisKontakt(w);
+  // Zurueck und wieder vor: Schritt 5 darf nicht doppelt gemeldet werden.
+  click(w.window, w.form.querySelector('.wizard__back'));
+  click(w.window, w.next);
+  kontaktAusfuellen(w);
+  absenden(w);
+  const ist = w.ereignisse().map(kurz).join(' ');
+  const soll = 'gesehen begonnen schritt:2 schritt:3 schritt:4 schritt:5 abgeschickt';
+  assert(ist === soll, 'Ereignisse: ' + ist + '\n       erwartet: ' + soll);
+});
+
+test('Trichter: Pruefmeldungen tragen Schritt und Grund', () => {
+  const w = bootTrichter();
+  click(w.window, w.next); // Schritt 1 ohne Auswahl
+  click(w.window, w.next); // zweites Mal: keine zweite Meldung
+  for (const step of w.steps.filter((s) => s.querySelector('input[type="radio"]'))) {
+    waehlen(w, step.querySelector('input[type="radio"]'));
+    click(w.window, w.next);
+  }
+  click(w.window, w.next); // Schritt 4 ohne Auswahl
+  waehlen(w, w.form.querySelector('input[name="teilnehmer"][value="it"]'));
+  click(w.window, w.next); // Schritt 4 ohne Geschaeftsfuehrung
+  waehlen(w, w.form.querySelector('input[name="teilnehmer"][value="gf"]'));
+  click(w.window, w.next);
+  absenden(w); // Schritt 5 leer
+  w.form.querySelector('[name="name"]').value = 'Erika Mustermann';
+  absenden(w); // ohne E-Mail
+  w.form.querySelector('[name="email"]').value = 'erika@example.org';
+  absenden(w); // ohne Unternehmen
+  w.form.querySelector('[name="firma"]').value = 'Musterbau GmbH';
+  absenden(w); // ohne Einwilligung
+  const ist = w.ereignisse().filter((e) => e.e === 'fehler').map(kurz).join(' ');
+  const soll = 'fehler:1:auswahl fehler:4:mehrfach fehler:4:gf fehler:5:name fehler:5:email fehler:5:firma fehler:5:einwilligung';
+  assert(ist === soll, 'Pruefmeldungen: ' + ist + '\n       erwartet: ' + soll);
+});
+
+test('Maske: Enter vor dem letzten Schritt schaltet weiter statt Kontaktfehler', () => {
+  const w = bootWizard();
+  absenden(w); // Enter ohne Auswahl
+  assert(w.activeIndex() === 0, 'Schritt 1 uebersprungen');
+  assert(w.err.textContent === 'Bitte wählen Sie eine Antwort aus.', 'Falsche Meldung: ' + w.err.textContent);
+  waehlen(w, w.steps[0].querySelector('input[type="radio"]'));
+  absenden(w); // Enter mit Auswahl
+  assert(w.activeIndex() === 1, 'Enter mit Auswahl schaltet nicht weiter');
+  assert(w.err.hidden, 'Fehlermeldung trotz gueltiger Auswahl');
+});
+
+test('Trichter: ohne Beacon und fetch laesst sich die Maske abschicken', () => {
+  // fetch ausdruecklich entfernen: bekaeme jsdom eines Tages fetch, ginge sonst aus
+  // der CI ein echter Request an manibase.de.
+  const w = bootWizard({
+    vorbereiten: (win) => {
+      win.Element.prototype.scrollIntoView = function () {};
+      win.fetch = undefined;
+    },
+  });
+  bisKontakt(w);
+  kontaktAusfuellen(w);
+  absenden(w);
+  assert(w.form.hidden, 'Maske ohne Beacon nicht abschickbar');
+});
+
+test('Trichter: Kalender meldet ok oder fehler', () => {
+  const lauf = (vorbereiten) => {
+    const w = bootTrichter({ vorbereiten });
+    bisKontakt(w);
+    kontaktAusfuellen(w);
+    absenden(w);
+    return w;
+  };
+  const kalender = (w) => w.ereignisse().filter((e) => e.e === 'kalender').map(kurz).join(' ');
+
+  const ok = lauf((win) => { win.Zeeg = { initInlineWidget() {} }; });
+  assert(kalender(ok) === 'kalender:ok', 'Zeeg vorhanden: ' + kalender(ok));
+
+  const wirft = lauf((win) => { win.Zeeg = { initInlineWidget() { throw new Error('kaputt'); } }; });
+  assert(kalender(wirft) === 'kalender:fehler', 'initInlineWidget wirft: ' + kalender(wirft));
+
+  const halb = lauf((win) => { win.Zeeg = {}; });
+  assert(kalender(halb) === 'kalender:fehler', 'Zeeg ohne initInlineWidget: ' + kalender(halb));
+
+  const geladen = lauf();
+  const skript = geladen.window.document.querySelector('script[src*="zeeg"]');
+  assert(skript, 'Zeeg-Skript wurde nicht angehaengt');
+  skript.dispatchEvent(new geladen.window.Event('load'));
+  assert(kalender(geladen) === 'kalender:fehler', 'Skript geladen ohne Zeeg: ' + kalender(geladen));
+
+  // Zeeg erscheint erst nach dem Absenden und meldet sich ueber den Ladeweg.
+  const spaet = lauf();
+  spaet.window.Zeeg = { initInlineWidget() {} };
+  spaet.window.document.querySelector('script[src*="zeeg"]').dispatchEvent(new spaet.window.Event('load'));
+  assert(kalender(spaet) === 'kalender:ok', 'Skript geladen mit Zeeg: ' + kalender(spaet));
+
+  const blockiert = lauf();
+  blockiert.window.document.querySelector('script[src*="zeeg"]').dispatchEvent(new blockiert.window.Event('error'));
+  assert(kalender(blockiert) === 'kalender:fehler', 'Skript blockiert: ' + kalender(blockiert));
 });
 
 /* --- Rechenbeispiel #hochrechnung und Klartag-Leistungsblatt ------------------
@@ -466,6 +760,17 @@ test('llms.txt verweist nur auf vorhandene Seiten', () => {
   assert(llms.includes('HRB 18632'), 'llms.txt: Handelsregisternummer fehlt');
   // Betriebsgroesse wird bewusst nicht oeffentlich genannt (Geschaeftsfuehrung, 02.10.2026).
   assert(!/\d+\s*(bis|–|-)\s*\d+\s*Mitarbeitende/.test(llms), 'llms.txt nennt eine Betriebsgroesse');
+});
+
+test('Datenschutz: Zaehlung der Formularschritte und Log-Frist sind beschrieben', () => {
+  const html = readFileSync('site/datenschutz.html', 'utf8');
+  for (const teil of ['Zählung der Formularschritte', 'Global Privacy Control', 'Do Not Track',
+    'spätestens 13 Monaten', 'index.html?trichter=aus', 'in der Regel nach 15 Tagen', 'Stand: 3. Oktober 2026',
+    'Gespeichert werden der Zeitpunkt', 'automatisierten Programm', 'Art. 21 DSGVO']) {
+    assert(html.includes(teil), 'Fehlt in datenschutz.html: ' + teil);
+  }
+  assert(!html.includes('nicht auf Ihrem Gerät gespeichert'), 'Behauptung "nicht auf Ihrem Gerät gespeichert" steht im Text');
+  assert(!/kein(en)? Zugriff auf (Ihr |das )?Endgerät/i.test(html), 'Behauptung "kein Zugriff auf das Endgerät" steht im Text');
 });
 
 if (failed) {

@@ -1,0 +1,24 @@
+# /etc/logrotate.d/manibase-trichter  (Spec docs/superpowers/specs/2026-10-03-formular-trichter-design.md)
+#
+# Pseudonymes Trichter-Log (keine IP, Zeitstempel auf die Stunde gekappt):
+# monatlich, 11 Generationen plus laufende Datei = hoechstens rund 12 Monate,
+# damit die Zusage "spaetestens 13 Monate" auch mit Timer-Verzoegerung haelt.
+# Bewusst OHNE notifempty: ein leerer Monat muss trotzdem
+# rotieren, sonst rueckt nichts nach und die aelteste Generation bleibt laenger
+# liegen. maxage hilft dagegen nicht, logrotate prueft es nur beim Rotieren.
+# Verzeichnis /var/log/manibase muss root:adm 0755 sein: die nginx-Worker laufen
+# als www-data und oeffnen die Datei bei USR1 selbst neu. Ohne x-Recht schrieben
+# sie in .1 weiter und die Zeilen gingen bei der naechsten Komprimierung verloren.
+/var/log/manibase/trichter.log {
+	monthly
+	rotate 11
+	maxsize 50M
+	missingok
+	compress
+	delaycompress
+	create 0640 www-data adm
+	sharedscripts
+	postrotate
+		invoke-rc.d nginx rotate >/dev/null 2>&1
+	endscript
+}
