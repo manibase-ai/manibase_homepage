@@ -861,14 +861,18 @@ test('llms.txt verweist nur auf vorhandene Seiten', () => {
   assert(!/\d+\s*(bis|–|-)\s*\d+\s*Mitarbeitende/.test(llms), 'llms.txt nennt eine Betriebsgroesse');
 });
 
-test('Datenschutz: Zaehlung der Formularschritte und Log-Frist sind beschrieben', () => {
+test('Datenschutz: Reichweitenmessung mit Umami ist vollstaendig beschrieben', () => {
   const html = readFileSync('site/datenschutz.html', 'utf8');
-  for (const teil of ['Zählung der Formularschritte', 'Global Privacy Control', 'Do Not Track',
-    'spätestens 13 Monaten', 'index.html?trichter=aus', 'in der Regel nach 15 Tagen', 'Stand: 3. Oktober 2026',
-    'Gespeichert werden der Zeitpunkt', 'automatisierten Programm', 'Art. 21 DSGVO']) {
+  for (const teil of ['12. Reichweitenmessung mit Umami', 'Seitentitel', 'UTM', 'Stadt', 'täglich wechselnden',
+    'Global Privacy Control', 'Do Not Track', 'spätestens 13 Monaten', 'datenschutz.html?statistik=aus',
+    'datenschutz.html?statistik=an', 'Art. 21 DSGVO', 'in der Regel nach 15 Tagen', '(Abschnitt 12)',
+    'Uhrzeit des Aufrufs', 'Zugriffsprotokoll', 'Namen der Zielwebsite',
+    'Stand: 4. Oktober 2026']) {
     assert(html.includes(teil), 'Fehlt in datenschutz.html: ' + teil);
   }
-  assert(!html.includes('nicht auf Ihrem Gerät gespeichert'), 'Behauptung "nicht auf Ihrem Gerät gespeichert" steht im Text');
+  for (const alt of ['trichter=', 'Zählung der Formularschritte', 'nicht auf Ihrem Gerät gespeichert']) {
+    assert(!html.includes(alt), 'Veralteter Text in datenschutz.html: ' + alt);
+  }
   assert(!/kein(en)? Zugriff auf (Ihr |das )?Endgerät/i.test(html), 'Behauptung "kein Zugriff auf das Endgerät" steht im Text');
 });
 
