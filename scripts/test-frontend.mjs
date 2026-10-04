@@ -473,7 +473,136 @@ test('Statistik: Mittelklick zaehlt nicht', () => {
   assert(w.gesendet.length === 0, 'Mittelklick gemeldet: ' + namen(w));
 });
 
-// TRICHTER-TESTS
+test('Trichter: Durchlauf meldet jede Stufe genau einmal', () => {
+  const w = umamiLaden(bootSeite());
+  const fortschritt = w.form.querySelector('.wizard__progress');
+  w.sichtbar(fortschritt);
+  w.sichtbar(fortschritt);
+  bisKontakt(w);
+  // Zurueck und wieder vor: Schritt 5 darf nicht doppelt gemeldet werden.
+  click(w.window, w.form.querySelector('.wizard__back'));
+  click(w.window, w.next);
+  kontaktAusfuellen(w);
+  absenden(w);
+  const soll = 'maske-gesehen maske-begonnen maske-schritt-2 maske-schritt-3 maske-schritt-4 maske-schritt-5 maske-abgeschickt';
+  assert(namen(w) === soll, 'Ereignisse: ' + namen(w) + '\n       erwartet: ' + soll);
+});
+
+test('Trichter: begonnen ohne sichtbare Fortschrittszeile meldet gesehen nach', () => {
+  const w = umamiLaden(bootSeite());
+  bisKontakt(w);
+  assert(namen(w).startsWith('maske-gesehen maske-begonnen maske-schritt-2'), 'Ereignisse: ' + namen(w));
+});
+
+test('Trichter: gesehen erst bei voller Sichtbarkeit', () => {
+  const w = umamiLaden(bootSeite());
+  const fortschritt = w.form.querySelector('.wizard__progress');
+  w.sichtbar(fortschritt, 0.5);
+  assert(namen(w) === '', 'Bei halber Sichtbarkeit gemeldet: ' + namen(w));
+  w.sichtbar(fortschritt, 1);
+  assert(namen(w) === 'maske-gesehen', 'Bei voller Sichtbarkeit: ' + namen(w));
+});
+
+test('Trichter: Pruefmeldungen tragen Schritt und Grund', () => {
+  const w = umamiLaden(bootSeite());
+  click(w.window, w.next); // Schritt 1 ohne Auswahl
+  click(w.window, w.next); // zweites Mal: keine zweite Meldung
+  for (const step of w.steps.filter((s) => s.querySelector('input[type="radio"]'))) {
+    waehlen(w, step.querySelector('input[type="radio"]'));
+    click(w.window, w.next);
+  }
+  click(w.window, w.next); // Schritt 4 ohne Auswahl
+  waehlen(w, w.form.querySelector('input[name="teilnehmer"][value="it"]'));
+  click(w.window, w.next); // Schritt 4 ohne Geschaeftsfuehrung
+  waehlen(w, w.form.querySelector('input[name="teilnehmer"][value="gf"]'));
+  click(w.window, w.next);
+  absenden(w); // Schritt 5 leer
+  w.form.querySelector('[name="name"]').value = 'Erika Mustermann';
+  absenden(w); // ohne E-Mail
+  w.form.querySelector('[name="email"]').value = 'erika@example.org';
+  absenden(w); // ohne Unternehmen
+  w.form.querySelector('[name="firma"]').value = 'Musterbau GmbH';
+  absenden(w); // ohne Einwilligung
+  const ist = JSON.stringify(w.gesendet.filter((g) => g.name === 'maske-fehler').map((g) => g.daten));
+  const soll = JSON.stringify([
+    { schritt: 1, grund: 'auswahl' }, { schritt: 4, grund: 'mehrfach' }, { schritt: 4, grund: 'gf' },
+    { schritt: 5, grund: 'name' }, { schritt: 5, grund: 'email' }, { schritt: 5, grund: 'firma' },
+    { schritt: 5, grund: 'einwilligung' },
+  ]);
+  assert(ist === soll, 'Pruefmeldungen: ' + ist + '\n       erwartet: ' + soll);
+});
+
+test('Trichter: Formularwerte gehen nie an die Messung', () => {
+  const w = umamiLaden(bootSeite());
+  bisKontakt(w);
+  kontaktAusfuellen(w);
+  absenden(w);
+  const roh = JSON.stringify(w.gesendet);
+  for (const wert of ['@', 'Erika', 'Mustermann', 'example', 'Musterbau']) {
+    assert(!roh.includes(wert), 'Formularwert gemeldet: ' + wert);
+  }
+});
+
+test('Trichter: ohne statistik.js laesst sich die Maske abschicken', () => {
+  const w = bootSeite({ ohneStatistik: true });
+  bisKontakt(w);
+  kontaktAusfuellen(w);
+  absenden(w);
+  assert(w.form.hidden, 'Maske ohne statistik.js nicht abschickbar');
+});
+
+test('Trichter: wirft umami.track, laesst sich die Maske trotzdem abschicken', () => {
+  const w = umamiLaden(bootSeite(), () => { throw new Error('kaputt'); });
+  bisKontakt(w);
+  kontaktAusfuellen(w);
+  absenden(w);
+  assert(w.form.hidden, 'Maske bei werfendem umami.track nicht abschickbar');
+});
+
+test('Maske: Enter vor dem letzten Schritt schaltet weiter statt Kontaktfehler', () => {
+  const w = bootWizard();
+  absenden(w); // Enter ohne Auswahl
+  assert(w.activeIndex() === 0, 'Schritt 1 uebersprungen');
+  assert(w.err.textContent === 'Bitte wählen Sie eine Antwort aus.', 'Falsche Meldung: ' + w.err.textContent);
+  waehlen(w, w.steps[0].querySelector('input[type="radio"]'));
+  absenden(w); // Enter mit Auswahl
+  assert(w.activeIndex() === 1, 'Enter mit Auswahl schaltet nicht weiter');
+  assert(w.err.hidden, 'Fehlermeldung trotz gueltiger Auswahl');
+});
+
+test('Trichter: Kalender meldet ok oder fehler', () => {
+  const lauf = (vorbereiten) => {
+    const w = umamiLaden(bootSeite({ vorbereiten }));
+    bisKontakt(w);
+    kontaktAusfuellen(w);
+    absenden(w);
+    return w;
+  };
+  const kalender = (w) => w.gesendet.filter((g) => g.name.startsWith('maske-kalender')).map((g) => g.name).join(' ');
+  const zeeg = (w) => w.window.document.querySelector('script[src*="zeeg"]');
+
+  const ok = lauf((win) => { win.Zeeg = { initInlineWidget() {} }; });
+  assert(kalender(ok) === 'maske-kalender-ok', 'Zeeg vorhanden: ' + kalender(ok));
+
+  const wirft = lauf((win) => { win.Zeeg = { initInlineWidget() { throw new Error('kaputt'); } }; });
+  assert(kalender(wirft) === 'maske-kalender-fehler', 'initInlineWidget wirft: ' + kalender(wirft));
+
+  const halb = lauf((win) => { win.Zeeg = {}; });
+  assert(kalender(halb) === 'maske-kalender-fehler', 'Zeeg ohne initInlineWidget: ' + kalender(halb));
+
+  const spaet = lauf();
+  spaet.window.Zeeg = { initInlineWidget() {} };
+  zeeg(spaet).dispatchEvent(new spaet.window.Event('load'));
+  assert(kalender(spaet) === 'maske-kalender-ok', 'Skript geladen mit Zeeg: ' + kalender(spaet));
+
+  const leer = lauf();
+  zeeg(leer).dispatchEvent(new leer.window.Event('load'));
+  assert(kalender(leer) === 'maske-kalender-fehler', 'Skript geladen ohne Zeeg: ' + kalender(leer));
+
+  const blockiert = lauf();
+  zeeg(blockiert).dispatchEvent(new blockiert.window.Event('error'));
+  assert(kalender(blockiert) === 'maske-kalender-fehler', 'Skript blockiert: ' + kalender(blockiert));
+});
 
 /* --- Rechenbeispiel #hochrechnung und Klartag-Leistungsblatt ------------------
  *
