@@ -341,6 +341,30 @@ test('Statistik: laedt den Umami-Tracker mit den festgelegten Attributen', () =>
     assert(t.getAttribute(k) === v, k + ' = ' + t.getAttribute(k) + ', erwartet ' + v);
   }
   assert(typeof w.window.statistik === 'function', 'window.statistik fehlt');
+  assert(t.getAttribute('data-before-send') === 'manibaseVorSenden', 'data-before-send = ' + t.getAttribute('data-before-send'));
+  assert(typeof w.window.manibaseVorSenden === 'function', 'window.manibaseVorSenden fehlt');
+});
+
+test('Statistik: Startseite wird als / gezaehlt, nicht als /index.html', () => {
+  const w = bootSeite();
+  const vor = w.window.manibaseVorSenden;
+  const ist = JSON.stringify(vor('event', { url: '/index.html?utm_source=x', referrer: '/index.html' }));
+  assert(ist === '{"url":"/?utm_source=x","referrer":"/"}', 'Nutzlast: ' + ist);
+  const faelle = [
+    ['https://manibase.de/index.html#a', 'https://manibase.de/#a'],
+    ['https://manibase.de/index.html', 'https://manibase.de/'],
+    ['/klartag.html', '/klartag.html'],
+    ['/blog/index.html', '/blog/index.html'],
+    ['https://example.org/index.html', 'https://example.org/index.html'],
+    ['', ''],
+  ];
+  for (const [von, nach] of faelle) {
+    const r = vor('event', { url: von, referrer: von });
+    assert(r.url === nach && r.referrer === nach, von + ' wurde zu ' + r.url + ' / ' + r.referrer + ', erwartet ' + nach);
+  }
+  const ohne = { name: 'x' };
+  assert(vor('event', ohne) === ohne && JSON.stringify(ohne) === '{"name":"x"}', 'Nutzlast ohne url veraendert');
+  assert(vor('identify', null) === null, 'null nicht durchgereicht');
 });
 
 test('Statistik: GPC, Do Not Track und Vermerk verhindern das Laden', () => {
@@ -464,6 +488,29 @@ test('Statistik: Klicks auf Telefon, E-Mail, Kontakt und fremde Links', () => {
   assert(ist === soll, 'Klicks: ' + ist + '\n       erwartet: ' + soll);
 });
 
+test('Statistik: Klick geht trotz haengendem frueheren Aufruf sofort raus', () => {
+  const w = umamiLaden(bootSeite(), () => new Promise(() => {}));
+  w.window.statistik('maske-gesehen');
+  assert(namen(w) === 'maske-gesehen', 'Erster Aufruf: ' + namen(w));
+  w.window.statistik('maske-begonnen');
+  assert(namen(w) === 'maske-gesehen', 'Trichterstufe ueberholt die Kette: ' + namen(w));
+  const a = w.window.document.createElement('a');
+  a.setAttribute('href', 'tel:+4915565697065');
+  w.window.document.body.appendChild(a);
+  click(w.window, a);
+  assert(namen(w) === 'maske-gesehen klick-telefon', 'Klick haengt hinter der Kette: ' + namen(w));
+});
+
+test('Statistik: Klick vor dem Laden wird gepuffert und danach gesendet', () => {
+  const w = bootSeite();
+  const a = w.window.document.createElement('a');
+  a.setAttribute('href', 'mailto:kontakt@manibase.de');
+  w.window.document.body.appendChild(a);
+  click(w.window, a);
+  umamiLaden(w);
+  assert(namen(w) === 'klick-email', 'Gepufferter Klick: ' + namen(w));
+});
+
 test('Statistik: Mittelklick zaehlt nicht', () => {
   const w = umamiLaden(bootSeite());
   const a = w.window.document.createElement('a');
@@ -492,6 +539,13 @@ test('Trichter: begonnen ohne sichtbare Fortschrittszeile meldet gesehen nach', 
   const w = umamiLaden(bootSeite());
   bisKontakt(w);
   assert(namen(w).startsWith('maske-gesehen maske-begonnen maske-schritt-2'), 'Ereignisse: ' + namen(w));
+});
+
+test('Trichter: begonnen auch, wenn nur "Weiter" geklickt wird (ohne change/input)', () => {
+  const w = umamiLaden(bootSeite());
+  w.steps[0].querySelector('input[type="radio"]').checked = true;
+  click(w.window, w.next);
+  assert(namen(w) === 'maske-gesehen maske-begonnen maske-schritt-2', 'Ereignisse: ' + namen(w));
 });
 
 test('Trichter: gesehen erst bei voller Sichtbarkeit', () => {
@@ -874,6 +928,9 @@ test('Datenschutz: Reichweitenmessung mit Umami ist vollstaendig beschrieben', (
     assert(!html.includes(alt), 'Veralteter Text in datenschutz.html: ' + alt);
   }
   assert(!/kein(en)? Zugriff auf (Ihr |das )?Endgerät/i.test(html), 'Behauptung "kein Zugriff auf das Endgerät" steht im Text');
+  const a12 = html.slice(html.indexOf('<h2>12.'), html.indexOf('Stand:'));
+  assert(a12.length > 200, 'Abschnitt 12 nicht gefunden');
+  assert(!/[\u2013\u2014]/.test(a12), 'Gedankenstrich in Abschnitt 12 der Datenschutzerklaerung');
 });
 
 if (failed) {

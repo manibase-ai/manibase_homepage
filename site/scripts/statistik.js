@@ -5,6 +5,10 @@
    2) Laedt /u.js (Umami-Tracker; nginx reicht an Umami durch, CSP bleibt 'self').
    3) window.statistik(name, daten): Ereignis an Umami. Vor dem Laden gepuffert,
       danach nacheinander gesendet, weil Umamis Trichter die Reihenfolge auswertet.
+      Klicks (klick-*) sind keine Trichterstufen und gehen direkt raus, damit ein
+      Klick mit Seitenwechsel nicht hinter einem haengenden Aufruf verloren geht.
+      Vor dem Senden vereinheitlicht window.manibaseVorSenden (data-before-send des
+      Trackers) /index.html zu /, sonst zaehlt die Startseite doppelt.
    4) Klicks auf Telefon, E-Mail, Kontakt (#termin) und fremde Links.
    Die Messung darf die Seite nie stoeren: Fehler werden bewusst verschluckt. */
 (function () {
@@ -56,11 +60,28 @@
   function nacheinander(name, daten) {
     kette = kette ? kette.then(function () { return senden(name, daten); }) : senden(name, daten);
   }
-
-  window.statistik = function (name, daten) {
+  // sofort: ohne Kette senden (Klicks). Vor dem Laden wird beides gepuffert.
+  function melden(name, daten, sofort) {
     if (aus || kaputt) { return; }
-    if (!bereit) { puffer.push([name, daten]); return; }
-    nacheinander(name, daten);
+    if (!bereit) { puffer.push([name, daten, sofort]); return; }
+    if (sofort) { senden(name, daten); } else { nacheinander(name, daten); }
+  }
+
+  window.statistik = function (name, daten) { melden(name, daten, false); };
+
+  /* Der Tracker ruft window[data-before-send](typ, nutzlast) und sendet, was zurueckkommt. */
+  function einheitlich(adresse) {
+    if (typeof adresse !== 'string') { return adresse; }
+    return adresse.replace(/^((?:https?:\/\/(?:www\.)?manibase\.de)?)\/index\.html(?=$|[?#])/i, '$1/');
+  }
+  window.manibaseVorSenden = function (typ, nutzlast) {
+    try {
+      if (nutzlast && typeof nutzlast === 'object') {
+        if ('url' in nutzlast) { nutzlast.url = einheitlich(nutzlast.url); }
+        if ('referrer' in nutzlast) { nutzlast.referrer = einheitlich(nutzlast.referrer); }
+      }
+    } catch (e) { /* Nutzlast unveraendert weitergeben */ }
+    return nutzlast;
   };
 
   if (aus) { return; }
@@ -73,13 +94,14 @@
   s.setAttribute('data-domains', 'manibase.de');
   s.setAttribute('data-exclude-hash', 'true');
   s.setAttribute('data-do-not-track', 'true');
+  s.setAttribute('data-before-send', 'manibaseVorSenden');
   s.onerror = function () { kaputt = true; puffer = []; };
   s.onload = function () {
     if (!window.umami || typeof window.umami.track !== 'function') { s.onerror(); return; }
     bereit = true;
     var liste = puffer;
     puffer = [];
-    for (var i = 0; i < liste.length; i++) { nacheinander(liste[i][0], liste[i][1]); }
+    for (var i = 0; i < liste.length; i++) { melden(liste[i][0], liste[i][1], liste[i][2]); }
   };
   (document.head || document.documentElement).appendChild(s);
 
@@ -93,11 +115,11 @@
     var a = ev.target && ev.target.closest ? ev.target.closest('a[href]') : null;
     if (!a) { return; }
     var href = a.getAttribute('href') || '';
-    if (/^tel:/i.test(href)) { window.statistik('klick-telefon'); return; }
-    if (/^mailto:/i.test(href)) { window.statistik('klick-email'); return; }
-    if (/#termin$/.test(href)) { window.statistik('klick-kontakt', { seite: seite() }); return; }
+    if (/^tel:/i.test(href)) { melden('klick-telefon', undefined, true); return; }
+    if (/^mailto:/i.test(href)) { melden('klick-email', undefined, true); return; }
+    if (/#termin$/.test(href)) { melden('klick-kontakt', { seite: seite() }, true); return; }
     if (/^https?:$/.test(a.protocol) && a.hostname && a.hostname !== window.location.hostname) {
-      window.statistik('klick-extern', { ziel: a.hostname });
+      melden('klick-extern', { ziel: a.hostname }, true);
     }
   }, true);
 })();

@@ -2,8 +2,8 @@
    1) Scroll-Reveal (mit reduced-motion-Fallback)
    2) Hero: wechselnde Begriffe
    3) Newsletter-Anmeldung (POST an /api/newsletter.php -> Odoo, Double-Opt-In)
-   4a) Formular-Trichter: meldet Schritte der Maske an die Reichweitenmessung (statistik.js)
    4) Qualifizierungs-Maske + Kalender erst nach Einwilligung laden (DSGVO)
+   4a) Formular-Trichter: meldet Schritte der Maske an die Reichweitenmessung (statistik.js)
 */
 (function () {
   'use strict';
@@ -407,7 +407,7 @@
 
     function next() {
       if (!valid(steps[idx])) return;
-      if (idx < total - 1) { idx++; trichter('schritt', idx + 1); render(true); }
+      if (idx < total - 1) { idx++; trichter('begonnen'); trichter('schritt', idx + 1); render(true); }
     }
     function back() { if (idx > 0) { idx--; render(true); } }
 
