@@ -59,6 +59,8 @@ function test(name, fn) {
 }
 ```
 
+In `bootWizard` den Kommentar `// (Beacon, IntersectionObserver, Browser-Signale, localStorage, Zeeg).` ersetzen durch `// (statistik.js, IntersectionObserver, Browser-Signale, localStorage, Zeeg).`
+
 - [ ] **Step 2: Test-Hilfen und Tests für `statistik.js` schreiben**
 
 Den gesamten Block ab der Zeile `/* --- Formular-Trichter ---------------------------------------------------------` bis **ausschließlich** zur Zeile `/* --- Rechenbeispiel #hochrechnung und Klartag-Leistungsblatt ------------------` löschen und durch Folgendes ersetzen (die Trichter-Tests kommen in Task 2 dazu, an die mit `// TRICHTER-TESTS` markierte Stelle):
@@ -260,6 +262,9 @@ test('Statistik: Ladefehler verwirft Puffer und spaetere Ereignisse', () => {
   const aufrufe = [];
   w.window.umami = { track: (n) => { aufrufe.push(n); } };
   w.window.statistik('b');
+  // Auch ein spaeteres "load" darf nach einem Ladefehler nichts mehr senden.
+  w.tracker().dispatchEvent(new w.window.Event('load'));
+  w.window.statistik('c');
   assert(aufrufe.length === 0, 'Nach Ladefehler gemeldet: ' + aufrufe.join(' '));
 });
 
@@ -282,13 +287,22 @@ test('Statistik: Klicks auf Telefon, E-Mail, Kontakt und fremde Links', () => {
   assert(ist === soll, 'Klicks: ' + ist + '\n       erwartet: ' + soll);
 });
 
+test('Statistik: Mittelklick zaehlt nicht', () => {
+  const w = umamiLaden(bootSeite());
+  const a = w.window.document.createElement('a');
+  a.setAttribute('href', 'tel:+4915565697065');
+  w.window.document.body.appendChild(a);
+  a.dispatchEvent(new w.window.MouseEvent('click', { bubbles: true, cancelable: true, button: 1 }));
+  assert(w.gesendet.length === 0, 'Mittelklick gemeldet: ' + namen(w));
+});
+
 // TRICHTER-TESTS
 ```
 
 - [ ] **Step 3: Tests laufen lassen, sie müssen scheitern**
 
 Run: `node scripts/test-frontend.mjs`
-Expected: Die neuen `Statistik:`-Tests scheitern (`ENOENT … statistik.js` bzw. „Kein script[src="/u.js"]“). Die älteren Tests bis auf die Datenschutz-Prüfung bleiben `ok`. Die alten Trichter-Tests gibt es nicht mehr.
+Expected: Die neuen `Statistik:`-Tests scheitern (`ENOENT … statistik.js` bzw. „Kein script[src="/u.js"]“). Alle älteren Tests bleiben `ok`. Die alten Trichter-Tests gibt es nicht mehr.
 
 - [ ] **Step 4: `site/scripts/statistik.js` anlegen**
 
@@ -401,7 +415,7 @@ Expected: Die neuen `Statistik:`-Tests scheitern (`ENOENT … statistik.js` bzw.
 - [ ] **Step 5: Tests laufen lassen**
 
 Run: `node scripts/test-frontend.mjs`
-Expected: alle `Statistik:`-Tests `ok`. Rot bleibt nur der alte Datenschutz-Test (Task 4); die Maske meldet noch über den alten Weg, das ändert Task 2.
+Expected: alle `ok`. Die Maske meldet noch über den alten Weg, das ändert Task 2.
 
 - [ ] **Step 6: Commit**
 
@@ -501,6 +515,14 @@ test('Trichter: ohne statistik.js laesst sich die Maske abschicken', () => {
   assert(w.form.hidden, 'Maske ohne statistik.js nicht abschickbar');
 });
 
+test('Trichter: wirft umami.track, laesst sich die Maske trotzdem abschicken', () => {
+  const w = umamiLaden(bootSeite(), () => { throw new Error('kaputt'); });
+  bisKontakt(w);
+  kontaktAusfuellen(w);
+  absenden(w);
+  assert(w.form.hidden, 'Maske bei werfendem umami.track nicht abschickbar');
+});
+
 test('Maske: Enter vor dem letzten Schritt schaltet weiter statt Kontaktfehler', () => {
   const w = bootWizard();
   absenden(w); // Enter ohne Auswahl
@@ -592,7 +614,7 @@ Zeile `   4a) Formular-Trichter: zaehlt Schritte der Maske ohne Cookies (Beacon 
 - [ ] **Step 5: Tests grün**
 
 Run: `node scripts/test-frontend.mjs`
-Expected: alles `ok` außer dem alten Datenschutz-Test.
+Expected: alle `ok`.
 
 - [ ] **Step 6: Commit**
 
@@ -615,6 +637,8 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 Nach dem Test „Voller Footer: Telefonnummer als tel:-Link“ einfügen:
 
 ```js
+// SEITEN umfasst nur site/*.html; die Seiten unter site/blog/ sind reine
+// Weiterleitungen (meta-refresh) und laden bewusst keine Messung.
 test('Statistik: alle Inhaltsseiten binden statistik.js vor site.js ein, Weiterleitungen nicht', () => {
   let anzahl = 0;
   for (const s of SEITEN) {
@@ -670,7 +694,7 @@ Expected: 14 Zeilen `eingebunden: …`; danach stempelt `cache-bust.py` die neue
 - [ ] **Step 4: Tests grün**
 
 Run: `node scripts/test-frontend.mjs && python3 scripts/cache-bust.py --check site`
-Expected: alles `ok` außer dem alten Datenschutz-Test; `--check` Exit 0.
+Expected: alle `ok`; `--check` Exit 0.
 
 - [ ] **Step 5: Commit**
 
@@ -697,6 +721,7 @@ test('Datenschutz: Reichweitenmessung mit Umami ist vollstaendig beschrieben', (
   for (const teil of ['12. Reichweitenmessung mit Umami', 'Seitentitel', 'UTM', 'Stadt', 'täglich wechselnden',
     'Global Privacy Control', 'Do Not Track', 'spätestens 13 Monaten', 'datenschutz.html?statistik=aus',
     'datenschutz.html?statistik=an', 'Art. 21 DSGVO', 'in der Regel nach 15 Tagen', '(Abschnitt 12)',
+    'Uhrzeit des Aufrufs', 'Zugriffsprotokoll', 'Namen der Zielwebsite',
     'Stand: 4. Oktober 2026']) {
     assert(html.includes(teil), 'Fehlt in datenschutz.html: ' + teil);
   }
@@ -731,8 +756,8 @@ Direkt **vor** der Zeile `    <p class="ticket__note" style="margin-top:32px">St
 ```html
     <h2>12. Reichweitenmessung mit Umami</h2>
     <p>Um zu verstehen, wie unsere Website genutzt wird und an welcher Stelle unser Anfrageformular schwer verständlich ist, setzen wir die Open-Source-Software Umami ein. Wir betreiben sie selbst auf unserem Server in Frankfurt am Main (siehe Abschnitt 3); die Daten gehen an keinen Dritten. Es werden keine Cookies gesetzt.</p>
-    <p>Beim Aufruf einer Seite verarbeiten wir dabei: die aufgerufene Adresse einschließlich ihrer Parameter und den Seitentitel, die Seite, von der Sie kommen, Kampagnenangaben in der Adresse (etwa UTM-Parameter oder Klick-Kennungen von Werbenetzwerken), Browser, Betriebssystem, Gerätetyp, Bildschirmgröße und Spracheinstellung sowie das aus Ihrer IP-Adresse abgeleitete Land, die Region und die Stadt. Außerdem zählen wir einzelne Ereignisse: welche Schritte des Anfrageformulars erreicht wurden, ob ein Hinweis auf eine fehlende Angabe erschien (mit Schritt und Art des Hinweises), ob das Formular abgeschickt und der Terminkalender geladen wurde, sowie Klicks auf Telefonnummer, E-Mail-Adresse, Kontaktaufnahme und Links zu anderen Websites (mit deren Adresse). Ihre Eingaben im Formular werden nicht erfasst.</p>
-    <p>Ihre IP-Adresse wird nur kurzzeitig verarbeitet, um daraus den Ort und eine pseudonyme Kennung zu bilden; für die Messung wird sie nicht gespeichert. Die Kennung entsteht aus IP-Adresse, Browserkennung und einem täglich wechselnden Wert. Besuche desselben Browsers lassen sich dadurch nur innerhalb eines Tages einander zuordnen. Rechtsgrundlage ist unser berechtigtes Interesse an der Verbesserung unserer Website (Art. 6 Abs. 1 lit. f DSGVO). Die Daten löschen wir nach spätestens 13 Monaten.</p>
+    <p>Beim Aufruf einer Seite verarbeiten wir dabei: Datum und Uhrzeit des Aufrufs, die aufgerufene Adresse einschließlich ihrer Parameter und den Seitentitel, die Seite, von der Sie kommen, Kampagnenangaben in der Adresse (etwa UTM-Parameter oder Klick-Kennungen von Werbenetzwerken), Browser, Betriebssystem, Gerätetyp, Bildschirmgröße und Spracheinstellung sowie das aus Ihrer IP-Adresse abgeleitete Land, die Region und die Stadt. Außerdem zählen wir einzelne Ereignisse: welche Schritte des Anfrageformulars erreicht wurden, ob ein Hinweis auf eine fehlende Angabe erschien (mit Schritt und Art des Hinweises), ob das Formular abgeschickt und der Terminkalender geladen wurde, sowie Klicks auf Telefonnummer, E-Mail-Adresse, Kontaktaufnahme und Links zu anderen Websites (mit dem Namen der Zielwebsite). Ihre Eingaben im Formular werden nicht erfasst.</p>
+    <p>Ihre IP-Adresse wird nur kurzzeitig verarbeitet, um daraus den Ort und eine pseudonyme Kennung zu bilden und übermäßig viele Meldungen abzuweisen; gespeichert wird sie dafür nicht, auch nicht im Zugriffsprotokoll des Servers. Die Kennung entsteht aus IP-Adresse, Browserkennung und einem täglich wechselnden Wert. Besuche desselben Browsers lassen sich dadurch nur innerhalb eines Tages einander zuordnen. Rechtsgrundlage ist unser berechtigtes Interesse an der Verbesserung unserer Website (Art. 6 Abs. 1 lit. f DSGVO). Die Daten löschen wir nach spätestens 13 Monaten.</p>
     <p>Hat Ihr Browser das Signal „Global Privacy Control“ oder „Do Not Track“ eingeschaltet, findet keine Messung statt. Sie können der Messung außerdem jederzeit widersprechen (Art. 21 DSGVO), am einfachsten über den Link <a href="datenschutz.html?statistik=aus">Messung abschalten</a>. Dazu legen wir im Speicher Ihres Browsers einen Vermerk ab; eine Bestätigung erscheint nicht. Über <a href="datenschutz.html?statistik=an">Messung wieder zulassen</a> oder durch Löschen der Websitedaten heben Sie das auf.</p>
 
 ```
@@ -801,4 +826,4 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 ## Offene Review-Punkte
 
-(nach Phase D)
+Runde 1 (D): alle Funde übernommen. Punkt 9 (Verweise in `CLAUDE.md` und Doku auf gelöschte Dateien) ist in der Hauptsitzung vor dem PR erledigt (Commit „Doku: Umami-Betrieb …“). Punkt 10 (Puffer vor Seitenaufruf, verlorene Klicks beim Seitenwechsel) hingenommen.
