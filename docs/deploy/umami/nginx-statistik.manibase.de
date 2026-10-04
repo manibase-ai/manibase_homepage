@@ -32,9 +32,15 @@ server {
     proxy_set_header X-Forwarded-For $remote_addr;
     proxy_set_header X-Forwarded-Proto $scheme;
 
-    # Erfasst wird nur ueber manibase.de (/u.js, /api/send); hier gesperrt.
-    location = /api/send { return 404; }
-    location = /script.js { return 404; }
+    # Erfasst wird nur ueber manibase.de (/u.js, /api/send, gedrosselt); hier sind
+    # alle Erfassungswege von Umami 3.4.0 gesperrt, die ohne Anmeldung funktionieren.
+    location = /api/send    { return 404; }
+    location = /api/batch   { return 404; }
+    location = /api/record  { return 404; }
+    location = /script.js   { return 404; }
+    location = /recorder.js { return 404; }
+    location ^~ /p/ { return 404; }
+    location ^~ /q/ { return 404; }
 
     location = /api/auth/login {
         limit_req zone=umami_login burst=5 nodelay;
