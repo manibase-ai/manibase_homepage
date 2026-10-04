@@ -811,6 +811,26 @@ test('Voller Footer: Telefonnummer als tel:-Link', () => {
   }
 });
 
+// SEITEN umfasst nur site/*.html; die Seiten unter site/blog/ sind reine
+// Weiterleitungen (meta-refresh) und laden bewusst keine Messung.
+test('Statistik: alle Inhaltsseiten binden statistik.js vor site.js ein, Weiterleitungen nicht', () => {
+  let anzahl = 0;
+  for (const s of SEITEN) {
+    const tags = s.html.match(/<script[^>]+scripts\/statistik\.js[^>]*>/g) || [];
+    if (istWeiterleitung(s)) {
+      assert(tags.length === 0, s.name + ': Weiterleitung laedt statistik.js');
+      continue;
+    }
+    assert(tags.length === 1, s.name + ': statistik.js ' + tags.length + 'x eingebunden');
+    assert(/\bdefer\b/.test(tags[0]), s.name + ': statistik.js ohne defer');
+    const posStatistik = s.html.indexOf('scripts/statistik.js');
+    const posSite = s.html.indexOf('scripts/site.js');
+    assert(posSite === -1 || posStatistik < posSite, s.name + ': statistik.js steht nach site.js');
+    anzahl++;
+  }
+  assert(anzahl === 14, 'Erwartet 14 Inhaltsseiten mit statistik.js, gefunden ' + anzahl);
+});
+
 test('Startseite: Title und Description passen in die Suchergebnisanzeige', () => {
   const html = readFileSync(HTML_PATH, 'utf8');
   const title = /<title>([^<]*)<\/title>/.exec(html)[1];
