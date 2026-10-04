@@ -9,10 +9,12 @@ Spec: `docs/superpowers/specs/2026-10-04-statistik-umami-design.md`. Versioniert
 | Dashboard | **https://statistik.manibase.de** (Login) |
 | Umami 3.4.0 + Postgres 16 | Docker-Stack `/opt/umami` auf `72.61.153.206`, Umami nur auf `127.0.0.1:3005` |
 | Geheimnisse | `/opt/umami/.env` (0600): `POSTGRES_PASSWORD`, `APP_SECRET`, `TWO_FACTOR_ENCRYPTION_KEY`. **`APP_SECRET` nie ändern**, sonst verschieben sich Sitzungskennungen und alle Anmeldungen werden ungültig. |
-| Erfassung | über `manibase.de`: `/u.js` (Tracker) und `/api/send` (Messaufrufe), beide ohne Zugriffslog, `/api/send` gedrosselt (300/min, Burst 300, max. 8 KB). Auf `statistik.manibase.de` sind beide gesperrt. |
+| Erfassung | über `manibase.de`: `/u.js` (Tracker) und `/api/send` (Messaufrufe), beide ohne Zugriffslog, `/api/send` gedrosselt (300/min, Burst 300, max. 8 KB). Auf `statistik.manibase.de` sind beide gesperrt. Restfall: Ist Umami nicht erreichbar oder eine Anfrage zu groß, schreibt nginx eine Zeile mit Client-IP ins `error.log` (Löschung nach Abschnitt 3 der Datenschutzerklärung, in der Regel 15 Tage). |
 | Website im Dashboard | „manibase.de“, ID `c7a7cd2d-e528-4fc1-bcea-667f89052ea2` (steht auch in `site/scripts/statistik.js`) |
 | Löschung nach 13 Monaten | `umami-aufbewahrung.timer` (täglich) → `/opt/umami/aufbewahrung.sh` |
 | nginx | `/etc/nginx/conf.d/manibase-statistik.conf` (Drosselzonen), Vhost `statistik.manibase.de`, im Vhost `manibase.de` der Block „Reichweitenmessung mit Umami“ vor `location / {` |
+
+Die Startseite wird einheitlich als `/` gezählt: `statistik.js` setzt `data-before-send="manibaseVorSenden"`, das `/index.html` in Adresse und Herkunft zu `/` vereinheitlicht (alle internen Links zeigen auf `index.html`).
 
 Wichtige Einstellungen (`docker-compose.yml`): `SALT_ROTATION=day` (Besucherkennung wechselt täglich; Wiederkehrer über mehrere Tage sind deshalb **nicht** erkennbar, Umstellen nur zusammen mit der Datenschutzerklärung), `SKIP_LOCATION_HEADERS=1`, `PRIVATE_MODE=1`, Telemetrie aus, Update-Hinweise an.
 
