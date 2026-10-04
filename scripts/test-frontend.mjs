@@ -24,13 +24,22 @@ const JS_PATH = 'site/scripts/site.js';
 const NAV_BREAKPOINT = 1100;
 
 let failed = 0;
+// Asynchrone Tests geben ein Promise zurueck und werden mit `await test(...)`
+// aufgerufen (Top-Level-await, die Datei ist ein ES-Modul). Synchrone Tests
+// laufen wie bisher sofort durch.
 function test(name, fn) {
-  try {
-    fn();
-    console.log('ok   ' + name);
-  } catch (err) {
+  const fehler = (err) => {
     failed++;
     console.error('FAIL ' + name + '\n       ' + err.message);
+  };
+  try {
+    const r = fn();
+    if (r && typeof r.then === 'function') {
+      return r.then(() => console.log('ok   ' + name), fehler);
+    }
+    console.log('ok   ' + name);
+  } catch (err) {
+    fehler(err);
   }
 }
 function assert(cond, msg) {
@@ -139,14 +148,17 @@ test('Navigation: .nav__toggle ist ohne Media-Query versteckt', () => {
 
 /* --- Qualifizierungs-Maske im DOM ------------------------------------------- */
 
-function bootWizard() {
+function bootWizard(opts = {}) {
   const dom = new JSDOM(readFileSync(HTML_PATH, 'utf8'), {
-    url: 'https://manibase.de/',
+    url: opts.url || 'https://manibase.de/',
     runScripts: 'outside-only',
   });
   // jsdom kennt matchMedia nicht; site.js fragt damit prefers-reduced-motion ab.
   // "matches:false" = normale Animationen, also der Alltagsfall im Browser.
   dom.window.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
+  // Optionaler Hook fuer Stubs, die site.js schon beim Laden sehen muss
+  // (statistik.js, IntersectionObserver, Browser-Signale, localStorage, Zeeg).
+  if (opts.vorbereiten) opts.vorbereiten(dom.window);
   // site.js laeuft als IIFE beim Laden; jsdom holt externe Skripte hier nicht
   // selbst, deshalb wird die Datei nach dem Parsen im Fensterkontext ausgefuehrt.
   dom.window.eval(readFileSync(JS_PATH, 'utf8'));
@@ -229,6 +241,421 @@ test('Maske: Mehrfachauswahl verlangt weiterhin die Geschaeftsfuehrung', () => {
   gf.dispatchEvent(new w.window.Event('change', { bubbles: true }));
   click(w.window, w.next);
   assert(w.activeIndex() === before + 1, 'Mit Geschaeftsfuehrung wurde nicht weitergeschaltet');
+});
+
+/* --- Reichweitenmessung (statistik.js) und Formular-Trichter -------------------
+ *
+ * statistik.js laedt Umami und stellt window.statistik bereit; site.js meldet die
+ * Maske darueber (Specs 2026-10-03-formular-trichter-design.md und
+ * 2026-10-04-statistik-umami-design.md). jsdom kennt weder IntersectionObserver
+ * noch scrollIntoView und laedt keine externen Skripte; bootSeite setzt Stubs und
+ * fuehrt statistik.js vor site.js aus, umamiLaden spielt den geladenen Tracker.
+ */
+
+const STATISTIK_PATH = 'site/scripts/statistik.js';
+const WEBSITE_ID = 'c7a7cd2d-e528-4fc1-bcea-667f89052ea2';
+
+function bootSeite(extra = {}) {
+  const beobachter = [];
+  const vorbereiten = (w) => {
+    w.Element.prototype.scrollIntoView = function () {};
+    w.IntersectionObserver = class {
+      constructor(cb) { this.cb = cb; this.ziele = []; beobachter.push(this); }
+      observe(el) { this.ziele.push(el); }
+      unobserve(el) { this.ziele = this.ziele.filter((z) => z !== el); }
+      disconnect() { this.ziele = []; }
+    };
+    // Links nicht wirklich oeffnen (jsdom meldet sonst "navigation not implemented").
+    w.addEventListener('click', (ev) => ev.preventDefault());
+    if (extra.vorbereiten) extra.vorbereiten(w);
+    if (extra.ohneStatistik) return;
+    w.eval(readFileSync(STATISTIK_PATH, 'utf8'));
+  };
+  const w = bootWizard({ url: extra.url, vorbereiten });
+  w.tracker = () => w.window.document.querySelector('script[src="/u.js"]');
+  w.sichtbar = (el, quote = 1) => {
+    for (const b of beobachter) {
+      if (b.ziele.includes(el)) b.cb([{ isIntersecting: true, intersectionRatio: quote, target: el }], b);
+    }
+  };
+  return w;
+}
+
+// Spielt den geladenen Umami-Tracker: setzt window.umami und loest "load" aus.
+// track(name, daten) protokolliert in w.gesendet; antwort(i) bestimmt den
+// Rueckgabewert des i-ten Aufrufs (Vorgabe: undefined, also synchron).
+function umamiLaden(w, antwort = () => undefined) {
+  w.gesendet = [];
+  w.window.umami = {
+    track(name, daten) {
+      w.gesendet.push(daten === undefined ? { name } : { name, daten });
+      return antwort(w.gesendet.length - 1, name);
+    },
+  };
+  const t = w.tracker();
+  assert(t, 'Tracker-Skript /u.js wurde nicht eingefuegt');
+  t.dispatchEvent(new w.window.Event('load'));
+  return w;
+}
+
+const namen = (w) => w.gesendet.map((g) => g.name).join(' ');
+const pause = () => new Promise((r) => setTimeout(r, 0));
+
+function waehlen(w, input) {
+  input.checked = true;
+  input.dispatchEvent(new w.window.Event('change', { bubbles: true }));
+}
+
+// Schritte 1 bis 4 gueltig ausfuellen, endet auf dem Kontakt-Schritt.
+function bisKontakt(w) {
+  for (const step of w.steps.filter((s) => s.querySelector('input[type="radio"]'))) {
+    waehlen(w, step.querySelector('input[type="radio"]'));
+    click(w.window, w.next);
+  }
+  waehlen(w, w.form.querySelector('input[name="teilnehmer"][value="gf"]'));
+  click(w.window, w.next);
+}
+
+function kontaktAusfuellen(w) {
+  w.form.querySelector('[name="name"]').value = 'Erika Mustermann';
+  w.form.querySelector('[name="email"]').value = 'erika@example.org';
+  w.form.querySelector('[name="firma"]').value = 'Musterbau GmbH';
+  w.form.querySelector('[name="consent"]').checked = true;
+}
+
+function absenden(w) {
+  w.form.dispatchEvent(new w.window.Event('submit', { bubbles: true, cancelable: true }));
+}
+
+test('Statistik: laedt den Umami-Tracker mit den festgelegten Attributen', () => {
+  const w = bootSeite();
+  const t = w.tracker();
+  assert(t, 'Kein script[src="/u.js"]');
+  assert(t.parentNode === w.window.document.head, 'Tracker steht nicht im head');
+  assert(t.async === true, 'Tracker nicht async');
+  const soll = {
+    'data-website-id': WEBSITE_ID, 'data-domains': 'manibase.de',
+    'data-exclude-hash': 'true', 'data-do-not-track': 'true',
+  };
+  for (const [k, v] of Object.entries(soll)) {
+    assert(t.getAttribute(k) === v, k + ' = ' + t.getAttribute(k) + ', erwartet ' + v);
+  }
+  assert(typeof w.window.statistik === 'function', 'window.statistik fehlt');
+  assert(t.getAttribute('data-before-send') === 'manibaseVorSenden', 'data-before-send = ' + t.getAttribute('data-before-send'));
+  assert(typeof w.window.manibaseVorSenden === 'function', 'window.manibaseVorSenden fehlt');
+});
+
+test('Statistik: Startseite wird als / gezaehlt, nicht als /index.html', () => {
+  const w = bootSeite();
+  const vor = w.window.manibaseVorSenden;
+  const ist = JSON.stringify(vor('event', { url: '/index.html?utm_source=x', referrer: '/index.html' }));
+  assert(ist === '{"url":"/?utm_source=x","referrer":"/"}', 'Nutzlast: ' + ist);
+  const faelle = [
+    ['https://manibase.de/index.html#a', 'https://manibase.de/#a'],
+    ['https://manibase.de/index.html', 'https://manibase.de/'],
+    ['/klartag.html', '/klartag.html'],
+    ['/blog/index.html', '/blog/index.html'],
+    ['https://example.org/index.html', 'https://example.org/index.html'],
+    ['', ''],
+  ];
+  for (const [von, nach] of faelle) {
+    const r = vor('event', { url: von, referrer: von });
+    assert(r.url === nach && r.referrer === nach, von + ' wurde zu ' + r.url + ' / ' + r.referrer + ', erwartet ' + nach);
+  }
+  const ohne = { name: 'x' };
+  assert(vor('event', ohne) === ohne && JSON.stringify(ohne) === '{"name":"x"}', 'Nutzlast ohne url veraendert');
+  assert(vor('identify', null) === null, 'null nicht durchgereicht');
+});
+
+test('Statistik: GPC, Do Not Track und Vermerk verhindern das Laden', () => {
+  const faelle = {
+    'navigator.globalPrivacyControl': (w) => Object.defineProperty(w.navigator, 'globalPrivacyControl', { configurable: true, value: true }),
+    'navigator.doNotTrack': (w) => Object.defineProperty(w.navigator, 'doNotTrack', { configurable: true, value: '1' }),
+    'window.doNotTrack': (w) => { w.doNotTrack = '1'; },
+    'localStorage': (w) => w.localStorage.setItem('manibase-statistik', 'aus'),
+  };
+  for (const [name, vorbereiten] of Object.entries(faelle)) {
+    const w = bootSeite({ vorbereiten });
+    assert(!w.tracker(), name + ': Tracker trotzdem geladen');
+    const aufrufe = [];
+    w.window.umami = { track: (n) => { aufrufe.push(n); } };
+    w.window.statistik('probe');
+    bisKontakt(w);
+    assert(aufrufe.length === 0, name + ': trotzdem gemeldet: ' + aufrufe.join(' '));
+  }
+});
+
+test('Statistik: ?statistik=aus speichert, raeumt die Adresse auf, ?statistik=an hebt auf', () => {
+  const w = bootSeite({ url: 'https://manibase.de/?q=a%20b&flag&statistik=aus#termin' });
+  assert(w.window.location.href === 'https://manibase.de/?q=a%20b&flag#termin', 'Adresse danach: ' + w.window.location.href);
+  assert(w.window.localStorage.getItem('manibase-statistik') === 'aus', 'Vermerk nicht gespeichert');
+  assert(!w.tracker(), 'Tracker trotz ?statistik=aus geladen');
+
+  const an = bootSeite({
+    url: 'https://manibase.de/?statistik=an',
+    vorbereiten: (win) => win.localStorage.setItem('manibase-statistik', 'aus'),
+  });
+  assert(an.window.location.href === 'https://manibase.de/', 'Adresse danach: ' + an.window.location.href);
+  assert(an.window.localStorage.getItem('manibase-statistik') === null, 'Vermerk nicht entfernt');
+  assert(an.tracker(), 'Nach ?statistik=an kein Tracker');
+});
+
+test('Statistik: ?statistik=aus wirkt auch bei gesperrtem Browser-Speicher', () => {
+  const w = bootSeite({
+    url: 'https://manibase.de/?statistik=aus',
+    vorbereiten: (win) => Object.defineProperty(win, 'localStorage', {
+      configurable: true, get() { throw new Error('gesperrt'); },
+    }),
+  });
+  assert(!w.tracker(), 'Tracker trotz ?statistik=aus geladen');
+});
+
+test('Statistik: Adresse wird vor dem Einfuegen des Trackers bereinigt', () => {
+  const zustand = [];
+  bootSeite({
+    url: 'https://manibase.de/?statistik=an',
+    vorbereiten: (win) => {
+      const original = win.history.replaceState.bind(win.history);
+      win.history.replaceState = (...args) => {
+        zustand.push(!!win.document.querySelector('script[src="/u.js"]'));
+        return original(...args);
+      };
+    },
+  });
+  assert(zustand.join() === 'false', 'replaceState lief bei vorhandenem Tracker: ' + zustand.join());
+});
+
+await test('Statistik: Puffer sendet nach dem Laden in Reihenfolge und nacheinander', async () => {
+  const w = bootSeite();
+  w.window.statistik('a');
+  w.window.statistik('b', { x: 1 });
+  const offen = [];
+  umamiLaden(w, () => new Promise((r) => offen.push(r)));
+  assert(namen(w) === 'a', 'Vor Abschluss von "a" schon gesendet: ' + namen(w));
+  offen[0]();
+  await pause();
+  assert(namen(w) === 'a b', 'Nach "a": ' + namen(w));
+  assert(JSON.stringify(w.gesendet[1].daten) === '{"x":1}', 'Daten von "b": ' + JSON.stringify(w.gesendet[1]));
+  w.window.statistik('c');
+  assert(namen(w) === 'a b', '"c" ueberholt "b": ' + namen(w));
+  offen[1]();
+  await pause();
+  assert(namen(w) === 'a b c', 'Nach "b": ' + namen(w));
+});
+
+await test('Statistik: Fehler in umami.track stoeren die Seite nicht', async () => {
+  const w = bootSeite();
+  umamiLaden(w, (i) => {
+    if (i === 0) throw new Error('kaputt');
+    return Promise.reject(new Error('abgelehnt'));
+  });
+  w.window.statistik('a');
+  w.window.statistik('b');
+  w.window.statistik('c');
+  await pause();
+  assert(namen(w) === 'a b c', 'Nach Fehlern: ' + namen(w));
+});
+
+test('Statistik: Ladefehler verwirft Puffer und spaetere Ereignisse', () => {
+  const w = bootSeite();
+  w.window.statistik('a');
+  w.tracker().dispatchEvent(new w.window.Event('error'));
+  const aufrufe = [];
+  w.window.umami = { track: (n) => { aufrufe.push(n); } };
+  w.window.statistik('b');
+  // Auch ein spaeteres "load" darf nach einem Ladefehler nichts mehr senden.
+  w.tracker().dispatchEvent(new w.window.Event('load'));
+  w.window.statistik('c');
+  assert(aufrufe.length === 0, 'Nach Ladefehler gemeldet: ' + aufrufe.join(' '));
+});
+
+test('Statistik: Klicks auf Telefon, E-Mail, Kontakt und fremde Links', () => {
+  const w = umamiLaden(bootSeite({ url: 'https://manibase.de/index.html' }));
+  const doc = w.window.document;
+  const links = ['tel:+4915565697065', 'mailto:kontakt@manibase.de', 'index.html#termin', 'https://example.org/x', 'ueber-uns.html'];
+  for (const href of links) {
+    const a = doc.createElement('a');
+    a.setAttribute('href', href);
+    a.textContent = 'x';
+    doc.body.appendChild(a);
+    click(w.window, a);
+  }
+  const ist = JSON.stringify(w.gesendet);
+  const soll = JSON.stringify([
+    { name: 'klick-telefon' }, { name: 'klick-email' },
+    { name: 'klick-kontakt', daten: { seite: '/' } }, { name: 'klick-extern', daten: { ziel: 'example.org' } },
+  ]);
+  assert(ist === soll, 'Klicks: ' + ist + '\n       erwartet: ' + soll);
+});
+
+test('Statistik: Klick geht trotz haengendem frueheren Aufruf sofort raus', () => {
+  const w = umamiLaden(bootSeite(), () => new Promise(() => {}));
+  w.window.statistik('maske-gesehen');
+  assert(namen(w) === 'maske-gesehen', 'Erster Aufruf: ' + namen(w));
+  w.window.statistik('maske-begonnen');
+  assert(namen(w) === 'maske-gesehen', 'Trichterstufe ueberholt die Kette: ' + namen(w));
+  const a = w.window.document.createElement('a');
+  a.setAttribute('href', 'tel:+4915565697065');
+  w.window.document.body.appendChild(a);
+  click(w.window, a);
+  assert(namen(w) === 'maske-gesehen klick-telefon', 'Klick haengt hinter der Kette: ' + namen(w));
+});
+
+test('Statistik: Klick vor dem Laden wird gepuffert und danach gesendet', () => {
+  const w = bootSeite();
+  const a = w.window.document.createElement('a');
+  a.setAttribute('href', 'mailto:kontakt@manibase.de');
+  w.window.document.body.appendChild(a);
+  click(w.window, a);
+  umamiLaden(w);
+  assert(namen(w) === 'klick-email', 'Gepufferter Klick: ' + namen(w));
+});
+
+test('Statistik: Mittelklick zaehlt nicht', () => {
+  const w = umamiLaden(bootSeite());
+  const a = w.window.document.createElement('a');
+  a.setAttribute('href', 'tel:+4915565697065');
+  w.window.document.body.appendChild(a);
+  a.dispatchEvent(new w.window.MouseEvent('click', { bubbles: true, cancelable: true, button: 1 }));
+  assert(w.gesendet.length === 0, 'Mittelklick gemeldet: ' + namen(w));
+});
+
+test('Trichter: Durchlauf meldet jede Stufe genau einmal', () => {
+  const w = umamiLaden(bootSeite());
+  const fortschritt = w.form.querySelector('.wizard__progress');
+  w.sichtbar(fortschritt);
+  w.sichtbar(fortschritt);
+  bisKontakt(w);
+  // Zurueck und wieder vor: Schritt 5 darf nicht doppelt gemeldet werden.
+  click(w.window, w.form.querySelector('.wizard__back'));
+  click(w.window, w.next);
+  kontaktAusfuellen(w);
+  absenden(w);
+  const soll = 'maske-gesehen maske-begonnen maske-schritt-2 maske-schritt-3 maske-schritt-4 maske-schritt-5 maske-abgeschickt';
+  assert(namen(w) === soll, 'Ereignisse: ' + namen(w) + '\n       erwartet: ' + soll);
+});
+
+test('Trichter: begonnen ohne sichtbare Fortschrittszeile meldet gesehen nach', () => {
+  const w = umamiLaden(bootSeite());
+  bisKontakt(w);
+  assert(namen(w).startsWith('maske-gesehen maske-begonnen maske-schritt-2'), 'Ereignisse: ' + namen(w));
+});
+
+test('Trichter: begonnen auch, wenn nur "Weiter" geklickt wird (ohne change/input)', () => {
+  const w = umamiLaden(bootSeite());
+  w.steps[0].querySelector('input[type="radio"]').checked = true;
+  click(w.window, w.next);
+  assert(namen(w) === 'maske-gesehen maske-begonnen maske-schritt-2', 'Ereignisse: ' + namen(w));
+});
+
+test('Trichter: gesehen erst bei voller Sichtbarkeit', () => {
+  const w = umamiLaden(bootSeite());
+  const fortschritt = w.form.querySelector('.wizard__progress');
+  w.sichtbar(fortschritt, 0.5);
+  assert(namen(w) === '', 'Bei halber Sichtbarkeit gemeldet: ' + namen(w));
+  w.sichtbar(fortschritt, 1);
+  assert(namen(w) === 'maske-gesehen', 'Bei voller Sichtbarkeit: ' + namen(w));
+});
+
+test('Trichter: Pruefmeldungen tragen Schritt und Grund', () => {
+  const w = umamiLaden(bootSeite());
+  click(w.window, w.next); // Schritt 1 ohne Auswahl
+  click(w.window, w.next); // zweites Mal: keine zweite Meldung
+  for (const step of w.steps.filter((s) => s.querySelector('input[type="radio"]'))) {
+    waehlen(w, step.querySelector('input[type="radio"]'));
+    click(w.window, w.next);
+  }
+  click(w.window, w.next); // Schritt 4 ohne Auswahl
+  waehlen(w, w.form.querySelector('input[name="teilnehmer"][value="it"]'));
+  click(w.window, w.next); // Schritt 4 ohne Geschaeftsfuehrung
+  waehlen(w, w.form.querySelector('input[name="teilnehmer"][value="gf"]'));
+  click(w.window, w.next);
+  absenden(w); // Schritt 5 leer
+  w.form.querySelector('[name="name"]').value = 'Erika Mustermann';
+  absenden(w); // ohne E-Mail
+  w.form.querySelector('[name="email"]').value = 'erika@example.org';
+  absenden(w); // ohne Unternehmen
+  w.form.querySelector('[name="firma"]').value = 'Musterbau GmbH';
+  absenden(w); // ohne Einwilligung
+  const ist = JSON.stringify(w.gesendet.filter((g) => g.name === 'maske-fehler').map((g) => g.daten));
+  const soll = JSON.stringify([
+    { schritt: 1, grund: 'auswahl' }, { schritt: 4, grund: 'mehrfach' }, { schritt: 4, grund: 'gf' },
+    { schritt: 5, grund: 'name' }, { schritt: 5, grund: 'email' }, { schritt: 5, grund: 'firma' },
+    { schritt: 5, grund: 'einwilligung' },
+  ]);
+  assert(ist === soll, 'Pruefmeldungen: ' + ist + '\n       erwartet: ' + soll);
+});
+
+test('Trichter: Formularwerte gehen nie an die Messung', () => {
+  const w = umamiLaden(bootSeite());
+  bisKontakt(w);
+  kontaktAusfuellen(w);
+  absenden(w);
+  const roh = JSON.stringify(w.gesendet);
+  for (const wert of ['@', 'Erika', 'Mustermann', 'example', 'Musterbau']) {
+    assert(!roh.includes(wert), 'Formularwert gemeldet: ' + wert);
+  }
+});
+
+test('Trichter: ohne statistik.js laesst sich die Maske abschicken', () => {
+  const w = bootSeite({ ohneStatistik: true });
+  bisKontakt(w);
+  kontaktAusfuellen(w);
+  absenden(w);
+  assert(w.form.hidden, 'Maske ohne statistik.js nicht abschickbar');
+});
+
+test('Trichter: wirft umami.track, laesst sich die Maske trotzdem abschicken', () => {
+  const w = umamiLaden(bootSeite(), () => { throw new Error('kaputt'); });
+  bisKontakt(w);
+  kontaktAusfuellen(w);
+  absenden(w);
+  assert(w.form.hidden, 'Maske bei werfendem umami.track nicht abschickbar');
+});
+
+test('Maske: Enter vor dem letzten Schritt schaltet weiter statt Kontaktfehler', () => {
+  const w = bootWizard();
+  absenden(w); // Enter ohne Auswahl
+  assert(w.activeIndex() === 0, 'Schritt 1 uebersprungen');
+  assert(w.err.textContent === 'Bitte wählen Sie eine Antwort aus.', 'Falsche Meldung: ' + w.err.textContent);
+  waehlen(w, w.steps[0].querySelector('input[type="radio"]'));
+  absenden(w); // Enter mit Auswahl
+  assert(w.activeIndex() === 1, 'Enter mit Auswahl schaltet nicht weiter');
+  assert(w.err.hidden, 'Fehlermeldung trotz gueltiger Auswahl');
+});
+
+test('Trichter: Kalender meldet ok oder fehler', () => {
+  const lauf = (vorbereiten) => {
+    const w = umamiLaden(bootSeite({ vorbereiten }));
+    bisKontakt(w);
+    kontaktAusfuellen(w);
+    absenden(w);
+    return w;
+  };
+  const kalender = (w) => w.gesendet.filter((g) => g.name.startsWith('maske-kalender')).map((g) => g.name).join(' ');
+  const zeeg = (w) => w.window.document.querySelector('script[src*="zeeg"]');
+
+  const ok = lauf((win) => { win.Zeeg = { initInlineWidget() {} }; });
+  assert(kalender(ok) === 'maske-kalender-ok', 'Zeeg vorhanden: ' + kalender(ok));
+
+  const wirft = lauf((win) => { win.Zeeg = { initInlineWidget() { throw new Error('kaputt'); } }; });
+  assert(kalender(wirft) === 'maske-kalender-fehler', 'initInlineWidget wirft: ' + kalender(wirft));
+
+  const halb = lauf((win) => { win.Zeeg = {}; });
+  assert(kalender(halb) === 'maske-kalender-fehler', 'Zeeg ohne initInlineWidget: ' + kalender(halb));
+
+  const spaet = lauf();
+  spaet.window.Zeeg = { initInlineWidget() {} };
+  zeeg(spaet).dispatchEvent(new spaet.window.Event('load'));
+  assert(kalender(spaet) === 'maske-kalender-ok', 'Skript geladen mit Zeeg: ' + kalender(spaet));
+
+  const leer = lauf();
+  zeeg(leer).dispatchEvent(new leer.window.Event('load'));
+  assert(kalender(leer) === 'maske-kalender-fehler', 'Skript geladen ohne Zeeg: ' + kalender(leer));
+
+  const blockiert = lauf();
+  zeeg(blockiert).dispatchEvent(new blockiert.window.Event('error'));
+  assert(kalender(blockiert) === 'maske-kalender-fehler', 'Skript blockiert: ' + kalender(blockiert));
 });
 
 /* --- Rechenbeispiel #hochrechnung und Klartag-Leistungsblatt ------------------
@@ -438,6 +865,26 @@ test('Voller Footer: Telefonnummer als tel:-Link', () => {
   }
 });
 
+// SEITEN umfasst nur site/*.html; die Seiten unter site/blog/ sind reine
+// Weiterleitungen (meta-refresh) und laden bewusst keine Messung.
+test('Statistik: alle Inhaltsseiten binden statistik.js vor site.js ein, Weiterleitungen nicht', () => {
+  let anzahl = 0;
+  for (const s of SEITEN) {
+    const tags = s.html.match(/<script[^>]+scripts\/statistik\.js[^>]*>/g) || [];
+    if (istWeiterleitung(s)) {
+      assert(tags.length === 0, s.name + ': Weiterleitung laedt statistik.js');
+      continue;
+    }
+    assert(tags.length === 1, s.name + ': statistik.js ' + tags.length + 'x eingebunden');
+    assert(/\bdefer\b/.test(tags[0]), s.name + ': statistik.js ohne defer');
+    const posStatistik = s.html.indexOf('scripts/statistik.js');
+    const posSite = s.html.indexOf('scripts/site.js');
+    assert(posSite === -1 || posStatistik < posSite, s.name + ': statistik.js steht nach site.js');
+    anzahl++;
+  }
+  assert(anzahl === 14, 'Erwartet 14 Inhaltsseiten mit statistik.js, gefunden ' + anzahl);
+});
+
 test('Startseite: Title und Description passen in die Suchergebnisanzeige', () => {
   const html = readFileSync(HTML_PATH, 'utf8');
   const title = /<title>([^<]*)<\/title>/.exec(html)[1];
@@ -466,6 +913,24 @@ test('llms.txt verweist nur auf vorhandene Seiten', () => {
   assert(llms.includes('HRB 18632'), 'llms.txt: Handelsregisternummer fehlt');
   // Betriebsgroesse wird bewusst nicht oeffentlich genannt (Geschaeftsfuehrung, 02.10.2026).
   assert(!/\d+\s*(bis|–|-)\s*\d+\s*Mitarbeitende/.test(llms), 'llms.txt nennt eine Betriebsgroesse');
+});
+
+test('Datenschutz: Reichweitenmessung mit Umami ist vollstaendig beschrieben', () => {
+  const html = readFileSync('site/datenschutz.html', 'utf8');
+  for (const teil of ['12. Reichweitenmessung mit Umami', 'Seitentitel', 'UTM', 'Stadt', 'täglich wechselnden',
+    'Global Privacy Control', 'Do Not Track', 'spätestens 13 Monaten', 'datenschutz.html?statistik=aus',
+    'datenschutz.html?statistik=an', 'Art. 21 DSGVO', 'in der Regel nach 15 Tagen', '(Abschnitt 12)',
+    'Uhrzeit des Aufrufs', 'Zugriffsprotokoll', 'Namen der Zielwebsite',
+    'Stand: 4. Oktober 2026']) {
+    assert(html.includes(teil), 'Fehlt in datenschutz.html: ' + teil);
+  }
+  for (const alt of ['trichter=', 'Zählung der Formularschritte', 'nicht auf Ihrem Gerät gespeichert']) {
+    assert(!html.includes(alt), 'Veralteter Text in datenschutz.html: ' + alt);
+  }
+  assert(!/kein(en)? Zugriff auf (Ihr |das )?Endgerät/i.test(html), 'Behauptung "kein Zugriff auf das Endgerät" steht im Text');
+  const a12 = html.slice(html.indexOf('<h2>12.'), html.indexOf('Stand:'));
+  assert(a12.length > 200, 'Abschnitt 12 nicht gefunden');
+  assert(!/[\u2013\u2014]/.test(a12), 'Gedankenstrich in Abschnitt 12 der Datenschutzerklaerung');
 });
 
 if (failed) {

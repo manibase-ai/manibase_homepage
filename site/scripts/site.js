@@ -3,6 +3,7 @@
    2) Hero: wechselnde Begriffe
    3) Newsletter-Anmeldung (POST an /api/newsletter.php -> Odoo, Double-Opt-In)
    4) Qualifizierungs-Maske + Kalender erst nach Einwilligung laden (DSGVO)
+   4a) Formular-Trichter: meldet Schritte der Maske an die Reichweitenmessung (statistik.js)
 */
 (function () {
   'use strict';
@@ -300,6 +301,31 @@
     });
   }
 
+  /* 4a) Formular-Trichter ----------------------------------------------------
+     Meldet, wie weit Besucher in der Qualifizierungs-Maske kommen, als Ereignis
+     an die Reichweitenmessung (scripts/statistik.js, Umami). Ereignisse und
+     Zeitpunkte: docs/superpowers/specs/2026-10-03-formular-trichter-design.md,
+     Namen und Transport: 2026-10-04-statistik-umami-design.md.
+     Jedes Ereignis geht je Seitenaufruf nur einmal raus. Umamis Trichter verlangt
+     alle Vorstufen in Reihenfolge, deshalb kommt vor "begonnen" ein noch
+     fehlendes "gesehen" (wer etwas eingibt, hat die Maske gesehen). */
+  var trichter = (function () {
+    var gemeldet = Object.create(null);
+    function trichter(e, n, r) {
+      var key = e + '|' + (n || '') + '|' + (r || '');
+      if (gemeldet[key]) { return; }
+      if (e === 'begonnen') { trichter('gesehen'); }
+      gemeldet[key] = true;
+      // Fehlt statistik.js (oder ist sie abgeschaltet), wird still nichts gemeldet.
+      if (typeof window.statistik !== 'function') { return; }
+      if (e === 'fehler') { window.statistik('maske-fehler', { schritt: n, grund: r }); }
+      else if (e === 'schritt') { window.statistik('maske-schritt-' + n); }
+      else if (e === 'kalender') { window.statistik('maske-kalender-' + r); }
+      else { window.statistik('maske-' + e); }
+    }
+    return trichter;
+  })();
+
   /* 4) Qualifizierungs-Maske ----------------------------------------------- */
   var wiz = document.getElementById('qualify');
   if (wiz) initWizard(wiz);
@@ -317,9 +343,10 @@
     var counter = form.querySelector('.wizard__count');
 
     function clearErr() { if (errBox) { errBox.hidden = true; errBox.textContent = ''; } }
-    function showErr(msg, field) {
+    function showErr(msg, field, grund) {
       if (errBox) { errBox.hidden = false; errBox.textContent = msg; }
       if (field) { field.setAttribute('aria-invalid', 'true'); }
+      if (grund) { trichter('fehler', idx + 1, grund); }
     }
 
     function render(doFocus) {
@@ -358,7 +385,7 @@
         var offen = Object.keys(answered).filter(function (n) { return !answered[n]; });
         if (offen.length) {
           var first = step.querySelector('input[type="radio"][name="' + offen[0] + '"]');
-          showErr('Bitte wählen Sie eine Antwort aus.');
+          showErr('Bitte wählen Sie eine Antwort aus.', null, 'auswahl');
           if (first) { first.focus(); }
           return false;
         }
@@ -367,11 +394,11 @@
       var checks = step.querySelectorAll('input[type="checkbox"]:not([name="consent"])');
       if (checks.length) {
         var any = Array.prototype.some.call(checks, function (c) { return c.checked; });
-        if (!any) { showErr('Bitte wählen Sie mindestens einen Punkt.'); return false; }
+        if (!any) { showErr('Bitte wählen Sie mindestens einen Punkt.', null, 'mehrfach'); return false; }
       }
       var management = step.querySelector('input[name="teilnehmer"][value="gf"]');
       if (management && !management.checked) {
-        showErr('Bitte beziehen Sie die Geschäftsführung in das Erstgespräch ein.');
+        showErr('Bitte beziehen Sie die Geschäftsführung in das Erstgespräch ein.', null, 'gf');
         management.focus();
         return false;
       }
@@ -380,15 +407,17 @@
 
     function next() {
       if (!valid(steps[idx])) return;
-      if (idx < total - 1) { idx++; render(true); }
+      if (idx < total - 1) { idx++; trichter('begonnen'); trichter('schritt', idx + 1); render(true); }
     }
     function back() { if (idx > 0) { idx--; render(true); } }
 
     form.addEventListener('change', function (ev) {
+      trichter('begonnen');
       if (ev.target) { ev.target.removeAttribute('aria-invalid'); }
       if (ev.target && (ev.target.type === 'checkbox' || ev.target.type === 'radio')) clearErr();
     });
     form.addEventListener('input', function (ev) {
+      trichter('begonnen');
       if (ev.target) { ev.target.removeAttribute('aria-invalid'); }
       clearErr();
     });
@@ -409,15 +438,20 @@
 
     form.addEventListener('submit', function (ev) {
       ev.preventDefault();
+      // Enter auf einer Auswahl in Schritt 1 bis 4 loest die implizite Absendung
+      // aus (der versteckte Absende-Button bleibt Default-Button). Dann wie "Weiter",
+      // statt den Namen fuer ein unsichtbares Feld anzumahnen.
+      if (idx < total - 1) { next(); return; }
       var name = form.querySelector('[name="name"]');
       var mail = form.querySelector('[name="email"]');
       var firma = form.querySelector('[name="firma"]');
       var consent = form.querySelector('[name="consent"]');
-      if (!name.value.trim()) { showErr('Bitte geben Sie Ihren Namen an.', name); name.focus(); return; }
-      if (!EMAIL_RE.test(mail.value.trim())) { showErr('Bitte geben Sie eine gültige E-Mail-Adresse an.', mail); mail.focus(); return; }
-      if (firma && !firma.value.trim()) { showErr('Bitte geben Sie Ihr Unternehmen an.', firma); firma.focus(); return; }
-      if (!consent.checked) { showErr('Bitte bestätigen Sie die Verarbeitung Ihrer Angaben.', consent); consent.focus(); return; }
+      if (!name.value.trim()) { showErr('Bitte geben Sie Ihren Namen an.', name, 'name'); name.focus(); return; }
+      if (!EMAIL_RE.test(mail.value.trim())) { showErr('Bitte geben Sie eine gültige E-Mail-Adresse an.', mail, 'email'); mail.focus(); return; }
+      if (firma && !firma.value.trim()) { showErr('Bitte geben Sie Ihr Unternehmen an.', firma, 'firma'); firma.focus(); return; }
+      if (!consent.checked) { showErr('Bitte bestätigen Sie die Verarbeitung Ihrer Angaben.', consent, 'einwilligung'); consent.focus(); return; }
       clearErr();
+      trichter('abgeschickt');
       // Antworten der Maske einsammeln und in den Kalender (Zeeg) vorbefüllen,
       // damit sie nicht verloren gehen und das Gespräch sofort beim Thema ist.
       var booking = buildBookingPrefill(form);
@@ -426,6 +460,22 @@
     });
 
     render(false);
+
+    // Trichter: "gesehen", sobald die Fortschrittszeile ganz im Bild ist. Die
+    // Maske selbst ist auf dem Handy hoeher als der Bildschirm und erreichte eine
+    // Sichtbarkeitsschwelle nie, deshalb die kleine Zeile darueber. 0.99 statt 1:
+    // bei Zoom und Subpixel-Lagen erreicht die Quote 1 oft nie. Die Quote wird
+    // selbst geprueft, weil der erste Callback nach observe() immer kommt und
+    // isIntersecting die Schwelle nicht beachtet.
+    var progress = form.querySelector('.wizard__progress');
+    if (progress && 'IntersectionObserver' in window) {
+      var sichtbar = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting && en.intersectionRatio >= 0.99) { trichter('gesehen'); sichtbar.disconnect(); }
+        });
+      }, { threshold: 0.99 });
+      sichtbar.observe(progress);
+    }
   }
 
   // Wizard-Antworten -> Zeeg-Prefill (firstName/lastName/email + Freitext-Zusammenfassung).
@@ -497,8 +547,9 @@
     target.setAttribute('data-loaded', '1');
 
     var answerId = box.getAttribute('data-cal-answer');
+    // true, wenn das Widget gestartet wurde; false, wenn Zeeg fehlt (Trichter: kalender).
     function init() {
-      if (!(window.Zeeg && window.Zeeg.initInlineWidget)) { return; }
+      if (!(window.Zeeg && window.Zeeg.initInlineWidget)) { return false; }
       var opts = { url: url, parentElement: target };
       if (booking && booking.prefill) {
         opts.prefill = booking.prefill;
@@ -507,11 +558,17 @@
           opts.prefill.answers[answerId] = booking.summary;
         }
       }
-      window.Zeeg.initInlineWidget(opts);
+      // Wirft das Widget, bleibt der Absende-Pfad heil und der Trichter sieht den Fehler.
+      try { window.Zeeg.initInlineWidget(opts); } catch (e) { return false; }
+      return true;
     }
-    if (window.Zeeg) { init(); return; }
+    function melden(ok) { trichter('kalender', null, ok ? 'ok' : 'fehler'); }
+    if (window.Zeeg) { melden(init()); return; }
     var s = document.createElement('script');
-    s.src = src; s.async = true; s.onload = init;
+    s.src = src; s.async = true;
+    s.onload = function () { melden(init()); };
+    // Werbeblocker oder Netzfehler: ohne diese Meldung bliebe der leere Kalender unsichtbar.
+    s.onerror = function () { melden(false); };
     document.body.appendChild(s);
   }
 })();

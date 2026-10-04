@@ -1,0 +1,8 @@
+[Unit]
+Description=Umami: Messdaten aelter als 13 Monate loeschen
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/umami/aufbewahrung.sh

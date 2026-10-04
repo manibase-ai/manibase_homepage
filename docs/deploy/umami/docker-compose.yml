@@ -1,0 +1,59 @@
+# Umami fuer manibase.de, selbst betrieben.
+# Spec: docs/superpowers/specs/2026-10-04-statistik-umami-design.md
+# Betrieb: docs/deployment/statistik-umami.md
+#
+# Liegt auf dem Server unter /opt/umami/docker-compose.yml, Geheimnisse in
+# /opt/umami/.env (0600, Vorlage: .env.example). Images per Digest festgeschrieben,
+# damit ein Neustart nicht still eine neue Version zieht. Aktualisieren: siehe
+# docs/deployment/statistik-umami.md, Abschnitt "Updates".
+
+name: umami
+
+services:
+  umami:
+    # Umami 3.4.0 (docker.umami.is, postgresql-latest vom 04.10.2026)
+    image: docker.umami.is/umami-software/umami@sha256:85909afc45bdcda1917394594a087421fdbb05610fded0fa9f6fb861abb2f367
+    restart: unless-stopped
+    init: true
+    ports:
+      - "127.0.0.1:3005:3000"   # nur lokal; nginx reicht /u.js, /api/send und statistik.manibase.de durch
+    environment:
+      DATABASE_URL: postgresql://umami:${POSTGRES_PASSWORD}@db:5432/umami
+      APP_SECRET: ${APP_SECRET}                                 # nie aendern (Sitzungskennungen, Tokens)
+      TWO_FACTOR_ENCRYPTION_KEY: ${TWO_FACTOR_ENCRYPTION_KEY}   # 2FA im Dashboard
+      CLIENT_IP_HEADER: x-real-ip   # nginx setzt X-Real-IP auf $remote_addr
+      SKIP_LOCATION_HEADERS: "1"    # Geo-Header (cf-ipcountry u. a.) vom Client nicht glauben
+      SALT_ROTATION: day            # Besucherkennung wechselt taeglich (Vorgabe waere monatlich)
+      PRIVATE_MODE: "1"             # Dashboard holt keine Favicons fremder Domains
+      DISABLE_TELEMETRY: "1"
+      # DISABLE_UPDATES bewusst nicht gesetzt: das Dashboard soll auf Updates hinweisen.
+    depends_on:
+      db:
+        condition: service_healthy
+    mem_limit: 768m                  # Server hat keinen Swap
+    logging: &logging
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+  db:
+    # postgres:16-alpine vom 04.10.2026
+    image: postgres@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      TZ: UTC
+      PGTZ: UTC
+    volumes:
+      - umami-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U umami -d umami"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    mem_limit: 512m
+    logging: *logging
+
+volumes:
+  umami-db:

@@ -1,0 +1,10 @@
+[Unit]
+Description=Umami: taegliche Loeschung alter Messdaten
+
+[Timer]
+OnCalendar=daily
+RandomizedDelaySec=1h
+Persistent=true
+
+[Install]
+WantedBy=timers.target
