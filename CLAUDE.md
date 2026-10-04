@@ -71,14 +71,15 @@ site/
   blog/index.html       Blog-Übersicht. Relative Pfade ../.
   blog/papierkram-am-chef.html  Archiviert, leitet auf ../index.html#arbeitssituationen weiter.
   impressum.html        § 5 DDG (Daten gesetzt, HRB 18632)
-  datenschutz.html      DSGVO, 11 Abschnitte: 3=Hosting (Server-Logdaten „in der Regel nach 15 Tagen“ gelöscht), 5=Anfrage-/Buchungsformular inkl. „Zählung der Formularschritte“, 6=Zeeg, 7=Newsletter (Double-Opt-In), 11=Speicherdauer.
+  datenschutz.html      DSGVO, 12 Abschnitte: 3=Hosting (Server-Logdaten „in der Regel nach 15 Tagen“ gelöscht), 5=Anfrage-/Buchungsformular, 6=Zeeg, 7=Newsletter (Double-Opt-In), 11=Speicherdauer, 12=Reichweitenmessung mit Umami.
   llms.txt              Kurzprofil für Sprachmodelle (26.09.2026). Preis, HRB und Links werden in test-frontend.mjs gegen die Seiten geprüft; wer Preis oder Seiten ändert, zieht sie hier mit.
   styles/tokens.css     Marken-Tokens (@import ../fonts/_fontface.css)
   styles/site.css       Basis-Layout und geteilte Komponenten (+ `[hidden]{display:none!important}`, .wizard/.qcard/.field/.cal, .blog/.postcard/.post)
   styles/seiten.css     Bausteine der Unterseiten, 15.08.2026 aus Phase 3 zurückgeholt: `page-hero(--split)`, `photo-figure`/`photo-credit`, `section--ink` mit `data-split`, `founders-teaser`/`person-card`, `helper-hero` mit `helper-rotator`, `helper-showcase`/`cockpit-frame`. Eingebunden auf klartag, fuer-ihre-it, ueber-uns und ki-helfer.
   styles/home.css       **Nur Startseite.** Werkplansatz-Schicht mit `hp-`-Präfix: Blattköpfe, Systemschnitt, Bento, Datenblätter, Maßkette, Bildbausteine, Reifegrad-Ampel. Body trägt `class="hp-home"`.
   scripts/kinetic-grid.js  Kinetic Grid (siehe eigenen Abschnitt). Eingebunden auf allen Seiten mit Seitenkopf: index, baugewerbe, gebaeudetechnik-ausbau, planungsbueros, firmen-ki, prozessautomatisierung, klartag, fuer-ihre-it und ueber-uns.
-  scripts/site.js       Reveal + Wortwechsel im KI-Helfer-Kopf (`[data-helper-rotator]`) + Qualifizierungs-Maske (Wizard, 5 Schritte, Auto-Advance mit 260 ms Sperre) + `loadBookingCalendar()` (Zeeg on-demand, einziger Wechselpunkt für das Buchungstool) + Formular-Trichter `trichter()` (Abschnitt 4a, siehe eigenen Abschnitt).
+  scripts/statistik.js  Reichweitenmessung (Umami): Abschaltung, Tracker /u.js, window.statistik, Klickzählung. Auf allen 14 Inhaltsseiten vor site.js.
+  scripts/site.js       Reveal + Wortwechsel im KI-Helfer-Kopf (`[data-helper-rotator]`) + Qualifizierungs-Maske (Wizard, 5 Schritte, Auto-Advance mit 260 ms Sperre) + `loadBookingCalendar()` (Zeeg on-demand, einziger Wechselpunkt für das Buchungstool) + Formular-Trichter `trichter()` (Abschnitt 4a, meldet an `statistik.js`).
   fonts/                Self-hosted woff2 (Sora, Hanken Grotesk, JetBrains Mono) + _fontface.css
   assets/               signet.png · signet-negative.png · signet-180.png · wortmarke.png · og-manibase.jpg
                         hero-plan-{1000,1600}.webp · hero-plan-hoch-{600,900}.webp
@@ -97,14 +98,13 @@ Das Bauplanraster liegt auf einer Canvas statt als CSS-Hintergrund: es zieht sic
 - Im Einsatz: Startseite (Hero cobalt, Governance-Band weiss, Abschlussband gelb), sowie **alle Seitenköpfe** (baugewerbe, gebaeudetechnik-ausbau, planungsbueros, firmen-ki, prozessautomatisierung, ueber-uns, klartag, fuer-ihre-it) einheitlich mit `data-kinetic="cobalt"`, Vorgabe-Achse y und `data-kinetic-guard=".h-hero, .lead"`. Der KI-Helfer-Kopf behält seine eigene Phase-3-Textur.
 - **Achse folgt dem CSS-Auslauf, nicht dem Geschmack:** die Rastermaske verläuft nach unten, deshalb steht überall Achse y. ueber-uns, klartag und fuer-ihre-it liefen bis 16.08.2026 auf x und fielen dadurch aus der Reihe.
 
-## Formular-Trichter (seit 03.10.2026)
-Selbst gebaute Messung, wo Besucher in der Qualifizierungs-Maske aussteigen. Kein Analyse-Werkzeug, keine Cookies, kein Drittanbieter. Spec: `docs/superpowers/specs/2026-10-03-formular-trichter-design.md`, Betrieb: `docs/deployment/trichter-und-logrotate.md`.
+## Reichweitenmessung und Formular-Trichter (seit 04.10.2026)
+Umami, selbst betrieben auf dem Produktivserver, ohne Cookies und ohne Banner. Dashboard: **https://statistik.manibase.de**. Spec: `docs/superpowers/specs/2026-10-04-statistik-umami-design.md` (Ereignisse der Maske: `2026-10-03-formular-trichter-design.md` §4). Betrieb, Zugang, Updates, Trichter anlegen: `docs/deployment/statistik-umami.md`.
 
-- `trichter(e, n, r)` in `site.js` (Abschnitt 4a) meldet per `sendBeacon` an `/t`: `gesehen`, `begonnen`, `schritt` 2–5, `fehler` mit Schritt und Grund, `abgeschickt`, `kalender` ok/fehler. Nur die Parameter `v, s, e, n, r`, nie Formularwerte. `s` ist eine Zufallskennung je Seitenaufruf im Arbeitsspeicher.
-- nginx beantwortet `/t` mit 204 und schreibt nach `/var/log/manibase/trichter.log`: keine IP, kein User-Agent, Zeit auf die volle Stunde gekappt, Bot-Kennzeichen `b`. Pseudonym, nicht anonym. Konfiguration versioniert in `docs/deploy/nginx-trichter.conf`.
-- **Wer die Maske ändert** (Schritt dazu, Prüfregel neu), zieht die Ereignisse mit: `showErr(msg, feld, grund)` braucht einen Grund aus der Liste in der Spec, sonst fehlt die Prüfmeldung im Trichter. Neue Gründe auch in `docs/deploy/nginx-trichter.conf` (map `$trichter_r`) und `scripts/trichter-auswertung.mjs` (`GRUENDE`) eintragen. Die Tests in `test-frontend.mjs` prüfen die Ereignisfolge.
-- Abgeschaltet bei Global Privacy Control, Do Not Track oder `?trichter=aus` (Vermerk in `localStorage`, zurück mit `?trichter=an`). Das Team schaltet so die eigenen Browser ab.
-- Auswertung lokal: `ssh root@72.61.153.206 'zcat -f /var/log/manibase/trichter.log*' | node scripts/trichter-auswertung.mjs - --von JJJJ-MM-TT --bis JJJJ-MM-TT`.
+- `site/scripts/statistik.js` steht auf allen 14 Inhaltsseiten **vor** `site.js` (Weiterleitungsseiten nicht). Es lädt den Tracker über `/u.js` (nginx → Umami, CSP bleibt `'self'`), stellt `window.statistik(name, daten)` bereit (puffert bis zum Laden, sendet nacheinander) und zählt Klicks auf Telefon, E-Mail, `#termin` und fremde Links. **Neue Seite = Zeile `<script src="scripts/statistik.js" defer>` mit einbauen**, der Test in `test-frontend.mjs` zählt genau 14.
+- `trichter(e, n, r)` in `site.js` (Abschnitt 4a) meldet die Maske: `maske-gesehen`, `maske-begonnen`, `maske-schritt-2` bis `-5`, `maske-abgeschickt`, `maske-kalender-ok|fehler`, `maske-fehler` mit `{schritt, grund}`. **Wer die Maske ändert**, zieht die Ereignisse mit: `showErr(msg, feld, grund)` braucht einen Grund, sonst fehlt die Prüfmeldung in der Statistik; der Umami-Trichter hat höchstens 8 Schritte.
+- Abgeschaltet bei Global Privacy Control, Do Not Track oder `?statistik=aus` (Vermerk in `localStorage`, zurück mit `?statistik=an`). Das Team schaltet so die eigenen Browser ab.
+- Besucherkennung wechselt täglich (`SALT_ROTATION=day`): Wiederkehrer über Tage sind bewusst nicht erkennbar. Umstellen nur zusammen mit Datenschutz Abschnitt 12.
 - Die Zeeg-Buchung selbst ist nicht messbar (das Embed meldet nur Höhenänderungen); Buchungszahlen kommen aus dem Zeeg-Dashboard.
 
 ## Bildregeln
