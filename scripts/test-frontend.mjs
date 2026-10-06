@@ -921,7 +921,10 @@ test('Datenschutz: Reichweitenmessung mit Umami ist vollstaendig beschrieben', (
     'Global Privacy Control', 'Do Not Track', 'spätestens 13 Monaten', 'datenschutz.html?statistik=aus',
     'datenschutz.html?statistik=an', 'Art. 21 DSGVO', 'in der Regel nach 15 Tagen', '(Abschnitt 12)',
     'Uhrzeit des Aufrufs', 'Zugriffsprotokoll', 'Namen der Zielwebsite',
-    'Stand: 4. Oktober 2026']) {
+    // Anmeldeseite KI-Werkbank (eigenes Repo manibase-ai/ki-werkbank-promo): eigene Subdomain, eigener Abschalt-Vermerk
+    'ki-werkbank-promo.manibase.de', 'https://ki-werkbank-promo.manibase.de/?statistik=aus',
+    'https://ki-werkbank-promo.manibase.de/?statistik=an', 'Vorstellungsvideos',
+    'Stand: 6. Oktober 2026']) {
     assert(html.includes(teil), 'Fehlt in datenschutz.html: ' + teil);
   }
   for (const alt of ['trichter=', 'Zählung der Formularschritte', 'nicht auf Ihrem Gerät gespeichert']) {
