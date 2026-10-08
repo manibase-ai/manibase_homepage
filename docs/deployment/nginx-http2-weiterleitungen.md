@@ -108,3 +108,15 @@ curl -sI https://manibase.de/llms.txt | grep -i '^content-type'
 ```
 
 Erwartet: `2`, dann `1`, dann `public, max-age=604800` ohne `immutable`, dann viermal `4` (HTML, CSS, Bild und Schrift tragen dieselben Sicherheits-Header), dann `301` mit `location: https://manibase.de/klartag.html`, dann `text/plain; charset=utf-8`.
+
+## Nachtrag 08.10.2026: Kurz-URL `/datenschutz`
+
+Unabhängig von den Punkten oben (die am 08.10.2026 noch nicht ausgeführt waren). Teams-Einladungen verlinken auf die Datenschutzerklärung; `https://manibase.de/datenschutz` lieferte 404, weil der Vhost keine Endungen ergänzt. Eine Zeile im Server-Block `manibase.de`, vor `location /`:
+
+```nginx
+    location = /datenschutz { return 301 /datenschutz.html$is_args$args; }
+```
+
+`$is_args$args` reicht `?statistik=aus` durch. Den Anker (`#online-meetings`) sieht der Server nicht; der Browser hängt ihn nach dem 301 selbst wieder an. `/datenschutz.html` bleibt unverändert die kanonische Adresse.
+
+Nachmessen: `curl -sI https://manibase.de/datenschutz | grep -iE '^(HTTP|location)'` → `301`, `location: https://manibase.de/datenschutz.html`.
