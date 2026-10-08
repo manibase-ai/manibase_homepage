@@ -71,7 +71,7 @@ site/
   blog/index.html       Blog-Übersicht. Relative Pfade ../.
   blog/papierkram-am-chef.html  Archiviert, leitet auf ../index.html#arbeitssituationen weiter.
   impressum.html        § 5 DDG (Daten gesetzt, HRB 18632)
-  datenschutz.html      DSGVO, 12 Abschnitte: 3=Hosting (Server-Logdaten „in der Regel nach 15 Tagen“ gelöscht), 5=Anfrage-/Buchungsformular, 6=Zeeg, 7=Newsletter (Double-Opt-In), 11=Speicherdauer, 12=Reichweitenmessung mit Umami.
+  datenschutz.html      DSGVO, 13 Abschnitte: 3=Hosting (Server-Logdaten „in der Regel nach 15 Tagen“ gelöscht), 5=Anfrage-/Buchungsformular, 6=Zeeg, 7=Newsletter (Double-Opt-In), 11=Speicherdauer, 12=Reichweitenmessung mit Umami, 13=Online-Meetings mit Teams und Transkription (Anker `#online-meetings`, Teams-Einladungen verlinken direkt darauf; Rechtsgrundlage der Transkription bewusst lit. f, nie Einwilligung; Fristen 6 Monate Interessenten / 3 Jahre nach Projektjahr Kunden, beschlossen 08.10.2026). Neue Abschnitte hinten anhängen, die Nummern 1 bis 12 werden aus Tests und Querverweisen referenziert.
   llms.txt              Kurzprofil für Sprachmodelle (26.09.2026). Preis, HRB und Links werden in test-frontend.mjs gegen die Seiten geprüft; wer Preis oder Seiten ändert, zieht sie hier mit.
   styles/tokens.css     Marken-Tokens (@import ../fonts/_fontface.css)
   styles/site.css       Basis-Layout und geteilte Komponenten (+ `[hidden]{display:none!important}`, .wizard/.qcard/.field/.cal, .blog/.postcard/.post)

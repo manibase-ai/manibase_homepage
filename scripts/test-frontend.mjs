@@ -924,16 +924,38 @@ test('Datenschutz: Reichweitenmessung mit Umami ist vollstaendig beschrieben', (
     // Anmeldeseite KI-Werkbank (eigenes Repo manibase-ai/ki-werkbank-promo): eigene Subdomain, eigener Abschalt-Vermerk
     'ki-werkbank-promo.manibase.de', 'https://ki-werkbank-promo.manibase.de/?statistik=aus',
     'https://ki-werkbank-promo.manibase.de/?statistik=an', 'Vorstellungsvideos',
-    'Stand: 6. Oktober 2026']) {
+    'Stand: 8. Oktober 2026']) {
     assert(html.includes(teil), 'Fehlt in datenschutz.html: ' + teil);
   }
   for (const alt of ['trichter=', 'Zählung der Formularschritte', 'nicht auf Ihrem Gerät gespeichert']) {
     assert(!html.includes(alt), 'Veralteter Text in datenschutz.html: ' + alt);
   }
   assert(!/kein(en)? Zugriff auf (Ihr |das )?Endgerät/i.test(html), 'Behauptung "kein Zugriff auf das Endgerät" steht im Text');
-  const a12 = html.slice(html.indexOf('<h2>12.'), html.indexOf('Stand:'));
+  const a12 = html.slice(html.indexOf('<h2>12.'), html.indexOf('<h2 id="online-meetings">'));
   assert(a12.length > 200, 'Abschnitt 12 nicht gefunden');
   assert(!/[\u2013\u2014]/.test(a12), 'Gedankenstrich in Abschnitt 12 der Datenschutzerklaerung');
+});
+
+test('Datenschutz: Online-Meetings mit Teams und Transkription (Anker fuer Einladungen)', () => {
+  const html = readFileSync('site/datenschutz.html', 'utf8');
+  const start = html.indexOf('<h2 id="online-meetings">13. Online-Meetings mit Microsoft Teams und Transkription</h2>');
+  assert(start > 0, 'Abschnitt 13 mit Anker #online-meetings fehlt (Einladungen verlinken direkt darauf)');
+  const a13 = html.slice(start, html.indexOf('Stand:'));
+  for (const teil of ['Microsoft 365 Copilot', 'nicht aufgezeichnet', 'Art. 21 DSGVO', 'ohne Transkription',
+    'Gesprächsnotiz', 'Art. 6 Abs. 1 lit. f DSGVO', 'EU Data Boundary', 'Data Privacy Framework',
+    'Standardvertragsklauseln', 'sechs Monate nach dem letzten Kontakt', 'drei Jahre nach Ablauf des Kalenderjahres',
+    'IP-Adresse', 'EFTA-Staaten', 'Transkripte, Zusammenfassungen und Gesprächsnotizen', 'Bei Partnern löschen wir sie']) {
+    assert(a13.includes(teil), 'Fehlt in Abschnitt 13: ' + teil);
+  }
+  // Abschnitt 11 nennt alle drei Datenarten (Transkript, Copilot-Zusammenfassung, Gesprächsnotiz).
+  const a11 = html.slice(html.indexOf('<h2>11.'), html.indexOf('<h2>12.'));
+  assert(a11.includes('Transkripte, Zusammenfassungen und Gesprächsnotizen'), 'Abschnitt 11: Zusammenfassungen fehlen bei den Meeting-Fristen');
+  // Einleitung: Seite ist Pflichtinformation auch fuer Meetings, nicht nur fuer die Website.
+  assert(html.includes('in Online-Meetings mit uns.</p>'), 'Einleitung nennt Online-Meetings nicht');
+  // Transkription stuetzt sich bewusst auf lit. f, nicht auf eine Einwilligung (Geschaeftsfuehrung, 08.10.2026).
+  assert(!/Einwilligung|lit\. a/.test(a13), 'Abschnitt 13 nennt eine Einwilligung als Rechtsgrundlage');
+  assert(!/[\u2013\u2014]/.test(a13), 'Gedankenstrich in Abschnitt 13 der Datenschutzerklaerung');
+  assert((html.match(/href="#online-meetings"/g) || []).length >= 2, 'Verweise aus Abschnitt 8 und 11 auf #online-meetings fehlen');
 });
 
 if (failed) {

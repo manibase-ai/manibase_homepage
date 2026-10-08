@@ -303,6 +303,7 @@ h1,h2,h3{margin:0;color:var(--color-ink);font-family:var(--font-display);text-wr
 .legal{padding-block:clamp(3rem,2rem + 4vw,5rem);}
 .legal h1{margin-bottom:var(--space-8);}
 .legal h2{font-size:var(--t-h3);margin:var(--space-10) 0 var(--space-3);}
+.legal h2[id]{scroll-margin-top:calc(var(--header-h) + 16px);}
 .legal p,.legal li{font-size:1rem;line-height:var(--lh-relaxed);color:var(--color-text-primary);max-width:var(--measure);}
 .legal a{color:var(--color-primary);}
 .legal .ph{background:var(--yellow-100);padding:1px 6px;border-radius:4px;color:var(--warm-900);}
