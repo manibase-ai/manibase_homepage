@@ -109,14 +109,37 @@ curl -sI https://manibase.de/llms.txt | grep -i '^content-type'
 
 Erwartet: `2`, dann `1`, dann `public, max-age=604800` ohne `immutable`, dann viermal `4` (HTML, CSS, Bild und Schrift tragen dieselben Sicherheits-Header), dann `301` mit `location: https://manibase.de/klartag.html`, dann `text/plain; charset=utf-8`.
 
-## Nachtrag 08.10.2026: Kurz-URL `/datenschutz`
+## Nachtrag 08.10.2026: Adressen ohne `.html`
 
-Unabhängig von den Punkten oben (die am 08.10.2026 noch nicht ausgeführt waren). Teams-Einladungen verlinken auf die Datenschutzerklärung; `https://manibase.de/datenschutz` lieferte 404, weil der Vhost keine Endungen ergänzt. Eine Zeile im Server-Block `manibase.de`, vor `location /`:
+Unabhängig von den Punkten oben (die am 08.10.2026 noch nicht ausgeführt waren). Teams-Einladungen verlinken auf die Datenschutzerklärung, und `https://manibase.de/datenschutz` lieferte 404, weil der Vhost keine Endungen ergänzt. Vorgabe der Geschäftsführung: die Weiterleitung gilt für alle Unterseiten, nicht nur für den Datenschutz.
+
+Eine Zeile im 443-Server-Block `manibase.de`, direkt unter `root /var/www/manibase.de/current;`:
 
 ```nginx
-    location = /datenschutz { return 301 /datenschutz.html$is_args$args; }
+    if (-f /var/www/manibase.de/current$uri.html) { return 301 $uri.html$is_args$args; }
 ```
 
-`$is_args$args` reicht `?statistik=aus` durch. Den Anker (`#online-meetings`) sieht der Server nicht; der Browser hängt ihn nach dem 301 selbst wieder an. `/datenschutz.html` bleibt unverändert die kanonische Adresse.
+- Sie steht auf Server-Ebene, nicht in einer Location. Damit läuft sie vor der Location-Auswahl und berührt keine der bestehenden Locations (`/api/newsletter.php`, `/u.js`, `/api/send`, Assets). `if` mit `return` ist dort unbedenklich.
+- Sie greift nur, wenn die passende `.html`-Datei existiert: `/datenschutz` → `/datenschutz.html`, `/blog/index` → `/blog/index.html`. Alles andere läuft unverändert weiter, unbekannte Adressen bleiben 404.
+- Es ist ein 301 und kein Rewrite: kanonisch bleibt die Adresse mit `.html` (so steht sie in `canonical`, Sitemap und allen Links).
+- `$is_args$args` reicht etwa `?statistik=aus` durch. Den Anker (`#online-meetings`) sieht der Server nicht, der Browser hängt ihn nach dem 301 selbst wieder an.
+- Pfad statt `$document_root`, weil nicht gesichert ist, dass `root` auf Server-Ebene steht.
 
-Nachmessen: `curl -sI https://manibase.de/datenschutz | grep -iE '^(HTTP|location)'` → `301`, `location: https://manibase.de/datenschutz.html`.
+Einspielen (als root):
+
+```bash
+cp /etc/nginx/sites-available/manibase.de /etc/nginx/sites-available/manibase.de.bak-$(date +%Y%m%d-%H%M%S)
+grep -n 'root /var/www/manibase.de/current;' /etc/nginx/sites-available/manibase.de
+sed -i '0,/^\(\s*\)root \/var\/www\/manibase\.de\/current;/s//&\n\1if (-f \/var\/www\/manibase.de\/current$uri.html) { return 301 $uri.html$is_args$args; }/' /etc/nginx/sites-available/manibase.de
+nginx -t && systemctl reload nginx
+```
+
+Das `grep` muss genau einen Treffer liefern, sonst die Zeile von Hand setzen.
+
+Nachmessen:
+
+```bash
+for u in /datenschutz /klartag /blog/index "/datenschutz?statistik=aus" /datenschutz.html /gibtsnicht /; do printf '%-28s ' "$u"; curl -s -o /dev/null -w '%{http_code} %{redirect_url}\n' "https://manibase.de$u"; done
+```
+
+Erwartet: die ersten vier `301` auf die `.html`-Adresse (mit `?statistik=aus`), dann `200`, `404`, `200`.
